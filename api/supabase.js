@@ -1,6 +1,6 @@
 export function initSupabase(){
   return supabase.createClient(
-    "YOUR_URL",
-    "YOUR_KEY"
+    "https://jejjqydkfyacjxspesyh.supabase.co/rest/v1/",
+    "sb_publishable_qRW-sWNFzGuLJIYw4KWHlQ_COyRmj9B"
   );
 }
