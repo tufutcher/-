@@ -1,181 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>不画画真的要完了</title>
+<title>不画画真的要完了 V4</title>
 
+<link rel="stylesheet" href="../styles/main.css"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-:root{
-  --main:#0CC0DF;
-  --bg:#f6f7fb;
-  --card:#fff;
-  --text:#111;
-  --muted:#777;
-  --shadow:0 20px 60px rgba(0,0,0,.08);
-}
-
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial;
-  background:var(--bg);
-  color:var(--text);
-  padding:16px 16px 100px;
-}
-
-h1{margin:0;font-size:22px}
-
-.card{
-  background:var(--card);
-  border-radius:18px;
-  padding:16px;
-  box-shadow:var(--shadow);
-  margin-bottom:14px;
-}
-
-.btn{
-  background:var(--main);
-  color:#fff;
-  border:0;
-  padding:12px;
-  border-radius:12px;
-  width:100%;
-  font-weight:700;
-  cursor:pointer;
-}
-
-input,textarea{
-  width:100%;
-  padding:12px;
-  border:1px solid #ddd;
-  border-radius:12px;
-  margin-top:8px;
-}
-
-.bottom{
-  position:fixed;
-  bottom:18px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:12px;
-  background:#fff;
-  padding:10px;
-  border-radius:999px;
-  box-shadow:var(--shadow);
-}
-
-.bottom button{
-  border:0;
-  background:none;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.badge{
-  display:inline-block;
-  padding:4px 10px;
-  border-radius:999px;
-  background:#eee;
-  margin-right:6px;
-  font-size:12px;
-}
-</style>
 </head>
 
 <body>
 
-<h1>不画画真的要完了</h1>
-
 <div id="app"></div>
 
-<div class="bottom">
-  <button onclick="view='wall';render()">打卡墙</button>
-  <button onclick="openPost()">＋</button>
-  <button onclick="view='me';render()">我的</button>
-</div>
-
-<script>
-const SUPABASE_URL="https://jejjqydkfyacjxspesyh.supabase.co/rest/v1/";
-const SUPABASE_KEY="sb_publishable_qRW-sWNFzGuLJIYw4KWHlQ_COyRmj9B";
-const sb = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
-let view="wall";
-let user=null;
-
-/* ================= AUTH ================= */
-async function login(){
-  const email = prompt("用户名");
-  const pass = prompt("密码");
-  const {data,error} = await sb.auth.signInWithPassword({
-    email: email+"@x.com",
-    password:pass
-  });
-  if(error) alert(error.message);
-  user=data.user;
-  render();
-}
-
-/* ================= DATA ================= */
-async function getCheckins(){
-  const {data} = await sb.from("checkins").select("*, checkin_images(*)").order("created_at",{ascending:false});
-  return data||[];
-}
-
-/* ================= WALL ================= */
-async function wall(){
-  const items = await getCheckins();
-  return items.map(i=>`
-    <div class="card">
-      <b>${i.username}</b>
-      <div>${i.note||""}</div>
-      ${i.checkin_images?.map(img=>`<img src="${img.image_url}" style="width:100%;border-radius:12px;margin-top:8px">`).join("")}
-    </div>
-  `).join("");
-}
-
-/* ================= PROFILE ================= */
-async function mePage(){
-  const items = await getCheckins();
-  const mine = items.filter(i=>i.user_id===user.id);
-
-  const total = mine.length;
-  const week = mine.slice(0,7).length;
-
-  return `
-    <div class="card">
-      <h3>我的主页</h3>
-      <p>本周：${week}</p>
-      <p>总打卡：${total}</p>
-
-      <div>
-        <span class="badge">⭐ 3</span>
-        <span class="badge">🔥 2</span>
-        <span class="badge">🎨 1</span>
-      </div>
-    </div>
-  `;
-}
-
-/* ================= RENDER ================= */
-async function render(){
-  const app=document.getElementById("app");
-
-  if(!user){
-    app.innerHTML=`<div class="card">
-      <button class="btn" onclick="login()">登录</button>
-    </div>`;
-    return;
-  }
-
-  if(view==="wall") app.innerHTML=await wall();
-  if(view==="me") app.innerHTML=await mePage();
-}
-
-render();
-</script>
+<script type="module" src="../core/app.js"></script>
 
 </body>
 </html>
