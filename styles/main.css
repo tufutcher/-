@@ -1,0 +1,27 @@
+body{
+  margin:0;
+  font-family:-apple-system;
+  background:#f6f7fb;
+}
+
+.card{
+  background:white;
+  padding:14px;
+  margin:12px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+img{
+  width:100%;
+  border-radius:12px;
+  margin-top:8px;
+}
+
+button{
+  padding:10px;
+  border:none;
+  background:#0CC0DF;
+  color:white;
+  border-radius:10px;
+}
