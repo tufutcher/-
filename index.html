@@ -1,114 +1,1248 @@
--- supabase-schema.sql
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>画画打卡</title>
 
-create table if not exists public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  username text unique not null,
-  avatar_url text,
-  is_admin boolean default false,
-  created_at timestamptz default now()
-);
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-create table if not exists public.checkins (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade not null,
-  username text not null,
-  note text,
-  created_at timestamptz default now()
-);
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#faf7f2;
+  --card:#fff;
+  --ink:#211f1d;
+  --muted:#8b8179;
+  --line:#eee4da;
+  --brand:#1f1c19;
+  --blue:#2f6fed;
+  --red:#d94841;
+  --green:#2f9e73;
+  --shadow:0 16px 40px rgba(70,45,20,.10);
+}
+body{
+  margin:0;
+  padding:18px 16px 96px;
+  background:radial-gradient(circle at top,#fff7ec 0,#faf7f2 42%,#f8f4ee 100%);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+.wrap{max-width:980px;margin:0 auto}
+.app-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.logo h1{font-size:24px;margin:0;font-weight:800;letter-spacing:-.02em}
+.logo .sub{font-size:13px;color:var(--muted);margin-top:4px}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.user-chip img{width:34px;height:34px;border-radius:999px;object-fit:cover;background:#ddd}
+.card{
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+label{display:block;font-size:13px;color:#675f58;margin:14px 0 7px}
+input,textarea,select{
+  width:100%;
+  border:1px solid #ddd4ca;
+  border-radius:12px;
+  background:#fff;
+  padding:12px 13px;
+  font-size:15px;
+  font-family:inherit;
+  outline:none;
+}
+textarea{min-height:86px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus{border-color:#1f1c19;box-shadow:0 0 0 3px rgba(31,28,25,.08)}
+button{
+  border:0;
+  border-radius:12px;
+  padding:12px 14px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+}
+.btn{
+  width:100%;
+  background:var(--brand);
+  color:#fff;
+  margin-top:16px;
+}
+.btn:disabled{background:#bbb;cursor:not-allowed}
+.btn-soft{background:#f2ece5;color:#322d28}
+.btn-danger{background:#fff1ef;color:var(--red)}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
+.toast{
+  display:none;
+  position:fixed;
+  left:50%;
+  top:18px;
+  transform:translateX(-50%);
+  z-index:300;
+  background:#1f1c19;
+  color:#fff;
+  padding:10px 15px;
+  border-radius:999px;
+  font-size:13px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2);
+}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.auth-tab{
+  text-align:center;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  cursor:pointer;
+  color:var(--muted);
+  background:#fff;
+  font-weight:700;
+}
+.auth-tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.hint{font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px}
+.wall-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin:8px 0 12px;
+}
+.wall-title h2,.section-title{font-size:18px;margin:0;font-weight:800}
+.seg{
+  display:flex;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  overflow:hidden;
+}
+.seg span{
+  font-size:12px;
+  padding:7px 12px;
+  cursor:pointer;
+  color:#7c736b;
+}
+.seg span.on{background:var(--brand);color:#fff}
+.wall-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:12px;
+}
+.wall-item{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 10px 24px rgba(80,60,35,.07);
+}
+.wall-item img.art{
+  width:100%;
+  height:150px;
+  display:block;
+  object-fit:cover;
+  background:#eee;
+}
+.wall-meta{padding:10px}
+.person-line{display:flex;align-items:center;gap:7px}
+.person-line img{width:24px;height:24px;border-radius:999px;object-fit:cover;background:#ddd}
+.who{font-size:13px;font-weight:800}
+.when{font-size:12px;color:var(--muted);margin-top:3px}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.tag{
+  font-size:11px;
+  color:#2f6fed;
+  background:#eef4ff;
+  padding:3px 7px;
+  border-radius:999px;
+}
+.note{
+  font-size:12px;
+  color:#625951;
+  line-height:1.55;
+  margin-top:7px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.link{
+  color:var(--blue);
+  cursor:pointer;
+  font-size:12px;
+  margin-top:6px;
+}
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:26px 0;
+  font-size:14px;
+}
+.group-block{margin-bottom:22px}
+.group-head{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  font-size:14px;
+  font-weight:800;
+  margin:8px 0 10px;
+}
+.group-head img{width:34px;height:34px;border-radius:999px;object-fit:cover;background:#ddd}
+.upload-box{
+  position:relative;
+  border:2px dashed #dacfc4;
+  background:#fffaf5;
+  border-radius:16px;
+  padding:24px;
+  text-align:center;
+  color:var(--muted);
+  cursor:pointer;
+}
+.upload-box input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.preview-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:12px}
+.preview-card{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:16px;
+  overflow:hidden;
+}
+.preview-card img{width:100%;height:150px;object-fit:cover;display:block;background:#eee}
+.preview-body{padding:10px}
+.tag-groups{display:grid;gap:8px;margin-top:8px}
+.tag-group-title{font-size:11px;color:var(--muted);margin-bottom:5px}
+.preset-tags{display:flex;gap:6px;flex-wrap:wrap}
+.preset-tag{
+  font-size:12px;
+  border:1px solid #ddd4ca;
+  border-radius:999px;
+  padding:5px 9px;
+  cursor:pointer;
+  background:#fff;
+  color:#675f58;
+}
+.preset-tag.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.stat{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  text-align:center;
+}
+.stat .num{font-size:24px;font-weight:900}
+.stat .lbl{font-size:12px;color:var(--muted);margin-top:3px}
+.profile-head{display:flex;align-items:center;gap:14px}
+.profile-head img{width:74px;height:74px;border-radius:999px;object-fit:cover;background:#ddd}
+.profile-name{font-size:20px;font-weight:900}
+.calendar{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+  margin-top:10px;
+}
+.cal-cell{
+  min-height:34px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+}
+.cal-head{color:var(--muted);font-weight:800}
+.cal-day{background:#fff;border:1px solid var(--line);color:#5b524b}
+.cal-hit{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:900}
+.analysis-row{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.pie-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.legend{font-size:12px;color:#554d46;display:grid;gap:5px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:999px;margin-right:6px}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px}
+.admin-table th,.admin-table td{padding:9px 6px;border-bottom:1px solid #eee;text-align:left}
+.admin-table th{color:var(--muted)}
+.bottom-nav{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  width:min(430px,92vw);
+  height:66px;
+  display:grid;
+  grid-template-columns:1fr 78px 1fr;
+  align-items:center;
+  background:rgba(255,255,255,.96);
+  border:1px solid var(--line);
+  border-radius:999px;
+  box-shadow:0 14px 38px rgba(0,0,0,.16);
+  z-index:100;
+}
+.nav-btn{text-align:center;font-size:13px;color:var(--muted);font-weight:800;cursor:pointer}
+.nav-btn.on{color:var(--ink)}
+.fab{
+  width:60px;
+  height:60px;
+  border-radius:999px;
+  background:var(--brand);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  justify-self:center;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+.modal-bg{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:200;
+  background:rgba(0,0,0,.45);
+  align-items:flex-end;
+  justify-content:center;
+}
+.modal{
+  width:100%;
+  max-width:980px;
+  max-height:90vh;
+  overflow:auto;
+  background:var(--bg);
+  border-radius:22px 22px 0 0;
+  padding:20px 16px 90px;
+  position:relative;
+}
+.close{
+  position:absolute;
+  right:16px;
+  top:14px;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  color:var(--muted);
+  cursor:pointer;
+}
+.detail-img{
+  width:100%;
+  max-height:520px;
+  object-fit:contain;
+  background:#f1ece5;
+  border-radius:16px;
+  margin:12px 0;
+}
+.hidden{display:none!important}
+@media(max-width:720px){
+  body{padding-left:12px;padding-right:12px}
+  .app-head{align-items:flex-start}
+  .wall-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .wall-item img.art{height:132px}
+  .analysis-row{display:flex;overflow-x:auto;padding-bottom:4px}
+  .analysis-row .card{min-width:260px}
+  .stats-row{gap:8px}
+  .stat{padding:12px 8px}
+  .stat .num{font-size:22px}
+}
+</style>
+</head>
 
-create table if not exists public.checkin_images (
-  id uuid primary key default gen_random_uuid(),
-  checkin_id uuid references public.checkins(id) on delete cascade not null,
-  user_id uuid references auth.users(id) on delete cascade not null,
-  image_url text not null,
-  storage_path text not null,
-  tags text[] default '{}',
-  created_at timestamptz default now()
-);
+<body>
+<div class="toast" id="toast"></div>
 
-alter table public.profiles enable row level security;
-alter table public.checkins enable row level security;
-alter table public.checkin_images enable row level security;
+<div class="wrap">
+  <header class="app-head">
+    <div class="logo">
+      <h1>画画打卡</h1>
+      <div class="sub" id="status-line">正在加载...</div>
+    </div>
+    <div class="user-chip hidden" id="user-chip">
+      <img id="chip-avatar" alt="">
+      <span id="chip-name"></span>
+    </div>
+  </header>
 
-create policy "profiles are public readable"
-on public.profiles for select
-to anon, authenticated
-using (true);
+  <section class="card" id="config-warning" style="display:none;">
+    <div class="section-title">需要先填写 Supabase 配置</div>
+    <p class="hint">
+      打开 index.html，找到 SUPABASE_URL 和 SUPABASE_ANON_KEY，替换成你 Supabase 项目里的 Project URL 和 anon public key。
+    </p>
+  </section>
 
-create policy "users insert own profile"
-on public.profiles for insert
-to authenticated
-with check (id = auth.uid());
+  <section class="card" id="auth-card" style="display:none;">
+    <div class="auth-tabs">
+      <div class="auth-tab on" data-mode="login">登录</div>
+      <div class="auth-tab" data-mode="register">注册</div>
+    </div>
 
-create policy "users update own profile"
-on public.profiles for update
-to authenticated
-using (id = auth.uid())
-with check (id = auth.uid());
+    <label>名字</label>
+    <input id="auth-username" placeholder="例如：小明" autocomplete="username">
 
-create policy "checkins public readable"
-on public.checkins for select
-to anon, authenticated
-using (true);
+    <label>密码</label>
+    <input id="auth-password" type="password" placeholder="至少 6 位" autocomplete="current-password">
 
-create policy "users insert own checkins"
-on public.checkins for insert
-to authenticated
-with check (user_id = auth.uid());
+    <button class="btn" id="auth-submit">登录</button>
 
-create policy "users update own checkins"
-on public.checkins for update
-to authenticated
-using (user_id = auth.uid())
-with check (user_id = auth.uid());
+    <p class="hint">
+      这里用 Supabase Auth 存密码，页面会自动把你的名字转换成内部邮箱格式，不需要真的收邮件。
+    </p>
+  </section>
 
-create policy "users delete own checkins"
-on public.checkins for delete
-to authenticated
-using (user_id = auth.uid());
+  <main id="main-app" style="display:none;">
+    <section id="tab-wall"></section>
+    <section id="tab-profile" style="display:none;"></section>
 
-create policy "images public readable"
-on public.checkin_images for select
-to anon, authenticated
-using (true);
+    <nav class="bottom-nav">
+      <div class="nav-btn on" data-tab="wall">打卡墙</div>
+      <div class="fab" id="open-checkin">＋</div>
+      <div class="nav-btn" data-tab="profile">我的主页</div>
+    </nav>
+  </main>
+</div>
 
-create policy "users insert own images"
-on public.checkin_images for insert
-to authenticated
-with check (user_id = auth.uid());
+<div class="modal-bg" id="checkin-modal">
+  <div class="modal">
+    <div class="close" data-close="checkin-modal">✕</div>
 
-create policy "users update own images"
-on public.checkin_images for update
-to authenticated
-using (user_id = auth.uid())
-with check (user_id = auth.uid());
+    <div class="stats-row">
+      <div class="stat"><div class="num" id="stat-month">0</div><div class="lbl">本月打卡天数</div></div>
+      <div class="stat"><div class="num" id="stat-streak">0</div><div class="lbl">最长连更</div></div>
+      <div class="stat"><div class="num" id="stat-total">0</div><div class="lbl">总张数</div></div>
+    </div>
 
-create policy "users delete own images"
-on public.checkin_images for delete
-to authenticated
-using (user_id = auth.uid());
+    <section class="card">
+      <div class="section-title">今天画了什么？</div>
 
-insert into storage.buckets (id, name, public)
-values ('art', 'art', true)
-on conflict (id) do update set public = true;
+      <label>上传作品，可以多选</label>
+      <div class="upload-box">
+        <div>点击选择图片</div>
+        <div class="hint">建议每次 1～6 张，系统会自动压缩</div>
+        <input type="file" id="file-input" accept="image/*" multiple>
+      </div>
 
-create policy "authenticated users upload art files"
-on storage.objects for insert
-to authenticated
-with check (bucket_id = 'art');
+      <div class="preview-list" id="preview-list"></div>
 
-create policy "public read art files"
-on storage.objects for select
-to anon, authenticated
-using (bucket_id = 'art');
+      <label>这次的感想</label>
+      <textarea id="note-input" placeholder="今天画画的时候发生了什么？"></textarea>
 
-create policy "users update own art files"
-on storage.objects for update
-to authenticated
-using (bucket_id = 'art' and owner = auth.uid())
-with check (bucket_id = 'art' and owner = auth.uid());
+      <button class="btn" id="submit-checkin">提交打卡</button>
+    </section>
+  </div>
+</div>
 
-create policy "users delete own art files"
-on storage.objects for delete
-to authenticated
-using (bucket_id = 'art' and owner = auth.uid());
+<div class="modal-bg" id="detail-modal">
+  <div class="modal">
+    <div class="close" data-close="detail-modal">✕</div>
+    <section class="card" id="detail-content"></section>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "替换成你的_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "替换成你的_SUPABASE_ANON_KEY";
+const BUCKET = "art";
+
+const TAG_CATEGORIES = {
+  "内容": ["生物", "场景", "人物", "物件"],
+  "类型": ["练习", "过程", "设计", "同人"],
+  "完成度": ["草稿", "线稿", "上色", "完成稿"]
+};
+
+const COLORS = ["#1f1c19","#5b8def","#f0a13c","#4cb38f","#d96b6b","#9b6bd9"];
+const INTERNAL_EMAIL_DOMAIN = "artcheckin.local";
+
+let sb = null;
+let authMode = "login";
+let session = null;
+let me = null;
+let selectedImages = [];
+let activeTab = "wall";
+let wallMode = "time";
+
+function isConfigured(){
+  return SUPABASE_URL.startsWith("https://") && SUPABASE_ANON_KEY.length > 40;
+}
+
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.display = "block";
+  setTimeout(()=>el.style.display="none",2400);
+}
+
+function cleanUsername(name){
+  return name.trim().replace(/\s+/g,"");
+}
+
+function usernameToEmail(username){
+  return encodeURIComponent(username.toLowerCase()) + "@" + INTERNAL_EMAIL_DOMAIN;
+}
+
+function fmtDate(value){
+  const d = new Date(value);
+  return `${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+function dayKey(value){
+  const d = new Date(value);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function defaultAvatar(name){
+  const first = (name || "?").slice(0,1);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">
+    <rect width="160" height="160" rx="80" fill="#1f1c19"/>
+    <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="66" fill="#fff">${first}</text>
+  </svg>`;
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+}
+
+async function init(){
+  if(!isConfigured()){
+    document.getElementById("config-warning").style.display = "block";
+    document.getElementById("status-line").textContent = "等待 Supabase 配置";
+    return;
+  }
+
+  const { createClient } = window.supabase;
+  sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const { data } = await sb.auth.getSession();
+  session = data.session;
+
+  if(session){
+    await loadMe();
+    showMain();
+  }else{
+    showAuth();
+  }
+
+  sb.auth.onAuthStateChange(async (_event, newSession)=>{
+    session = newSession;
+    if(session){
+      await loadMe();
+      showMain();
+    }else{
+      showAuth();
+    }
+  });
+}
+
+function showAuth(){
+  document.getElementById("auth-card").style.display = "block";
+  document.getElementById("main-app").style.display = "none";
+  document.getElementById("user-chip").classList.add("hidden");
+  document.getElementById("status-line").textContent = "请先登录或注册";
+}
+
+function showMain(){
+  document.getElementById("auth-card").style.display = "none";
+  document.getElementById("main-app").style.display = "block";
+  document.getElementById("user-chip").classList.remove("hidden");
+  document.getElementById("chip-name").textContent = me.username;
+  document.getElementById("chip-avatar").src = me.avatar_url || defaultAvatar(me.username);
+  document.getElementById("status-line").textContent = "一起慢慢画，一起慢慢进步";
+  renderWall();
+}
+
+async function loadMe(){
+  const user = session.user;
+  let { data: profile, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if(error || !profile){
+    const username = user.user_metadata?.username || user.email.split("@")[0];
+    const payload = {
+      id:user.id,
+      username,
+      avatar_url:defaultAvatar(username)
+    };
+    await sb.from("profiles").insert(payload);
+    profile = payload;
+  }
+
+  me = profile;
+}
+
+document.querySelectorAll(".auth-tab").forEach(tab=>{
+  tab.onclick = ()=>{
+    authMode = tab.dataset.mode;
+    document.querySelectorAll(".auth-tab").forEach(t=>t.classList.remove("on"));
+    tab.classList.add("on");
+    document.getElementById("auth-submit").textContent = authMode === "login" ? "登录" : "注册";
+  };
+});
+
+document.getElementById("auth-submit").onclick = async ()=>{
+  const username = cleanUsername(document.getElementById("auth-username").value);
+  const password = document.getElementById("auth-password").value;
+  const btn = document.getElementById("auth-submit");
+
+  if(!username || !password){
+    toast("请输入名字和密码");
+    return;
+  }
+  if(password.length < 6){
+    toast("密码至少 6 位");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "处理中...";
+
+  try{
+    const email = usernameToEmail(username);
+
+    if(authMode === "register"){
+      const { data, error } = await sb.auth.signUp({
+        email,
+        password,
+        options:{ data:{ username } }
+      });
+      if(error) throw error;
+
+      if(data.user){
+        const { error: pError } = await sb.from("profiles").upsert({
+          id:data.user.id,
+          username,
+          avatar_url:defaultAvatar(username)
+        });
+        if(pError) throw pError;
+      }
+
+      toast("注册成功");
+    }else{
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if(error) throw error;
+      toast("登录成功");
+    }
+  }catch(err){
+    console.error(err);
+    toast(err.message || "操作失败");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = authMode === "login" ? "登录" : "注册";
+  }
+};
+
+async function signOut(){
+  await sb.auth.signOut();
+}
+
+async function compressImage(file,maxSide=1280,quality=.78){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e=>{
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = ()=>{
+        let {width,height} = img;
+        if(width > maxSide || height > maxSide){
+          if(width > height){
+            height = Math.round(height * maxSide / width);
+            width = maxSide;
+          }else{
+            width = Math.round(width * maxSide / height);
+            height = maxSide;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img,0,0,width,height);
+        canvas.toBlob(blob=>{
+          resolve(new File([blob], file.name.replace(/\.\w+$/,"") + ".jpg", {type:"image/jpeg"}));
+        },"image/jpeg",quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById("file-input").onchange = async e=>{
+  const files = Array.from(e.target.files || []);
+  for(const file of files){
+    const compressed = await compressImage(file);
+    const url = URL.createObjectURL(compressed);
+    selectedImages.push({
+      file:compressed,
+      preview:url,
+      tags:[]
+    });
+  }
+  e.target.value = "";
+  renderPreviews();
+};
+
+function renderPreviews(){
+  const list = document.getElementById("preview-list");
+  list.innerHTML = "";
+
+  selectedImages.forEach((img,index)=>{
+    const card = document.createElement("div");
+    card.className = "preview-card";
+
+    let tagsHtml = "";
+    Object.entries(TAG_CATEGORIES).forEach(([cat,tags])=>{
+      tagsHtml += `<div>
+        <div class="tag-group-title">${cat}</div>
+        <div class="preset-tags">
+          ${tags.map(t=>`<span class="preset-tag ${img.tags.includes(t)?"on":""}" data-index="${index}" data-tag="${t}">${t}</span>`).join("")}
+        </div>
+      </div>`;
+    });
+
+    card.innerHTML = `
+      <img src="${img.preview}" alt="">
+      <div class="preview-body">
+        <button class="btn-danger" data-remove="${index}" style="width:100%;padding:8px;font-size:12px;">移除</button>
+        <div class="tag-groups">${tagsHtml}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll("[data-remove]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const i = Number(btn.dataset.remove);
+      URL.revokeObjectURL(selectedImages[i].preview);
+      selectedImages.splice(i,1);
+      renderPreviews();
+    };
+  });
+
+  list.querySelectorAll(".preset-tag").forEach(tag=>{
+    tag.onclick = ()=>{
+      const img = selectedImages[Number(tag.dataset.index)];
+      const value = tag.dataset.tag;
+      img.tags = img.tags.includes(value)
+        ? img.tags.filter(t=>t!==value)
+        : img.tags.concat(value);
+      renderPreviews();
+    };
+  });
+}
+
+document.getElementById("submit-checkin").onclick = async ()=>{
+  if(!selectedImages.length){
+    toast("请先上传图片");
+    return;
+  }
+
+  const btn = document.getElementById("submit-checkin");
+  const note = document.getElementById("note-input").value.trim();
+
+  btn.disabled = true;
+  btn.textContent = "提交中...";
+
+  try{
+    const { data: checkin, error: checkinError } = await sb
+      .from("checkins")
+      .insert({
+        user_id:session.user.id,
+        username:me.username,
+        note
+      })
+      .select()
+      .single();
+
+    if(checkinError) throw checkinError;
+
+    const rows = [];
+
+    for(let i=0;i<selectedImages.length;i++){
+      const item = selectedImages[i];
+      const path = `${session.user.id}/${Date.now()}-${i}.jpg`;
+
+      const { error: uploadError } = await sb.storage
+        .from(BUCKET)
+        .upload(path,item.file,{contentType:"image/jpeg",upsert:false});
+
+      if(uploadError) throw uploadError;
+
+      const { data: publicData } = sb.storage.from(BUCKET).getPublicUrl(path);
+
+      rows.push({
+        checkin_id:checkin.id,
+        user_id:session.user.id,
+        image_url:publicData.publicUrl,
+        storage_path:path,
+        tags:item.tags
+      });
+    }
+
+    const { error: imageError } = await sb.from("checkin_images").insert(rows);
+    if(imageError) throw imageError;
+
+    selectedImages.forEach(i=>URL.revokeObjectURL(i.preview));
+    selectedImages = [];
+    renderPreviews();
+    document.getElementById("note-input").value = "";
+    closeModal("checkin-modal");
+    toast("打卡成功");
+
+    if(activeTab === "wall") await renderWall();
+    else await renderProfile();
+
+  }catch(err){
+    console.error(err);
+    toast(err.message || "提交失败");
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "提交打卡";
+  }
+};
+
+async function fetchCheckins(){
+  const { data, error } = await sb
+    .from("checkins")
+    .select(`
+      *,
+      profiles:user_id(username,avatar_url,is_admin),
+      checkin_images(*)
+    `)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    console.error(error);
+    toast("读取打卡失败");
+    return [];
+  }
+
+  return data || [];
+}
+
+async function renderWall(){
+  const box = document.getElementById("tab-wall");
+  box.innerHTML = `
+    <div class="wall-title">
+      <h2>打卡墙</h2>
+      <div class="seg">
+        <span data-wall="time" class="${wallMode==="time"?"on":""}">时间倒序</span>
+        <span data-wall="person" class="${wallMode==="person"?"on":""}">按人分组</span>
+      </div>
+    </div>
+    <div id="wall-body"><div class="empty">加载中...</div></div>
+  `;
+
+  box.querySelectorAll("[data-wall]").forEach(btn=>{
+    btn.onclick = ()=>{
+      wallMode = btn.dataset.wall;
+      renderWall();
+    };
+  });
+
+  const items = await fetchCheckins();
+  const body = document.getElementById("wall-body");
+
+  if(!items.length){
+    body.innerHTML = `<div class="empty">还没有人打卡，第一个来！</div>`;
+    return;
+  }
+
+  if(wallMode === "time"){
+    body.innerHTML = `<div class="wall-grid"></div>`;
+    fillWallGrid(body.querySelector(".wall-grid"), items);
+  }else{
+    const grouped = {};
+    items.forEach(item=>{
+      const name = item.profiles?.username || item.username;
+      if(!grouped[name]) grouped[name] = [];
+      grouped[name].push(item);
+    });
+
+    body.innerHTML = "";
+    Object.entries(grouped).forEach(([name,rows])=>{
+      const avatar = rows[0].profiles?.avatar_url || defaultAvatar(name);
+      const block = document.createElement("div");
+      block.className = "group-block";
+      block.innerHTML = `
+        <div class="group-head">
+          <img src="${avatar}" alt="">
+          <span>${name}</span>
+          <span style="color:var(--muted);font-weight:500;">${rows.length} 次打卡</span>
+        </div>
+        <div class="wall-grid"></div>
+      `;
+      body.appendChild(block);
+      fillWallGrid(block.querySelector(".wall-grid"), rows.slice(0,8));
+    });
+  }
+}
+
+function fillWallGrid(container,items){
+  container.innerHTML = "";
+
+  items.forEach(item=>{
+    const img = item.checkin_images?.[0];
+    const name = item.profiles?.username || item.username;
+    const avatar = item.profiles?.avatar_url || defaultAvatar(name);
+    const extra = item.checkin_images?.length > 1 ? `<div class="when">+${item.checkin_images.length-1} 张</div>` : "";
+    const tags = img?.tags || [];
+
+    const card = document.createElement("article");
+    card.className = "wall-item";
+    card.innerHTML = `
+      <img class="art" src="${img?.image_url || ""}" alt="">
+      <div class="wall-meta">
+        <div class="person-line">
+          <img src="${avatar}" alt="">
+          <div>
+            <div class="who">${name}</div>
+            <div class="when">${fmtDate(item.created_at)}</div>
+          </div>
+        </div>
+        ${extra}
+        ${tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>` : ""}
+        ${item.note ? `<div class="note">${escapeHtml(item.note)}</div><div class="link">查看详情</div>` : ""}
+      </div>
+    `;
+
+    card.onclick = ()=>openDetail(item);
+    container.appendChild(card);
+  });
+}
+
+function openDetail(item){
+  const img = item.checkin_images?.[0];
+  const name = item.profiles?.username || item.username;
+  const avatar = item.profiles?.avatar_url || defaultAvatar(name);
+
+  document.getElementById("detail-content").innerHTML = `
+    <div class="person-line">
+      <img src="${avatar}" alt="">
+      <div>
+        <div class="who">${name}</div>
+        <div class="when">${fmtDate(item.created_at)}</div>
+      </div>
+    </div>
+
+    ${img ? `<img class="detail-img" src="${img.image_url}" alt="">` : ""}
+
+    ${item.checkin_images?.length > 1 ? `
+      <div class="preview-list">
+        ${item.checkin_images.map(i=>`<img src="${i.image_url}" style="width:100%;height:110px;object-fit:cover;border-radius:12px;background:#eee;">`).join("")}
+      </div>
+    ` : ""}
+
+    ${img?.tags?.length ? `<div class="tags">${img.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>` : ""}
+
+    <p style="white-space:pre-wrap;line-height:1.75;font-size:14px;color:#4b433d;">${escapeHtml(item.note || "没有填写感想")}</p>
+  `;
+  openModal("detail-modal");
+}
+
+async function renderProfile(){
+  const box = document.getElementById("tab-profile");
+  box.innerHTML = `<div class="empty">加载中...</div>`;
+
+  const items = await fetchCheckins();
+  const mine = items.filter(i=>i.user_id === session.user.id);
+  const stats = computeStats(mine);
+  const tagCount = countTags(mine);
+
+  box.innerHTML = `
+    <section class="card">
+      <div class="profile-head">
+        <img id="profile-avatar" src="${me.avatar_url || defaultAvatar(me.username)}" alt="">
+        <div>
+          <div class="profile-name">${me.username}</div>
+          <div class="link" id="avatar-trigger">上传/更换头像</div>
+          <div class="link" id="logout-link" style="color:var(--red);">退出登录</div>
+        </div>
+      </div>
+      <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+    </section>
+
+    <section class="stats-row">
+      <div class="stat"><div class="num">${stats.month}</div><div class="lbl">本月打卡天数</div></div>
+      <div class="stat"><div class="num">${stats.streak}</div><div class="lbl">最长连更</div></div>
+      <div class="stat"><div class="num">${stats.totalImages}</div><div class="lbl">总张数</div></div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">本月打卡月历</div>
+      ${calendarHtml(mine)}
+    </section>
+
+    <section class="analysis-row">
+      <div class="card"><div class="section-title">创作内容分布</div>${pieSvg("内容",tagCount)}</div>
+      <div class="card"><div class="section-title">创作类型分布</div>${pieSvg("类型",tagCount)}</div>
+      <div class="card"><div class="section-title">完成度分布</div>${pieSvg("完成度",tagCount)}</div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">历史打卡</div>
+      <div class="wall-grid" id="profile-grid"></div>
+    </section>
+
+    <section class="card">
+      <div class="link" id="admin-entry">管理员入口</div>
+      <div id="admin-box" style="display:none;margin-top:12px;"></div>
+    </section>
+  `;
+
+  document.getElementById("avatar-trigger").onclick = ()=>document.getElementById("avatar-input").click();
+  document.getElementById("logout-link").onclick = signOut;
+  document.getElementById("avatar-input").onchange = uploadAvatar;
+  document.getElementById("admin-entry").onclick = renderAdmin;
+
+  const grid = document.getElementById("profile-grid");
+  if(!mine.length) grid.innerHTML = `<div class="empty">还没有打卡记录</div>`;
+  else fillWallGrid(grid,mine.slice(0,12));
+}
+
+async function uploadAvatar(e){
+  const file = e.target.files?.[0];
+  if(!file) return;
+
+  try{
+    const compressed = await compressImage(file,500,.82);
+    const path = `${session.user.id}/avatar-${Date.now()}.jpg`;
+
+    const { error: upError } = await sb.storage
+      .from(BUCKET)
+      .upload(path,compressed,{contentType:"image/jpeg",upsert:true});
+
+    if(upError) throw upError;
+
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
+    const avatar_url = data.publicUrl;
+
+    const { error } = await sb.from("profiles").update({ avatar_url }).eq("id",session.user.id);
+    if(error) throw error;
+
+    me.avatar_url = avatar_url;
+    document.getElementById("profile-avatar").src = avatar_url;
+    document.getElementById("chip-avatar").src = avatar_url;
+    toast("头像已更新");
+  }catch(err){
+    console.error(err);
+    toast(err.message || "头像上传失败");
+  }
+}
+
+function computeStats(items){
+  const now = new Date();
+  const monthKeys = new Set();
+  const allKeys = new Set();
+  let totalImages = 0;
+
+  items.forEach(item=>{
+    const d = new Date(item.created_at);
+    const key = dayKey(item.created_at);
+    allKeys.add(key);
+    if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) monthKeys.add(key);
+    totalImages += item.checkin_images?.length || 0;
+  });
+
+  const sorted = Array.from(allKeys).map(k=>new Date(k).getTime()).sort((a,b)=>a-b);
+  let streak = sorted.length ? 1 : 0;
+  let current = sorted.length ? 1 : 0;
+
+  for(let i=1;i<sorted.length;i++){
+    if(sorted[i] - sorted[i-1] <= 86400000 * 1.5) current++;
+    else current = 1;
+    streak = Math.max(streak,current);
+  }
+
+  return { month:monthKeys.size, streak, totalImages };
+}
+
+function countTags(items){
+  const count = {};
+  items.forEach(item=>{
+    item.checkin_images?.forEach(img=>{
+      (img.tags || []).forEach(t=>{
+        count[t] = (count[t] || 0) + 1;
+      });
+    });
+  });
+  return count;
+}
+
+function calendarHtml(items){
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const hits = new Set(
+    items
+      .filter(i=>{
+        const d = new Date(i.created_at);
+        return d.getFullYear() === y && d.getMonth() === m;
+      })
+      .map(i=>new Date(i.created_at).getDate())
+  );
+
+  const first = new Date(y,m,1).getDay();
+  const days = new Date(y,m+1,0).getDate();
+
+  let html = `<div class="calendar">`;
+  ["日","一","二","三","四","五","六"].forEach(d=>{
+    html += `<div class="cal-cell cal-head">${d}</div>`;
+  });
+  for(let i=0;i<first;i++) html += `<div></div>`;
+  for(let d=1;d<=days;d++){
+    html += `<div class="cal-cell cal-day ${hits.has(d) ? "cal-hit" : ""}">${d}</div>`;
+  }
+  return html + `</div>`;
+}
+
+function pieSvg(category,tagCount){
+  const labels = TAG_CATEGORIES[category];
+  const vals = labels.map(l=>tagCount[l] || 0);
+  const total = vals.reduce((a,b)=>a+b,0);
+  const size = 120, cx = 60, cy = 60, r = 50;
+
+  if(!total){
+    return `<div class="pie-wrap">
+      <svg width="120" height="120"><circle cx="60" cy="60" r="50" fill="#f1ebe5"></circle></svg>
+      <div class="legend">暂无数据</div>
+    </div>`;
+  }
+
+  let angle = -90;
+  let paths = "";
+
+  vals.forEach((v,i)=>{
+    if(!v) return;
+    const slice = v / total * 360;
+    const start = angle;
+    const end = angle + slice;
+    const x1 = cx + r * Math.cos(start * Math.PI/180);
+    const y1 = cy + r * Math.sin(start * Math.PI/180);
+    const x2 = cx + r * Math.cos(end * Math.PI/180);
+    const y2 = cy + r * Math.sin(end * Math.PI/180);
+    const large = slice > 180 ? 1 : 0;
+    paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${COLORS[i]}"></path>`;
+    angle = end;
+  });
+
+  const legend = labels.map((l,i)=>vals[i] ? `<div><span class="dot" style="background:${COLORS[i]}"></span>${l} ×${vals[i]}</div>` : "").join("");
+
+  return `<div class="pie-wrap">
+    <svg width="120" height="120" viewBox="0 0 120 120">${paths}</svg>
+    <div class="legend">${legend}</div>
+  </div>`;
+}
+
+async function renderAdmin(){
+  const box = document.getElementById("admin-box");
+  box.style.display = box.style.display === "none" ? "block" : "none";
+  if(box.style.display === "none") return;
+
+  if(!me.is_admin){
+    box.innerHTML = `<div class="hint">你不是管理员。要设管理员，请在 Supabase 的 profiles 表里把你的 is_admin 改成 true。</div>`;
+    return;
+  }
+
+  const items = await fetchCheckins();
+  const by = {};
+
+  items.forEach(item=>{
+    const name = item.profiles?.username || item.username;
+    if(!by[name]) by[name] = {days:new Set(),images:0,tags:{}};
+    by[name].days.add(dayKey(item.created_at));
+    by[name].images += item.checkin_images?.length || 0;
+    item.checkin_images?.forEach(img=>{
+      (img.tags || []).forEach(t=>by[name].tags[t]=(by[name].tags[t]||0)+1);
+    });
+  });
+
+  const rows = Object.entries(by).map(([name,d])=>{
+    const top = Object.entries(d.tags).sort((a,b)=>b[1]-a[1])[0];
+    return {name,days:d.days.size,images:d.images,top:top?top[0]:"-"};
+  }).sort((a,b)=>b.days-a.days);
+
+  box.innerHTML = `
+    <table class="admin-table">
+      <tr><th>名字</th><th>打卡天数</th><th>总张数</th><th>最常画</th></tr>
+      ${rows.map(r=>`<tr><td>${r.name}</td><td>${r.days}</td><td>${r.images}</td><td>${r.top}</td></tr>`).join("")}
+    </table>
+    <button class="btn-soft" id="export-csv" style="width:100%;margin-top:12px;">导出 CSV</button>
+  `;
+
+  document.getElementById("export-csv").onclick = ()=>{
+    let csv = "名字,打卡天数,总张数,最常画\n";
+    rows.forEach(r=>csv += `${r.name},${r.days},${r.images},${r.top}\n`);
+    const blob = new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "打卡统计.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.onclick = async ()=>{
+    activeTab = btn.dataset.tab;
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    document.getElementById("tab-wall").style.display = activeTab === "wall" ? "block" : "none";
+    document.getElementById("tab-profile").style.display = activeTab === "profile" ? "block" : "none";
+    if(activeTab === "wall") await renderWall();
+    if(activeTab === "profile") await renderProfile();
+  };
+});
+
+document.getElementById("open-checkin").onclick = async ()=>{
+  await refreshModalStats();
+  openModal("checkin-modal");
+};
+
+async function refreshModalStats(){
+  const items = await fetchCheckins();
+  const mine = items.filter(i=>i.user_id === session.user.id);
+  const stats = computeStats(mine);
+  document.getElementById("stat-month").textContent = stats.month;
+  document.getElementById("stat-streak").textContent = stats.streak;
+  document.getElementById("stat-total").textContent = stats.totalImages;
+}
+
+function openModal(id){
+  document.getElementById(id).style.display = "flex";
+}
+
+function closeModal(id){
+  document.getElementById(id).style.display = "none";
+}
+
+document.querySelectorAll("[data-close]").forEach(btn=>{
+  btn.onclick = ()=>closeModal(btn.dataset.close);
+});
+
+document.querySelectorAll(".modal-bg").forEach(bg=>{
+  bg.onclick = e=>{
+    if(e.target === bg) bg.style.display = "none";
+  };
+});
+
+function escapeHtml(str){
+  return String(str || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+init();
+</script>
+</body>
+</html>
