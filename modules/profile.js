@@ -34,23 +34,96 @@ function computeBadges(mine){
   return { star, fire, palette };
 }
 
+function startOfWeek(date){
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+
+  const day = d.getDay(); // 周日=0，周一=1
+  const diff = day === 0 ? 6 : day - 1; // 周一作为一周开始
+  d.setDate(d.getDate() - diff);
+
+  return d;
+}
+
+function startOfMonth(date){
+  const d = new Date(date);
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function dateKey(date){
+  const d = new Date(date);
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+
+function imageCount(item){
+  return item.checkin_images?.length || 0;
+}
+
 function computeStats(mine){
   const now = new Date();
-  const monthDays = new Set(mine.filter(x => {
-    const d = new Date(x.created_at);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  }).map(x => new Date(x.created_at).toDateString()));
+  const weekStart = startOfWeek(now);
+  const monthStart = startOfMonth(now);
 
-  const totalImgs = mine.reduce((s,x) => s + (x.checkin_images?.length || 0), 0);
+  const weekDays = new Set();
+  const monthDays = new Set();
 
-  const allDays = Array.from(new Set(mine.map(x => new Date(x.created_at).toDateString())))
-    .map(d => new Date(d).getTime()).sort();
-  let maxStreak = allDays.length ? 1 : 0, cur = allDays.length ? 1 : 0;
-  for(let i=1;i<allDays.length;i++){
-    if(allDays[i]-allDays[i-1] <= 86400000*1.5) cur++; else cur = 1;
-    if(cur > maxStreak) maxStreak = cur;
+  let weekImages = 0;
+  let monthImages = 0;
+  let totalImages = 0;
+
+  mine.forEach(item => {
+    const d = new Date(item.created_at);
+    const imgs = imageCount(item);
+
+    totalImages += imgs;
+
+    if(d >= weekStart){
+      weekDays.add(dateKey(d));
+      weekImages += imgs;
+    }
+
+    if(d >= monthStart){
+      monthDays.add(dateKey(d));
+      monthImages += imgs;
+    }
+  });
+
+  const allDays = Array.from(new Set(
+    mine.map(item => dateKey(item.created_at))
+  ))
+    .map(key => {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day).getTime();
+    })
+    .sort((a, b) => a - b);
+
+  let maxStreak = allDays.length ? 1 : 0;
+  let currentStreak = allDays.length ? 1 : 0;
+
+  for(let i = 1; i < allDays.length; i++){
+    const gap = allDays[i] - allDays[i - 1];
+
+    if(gap <= 86400000 * 1.5){
+      currentStreak++;
+    } else {
+      currentStreak = 1;
+    }
+
+    if(currentStreak > maxStreak){
+      maxStreak = currentStreak;
+    }
   }
-  return { month: monthDays.size, streak: maxStreak, total: totalImgs };
+
+  return {
+    weekDays: weekDays.size,
+    weekImages,
+    monthDays: monthDays.size,
+    monthImages,
+    maxStreak,
+    totalImages
+  };
 }
 
 function pieSvg(tagCount, catName){
