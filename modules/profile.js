@@ -291,25 +291,89 @@ function renderMiniCalendar(mine){
 function pieSvg(tagCount, catName){
   const opts = TAG_CATEGORIES[catName];
   const vals = opts.map(o => tagCount[o] || 0);
-  const total = vals.reduce((a,b)=>a+b,0);
-  const size=120, r=50, cx=60, cy=60;
+  const total = vals.reduce((a,b) => a + b, 0);
+
+  const size = 120;
+  const r = 50;
+  const cx = 60;
+  const cy = 60;
+
   if(!total){
-    return `<div class="pie-wrap"><svg width="${size}" height="${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="#f1f1f1"/></svg><div class="pie-legend"><span class="muted">还没有数据</span></div></div>`;
+    return `
+      <div class="pie-wrap">
+        <svg width="${size}" height="${size}" viewBox="0 0 120 120">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="#f1f1f1"/>
+        </svg>
+        <div class="pie-legend">
+          <span class="muted">还没有数据</span>
+        </div>
+      </div>
+    `;
   }
-  let angle = -90, paths = "";
-  opts.forEach((o,i) => {
+
+  const active = vals
+    .map((v, i) => ({ value:v, label:opts[i], color:PIE_COLORS[i % PIE_COLORS.length] }))
+    .filter(x => x.value > 0);
+
+  if(active.length === 1){
+    const one = active[0];
+
+    return `
+      <div class="pie-wrap">
+        <svg width="${size}" height="${size}" viewBox="0 0 120 120">
+          <circle cx="${cx}" cy="${cy}" r="${r}" fill="${one.color}"/>
+        </svg>
+        <div class="pie-legend">
+          <div><span class="dot" style="background:${one.color}"></span>${one.label} ×${one.value}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  let angle = -90;
+  let paths = "";
+
+  opts.forEach((o, i) => {
     const v = vals[i];
     if(!v) return;
-    const slice = (v/total)*360;
-    const start = angle, end = angle+slice;
-    const x1 = cx + r*Math.cos(start*Math.PI/180), y1 = cy + r*Math.sin(start*Math.PI/180);
-    const x2 = cx + r*Math.cos(end*Math.PI/180), y2 = cy + r*Math.sin(end*Math.PI/180);
+
+    const slice = (v / total) * 360;
+    const start = angle;
+    const end = angle + slice;
+
+    const x1 = cx + r * Math.cos(start * Math.PI / 180);
+    const y1 = cy + r * Math.sin(start * Math.PI / 180);
+    const x2 = cx + r * Math.cos(end * Math.PI / 180);
+    const y2 = cy + r * Math.sin(end * Math.PI / 180);
+
     const largeArc = slice > 180 ? 1 : 0;
-    paths += `<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${largeArc} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${PIE_COLORS[i%PIE_COLORS.length]}"/>`;
+
+    paths += `
+      <path
+        d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${largeArc} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z"
+        fill="${PIE_COLORS[i % PIE_COLORS.length]}"
+      />
+    `;
+
     angle = end;
   });
-  const legend = opts.map((o,i) => vals[i] ? `<div><span class="dot" style="background:${PIE_COLORS[i%PIE_COLORS.length]}"></span>${o} ×${vals[i]}</div>` : "").join("");
-  return `<div class="pie-wrap"><svg width="${size}" height="${size}" viewBox="0 0 120 120">${paths}</svg><div class="pie-legend">${legend}</div></div>`;
+
+  const legend = opts.map((o, i) => {
+    if(!vals[i]) return "";
+
+    return `
+      <div>
+        <span class="dot" style="background:${PIE_COLORS[i % PIE_COLORS.length]}"></span>${o} ×${vals[i]}
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="pie-wrap">
+      <svg width="${size}" height="${size}" viewBox="0 0 120 120">${paths}</svg>
+      <div class="pie-legend">${legend}</div>
+    </div>
+  `;
 }
 
 function csvCell(value){
