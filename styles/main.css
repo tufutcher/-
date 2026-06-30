@@ -47,7 +47,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .wall-card-body{padding:8px;}
 .who-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;}
 .wall-card .when{font-size:11px;color:#999;}
-.wall-card .note{font-size:12px;color:#666;margin-top:4px;line-height:1.4;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
+.wall-card .note{font-size:12px;color:#666;margin-top:4px;line-height:1.4;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .wall-card .tags{font-size:11px;color:#1a6cd9;margin-top:4px;}
 
 .group-block{margin-bottom:18px;}
