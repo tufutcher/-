@@ -135,6 +135,10 @@ function personCardHtml(group){
       <div class="person-thumbs">
         ${thumbs || `<div class="person-empty">还没有缩略图</div>`}
       </div>
+      
+      <button class="person-profile-btn" data-user-id="${group.userId}">
+        查看主页
+      </button>
     </div>
   `;
 }
@@ -191,6 +195,30 @@ function bindCardClicks(){
     card.onclick = () => {
       const item = allCheckins.find(x => x.id === card.dataset.id);
       if(item) openDetail(item);
+    };
+  });
+
+  document.querySelectorAll(".person-profile-btn").forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const userId = btn.dataset.userId;
+      if(!userId) return;
+
+      const currentUser = window.__user;
+
+      if(currentUser && currentUser.id === userId){
+        window.setState?.({
+          view: "me",
+          viewUserId: null
+        });
+      } else {
+        window.setState?.({
+          view: "user",
+          viewUserId: userId
+        });
+      }
     };
   });
 }
