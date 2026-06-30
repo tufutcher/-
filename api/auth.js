@@ -2,20 +2,28 @@ import { checkInvite } from "./invite.js";
 
 // 把任意昵称（含中文）转换成邮箱安全的英文字符串，同一个昵称每次转换结果一致
 export function usernameToEmail(username){
-  const encoded = btoa(unescape(encodeURIComponent(username)))
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .toLowerCase()
-    .slice(0, 30);
-  return encoded + "@x.com";
+  const raw = btoa(unescape(encodeURIComponent(username)));
+  let safe = "";
+  for(let i = 0; i < raw.length && safe.length < 30; i++){
+    const c = raw[i];
+    const code = raw.charCodeAt(i);
+    const isDigit = code >= 48 && code <= 57;
+    const isUpper = code >= 65 && code <= 90;
+    const isLower = code >= 97 && code <= 122;
+    if(isDigit || isUpper || isLower){
+      safe += c.toLowerCase();
+    }
+  }
+  return safe + "@x.com";
 }
 
 export async function signIn(sb, username, password){
   const email = usernameToEmail(username);
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-  if(error){
-    return { user: null, error: error.message };
+  const result = await sb.auth.signInWithPassword({ email: email, password: password });
+  if(result.error){
+    return { user: null, error: result.error.message };
   }
-  return { user: data.user, error: null };
+  return { user: result.data.user, error: null };
 }
 
 export async function signUp(sb, username, password, invite){
@@ -25,28 +33,27 @@ export async function signUp(sb, username, password, invite){
   }
 
   const email = usernameToEmail(username);
-  const { data, error } = await sb.auth.signUp({ email, password });
-  if(error){
-    return { user: null, error: error.message };
+  const result = await sb.auth.signUp({ email: email, password: password });
+  if(result.error){
+    return { user: null, error: result.error.message };
   }
-  const user = data.user;
+  const user = result.data.user;
   if(!user){
     return { user: null, error: "注册失败，请重试" };
   }
 
-  const { error: profileError } = await sb.from("profiles").insert({
+  const profileResult = await sb.from("profiles").insert({
     id: user.id,
     username: username
   });
-  if(profileError){
-    return { user: null, error: "用户名可能已被占用：" + profileError.message };
+  if(profileResult.error){
+    return { user: null, error: "用户名可能已被占用：" + profileResult.error.message };
   }
 
-  return { user, error: null };
+  return { user: user, error: null };
 }
 
-// 获取当前已登录用户（如果浏览器里有持久化的登录态）
 export async function getCurrentUser(sb){
-  const { data } = await sb.auth.getUser();
-  return data?.user || null;
+  const result = await sb.auth.getUser();
+  return (result.data && result.data.user) ? result.data.user : null;
 }
