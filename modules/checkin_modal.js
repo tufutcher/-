@@ -44,13 +44,8 @@ export function openCheckinModal(){
         <input type="file" id="ci-files" accept="image/*" multiple />
       </div>
 
-      <div class="ci-global-tags-box">
-        <div class="ci-section-title">套用标签</div>
-        <div class="hint-text">选择的标签会自动套用到所有图片，点击图片可以单独修改。</div>
-        <div id="ci-global-tags"></div>
-      </div>
-
       <div id="ci-img-list"></div>
+      <div id="ci-tag-panel"></div>
 
       <label>感想（选填）</label>
       <textarea id="ci-note" placeholder="${NOTE_PLACEHOLDERS[Math.floor(Math.random() * NOTE_PLACEHOLDERS.length)]}"></textarea>
@@ -91,10 +86,6 @@ export function openCheckinModal(){
         tags: [...globalTags],
         customTags: false
       });
-
-      if(!selectedImageId){
-        selectedImageId = id;
-      }
     }
 
     renderImgList();
@@ -122,12 +113,94 @@ function readAsDataUrl(file){
 
 function renderImgList(){
   const wrap = document.getElementById("ci-img-list");
-  const globalWrap = document.getElementById("ci-global-tags");
-  if(!wrap || !globalWrap) return;
+  const tagPanel = document.getElementById("ci-tag-panel");
+  if(!wrap || !tagPanel) return;
 
-  globalWrap.innerHTML = renderTagGroups(globalTags, "global");
+  if(!pendingImages.length){
+    wrap.innerHTML = "";
+    tagPanel.innerHTML = "";
+    selectedImageId = null;
+    return;
+  }
 
-  globalWrap.querySelectorAll(".preset-tag").forEach(btn => {
+  const selected = pendingImages.find(img => img.id === selectedImageId);
+  const isSingleMode = !!selected;
+
+  const gridHtml = pendingImages.map((img, index) => {
+    const selectedClass = img.id === selectedImageId ? " selected" : "";
+    const customMark = img.customTags ? '<span class="ci-custom-mark">单独</span>' : "";
+
+    return `
+      <button class="ci-thumb${selectedClass}" data-id="${img.id}" type="button">
+        <img src="${img.preview}">
+        <span class="ci-thumb-num">${index + 1}</span>
+        ${customMark}
+        <span class="ci-thumb-remove" data-remove-id="${img.id}">×</span>
+      </button>
+    `;
+  }).join("");
+
+  wrap.innerHTML = `
+    <div class="ci-thumb-grid">
+      ${gridHtml}
+    </div>
+  `;
+
+  if(isSingleMode){
+    tagPanel.innerHTML = `
+      <div class="ci-tag-box single">
+        <div class="ci-tag-head">
+          <div>
+            <div class="ci-section-title">单张标签</div>
+            <div class="hint-text">正在修改第 ${pendingImages.findIndex(x => x.id === selected.id) + 1} 张图片。</div>
+          </div>
+
+          <button id="ci-back-global" class="secondary small-btn" type="button">返回套用标签</button>
+        </div>
+
+        <div class="ci-selected-tags">${tagsLabel(selected.tags)}</div>
+
+        ${renderTagGroups(selected.tags, "single")}
+
+        ${selected.customTags ? '<button id="ci-reset-tags" class="secondary small-btn ci-reset-btn" type="button">恢复统一标签</button>' : ""}
+      </div>
+    `;
+  } else {
+    tagPanel.innerHTML = `
+      <div class="ci-tag-box">
+        <div class="ci-section-title">套用标签</div>
+        <div class="hint-text">选择的标签会套用到所有图片，点击图片可以单独套用标签。</div>
+
+        ${renderTagGroups(globalTags, "global")}
+      </div>
+    `;
+  }
+
+  wrap.querySelectorAll(".ci-thumb").forEach(btn => {
+    btn.onclick = (e) => {
+      if(e.target.classList.contains("ci-thumb-remove")) return;
+
+      selectedImageId = btn.dataset.id;
+      renderImgList();
+    };
+  });
+
+  wrap.querySelectorAll(".ci-thumb-remove").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+
+      const id = btn.dataset.removeId;
+      pendingImages = pendingImages.filter(img => img.id !== id);
+
+      if(selectedImageId === id){
+        selectedImageId = null;
+      }
+
+      renderImgList();
+    };
+  });
+
+  tagPanel.querySelectorAll('.preset-tag[data-mode="global"]').forEach(btn => {
     btn.onclick = () => {
       const tag = btn.dataset.tag;
       globalTags = toggleTag(globalTags, tag);
@@ -145,107 +218,34 @@ function renderImgList(){
     };
   });
 
-  if(!pendingImages.length){
-    wrap.innerHTML = `
-      <div class="ci-empty">
-        还没有选择图片。选几张作品，让它们排排坐。
-      </div>
-    `;
-    return;
-  }
+  tagPanel.querySelectorAll('.preset-tag[data-mode="single"]').forEach(btn => {
+    btn.onclick = () => {
+      if(!selected) return;
 
-  if(!selectedImageId || !pendingImages.some(img => img.id === selectedImageId)){
-    selectedImageId = pendingImages[0].id;
-  }
-
-  const selected = pendingImages.find(img => img.id === selectedImageId);
-
-  const gridHtml = pendingImages.map((img, index) => {
-    const selectedClass = img.id === selectedImageId ? " selected" : "";
-    const customMark = img.customTags ? '<span class="ci-custom-mark">单独</span>' : "";
-
-    return `
-      <button class="ci-thumb${selectedClass}" data-id="${img.id}" type="button">
-        <img src="${img.preview}">
-        <span class="ci-thumb-num">${index + 1}</span>
-        ${customMark}
-        <span class="ci-thumb-remove" data-remove-id="${img.id}">×</span>
-      </button>
-    `;
-  }).join("");
-
-  const singleEditorHtml = selected ? `
-    <div class="ci-single-editor">
-      <div class="ci-single-head">
-        <div>
-          <div class="ci-section-title">单张标签</div>
-          <div class="hint-text">${selected.customTags ? "这张图片正在使用单独标签。" : "这张图片目前使用本次统一标签。"}</div>
-        </div>
-
-        ${selected.customTags ? '<button id="ci-reset-tags" class="secondary small-btn" type="button">恢复统一标签</button>' : ""}
-      </div>
-
-      <div class="ci-selected-preview">
-        <img src="${selected.preview}">
-        <div class="ci-selected-tags">${tagsLabel(selected.tags)}</div>
-      </div>
-
-      <div id="ci-single-tags">
-        ${renderTagGroups(selected.tags, "single")}
-      </div>
-    </div>
-  ` : "";
-
-  wrap.innerHTML = `
-    <div class="ci-thumb-grid">
-      ${gridHtml}
-    </div>
-
-    ${singleEditorHtml}
-  `;
-
-  wrap.querySelectorAll(".ci-thumb").forEach(btn => {
-    btn.onclick = (e) => {
-      if(e.target.classList.contains("ci-thumb-remove")) return;
-      selectedImageId = btn.dataset.id;
-      renderImgList();
-    };
-  });
-
-  wrap.querySelectorAll(".ci-thumb-remove").forEach(btn => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-
-      const id = btn.dataset.removeId;
-      pendingImages = pendingImages.filter(img => img.id !== id);
-
-      if(selectedImageId === id){
-        selectedImageId = pendingImages[0]?.id || null;
-      }
+      const tag = btn.dataset.tag;
+      selected.tags = toggleTag(selected.tags, tag);
+      selected.customTags = true;
 
       renderImgList();
     };
   });
+
+  const backBtn = document.getElementById("ci-back-global");
+  if(backBtn){
+    backBtn.onclick = () => {
+      selectedImageId = null;
+      renderImgList();
+    };
+  }
 
   const resetBtn = document.getElementById("ci-reset-tags");
   if(resetBtn && selected){
     resetBtn.onclick = () => {
       selected.tags = [...globalTags];
       selected.customTags = false;
+      selectedImageId = null;
       renderImgList();
     };
-  }
-
-  const singleTags = document.getElementById("ci-single-tags");
-  if(singleTags && selected){
-    singleTags.querySelectorAll(".preset-tag").forEach(btn => {
-      btn.onclick = () => {
-        const tag = btn.dataset.tag;
-        selected.tags = toggleTag(selected.tags, tag);
-        selected.customTags = true;
-        renderImgList();
-      };
-    });
   }
 }
 
@@ -261,9 +261,7 @@ function tagsLabel(tags){
 }
 
 function renderTagGroups(activeTags, mode){
-  let html = "";
-
-  Object.keys(TAG_CATEGORIES).forEach(cat => {
+  return Object.keys(TAG_CATEGORIES).map(cat => {
     const opts = TAG_CATEGORIES[cat].map(tag => {
       const onClass = activeTags.includes(tag) ? " on" : "";
 
@@ -274,15 +272,13 @@ function renderTagGroups(activeTags, mode){
       `;
     }).join("");
 
-    html += `
-      <div class="tag-group">
-        <div class="glabel">${cat}</div>
-        <div class="preset-tags">${opts}</div>
+    return `
+      <div class="ci-tag-row">
+        <div class="ci-tag-label">${cat}</div>
+        <div class="preset-tags ci-tag-options">${opts}</div>
       </div>
     `;
-  });
-
-  return html;
+  }).join("");
 }
 
 async function submitCheckin(modal){
