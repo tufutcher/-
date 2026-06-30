@@ -154,7 +154,7 @@ function renderGalleryView(items){
       images.map(img =>
         '<button class="gallery-tile" data-checkin-id="' + img.checkin_id + '" type="button">' +
           '<img src="' + img.image_url + '">' +
-          '<span>' + fmtDate(img.created_at) + '</span>' +
+          '<span class="gallery-date">' + fmtDate(img.created_at) + '</span>' +
         '</button>'
       ).join("") +
     '</div>'
