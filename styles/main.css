@@ -997,3 +997,35 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     height:120px;
   }
 }
+/* 月历：点击日期查看当天打卡 */
+.cal-cell{
+  border:none;
+  font:inherit;
+}
+
+button.cal-cell{
+  cursor:pointer;
+}
+
+button.cal-cell:disabled{
+  cursor:default;
+}
+
+.calendar-day-card{
+  max-height:86vh;
+  overflow:auto;
+}
+
+.calendar-day-item{
+  padding:14px 0;
+  border-top:1px solid rgba(0,0,0,.06);
+}
+
+.calendar-day-item:first-of-type{
+  border-top:none;
+}
+
+.calendar-edit-btn{
+  margin-top:10px;
+  width:100%;
+}
