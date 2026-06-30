@@ -17,9 +17,17 @@ window.switchView = (view) => {
   });
 };
 
-async function loadProfile(userId){
-  const { data } = await sb.from("profiles").select("*").eq("id", userId).single();
-  return data || null;
+async function loadProfiles(){
+  const { data, error } = await sb
+    .from("profiles")
+    .select("id, username, avatar_url");
+
+  if(error){
+    console.error("loadProfiles error:", error);
+    return [];
+  }
+
+  return data || [];
 }
 
 // 渲染函数（唯一入口）
@@ -27,13 +35,13 @@ function render(){
   const app = document.getElementById("app");
 
   if(state.view === "wall"){
-    app.innerHTML = renderWall(state.checkins);
+    app.innerHTML = renderWall(state.checkins, state.profiles || []);
     bindWallEvents();
   }
 
   if(state.view === "me"){
     if(!state.user){
-      app.innerHTML = renderWall(state.checkins);
+      app.innerHTML = renderWall(state.checkins, state.profiles || []);
       bindWallEvents();
 
       openAuthModal(sb, async (user) => {
@@ -54,16 +62,30 @@ function render(){
 
 // 浮动按钮
 function renderFab(){
-  let fab = document.getElementById("fab-add");
+  let nav = document.getElementById("bottom-nav");
 
-  if(!fab){
-    fab = document.createElement("div");
-    fab.id = "fab-add";
-    fab.textContent = "＋";
-    document.body.appendChild(fab);
+  if(!nav){
+    nav = document.createElement("div");
+    nav.id = "bottom-nav";
+    nav.innerHTML = `
+      <button id="nav-wall" class="nav-btn">墙</button>
+      <button id="fab-add">＋</button>
+      <button id="nav-me" class="nav-btn">我的</button>
+    `;
+    document.body.appendChild(nav);
   }
 
-  fab.onclick = () => {
+  const wallBtn = nav.querySelector("#nav-wall");
+  const meBtn = nav.querySelector("#nav-me");
+  const addBtn = nav.querySelector("#fab-add");
+
+  wallBtn.classList.toggle("on", state.view === "wall");
+  meBtn.classList.toggle("on", state.view === "me");
+
+  wallBtn.onclick = () => setState({ view: "wall" });
+  meBtn.onclick = () => setState({ view: "me" });
+
+  addBtn.onclick = () => {
     if(state.user){
       openCheckinModal();
     } else {
@@ -72,8 +94,9 @@ function renderFab(){
         setState({ user });
 
         const profile = await loadProfile(user.id);
-        setState({ profile });
+        const profiles = await loadProfiles();
 
+        setState({ profile, profiles });
         openCheckinModal();
       });
     }
@@ -90,6 +113,7 @@ async function start(){
   }
 
   const checkins = await loadCheckins(sb);
+  const profiles = await loadProfiles();
 
   window.__user = user;
 
