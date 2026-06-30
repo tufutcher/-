@@ -1,12 +1,9 @@
 export const events = {
-  map: {},
-
-  on(e,fn){
-    this.map[e] = this.map[e] || [];
-    this.map[e].push(fn);
+  _listeners: {},
+  on(name, fn){
+    (this._listeners[name] ||= []).push(fn);
   },
-
-  emit(e,data){
-    (this.map[e]||[]).forEach(fn=>fn(data));
+  emit(name, payload){
+    (this._listeners[name] || []).forEach(fn => fn(payload));
   }
 };
