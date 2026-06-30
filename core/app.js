@@ -10,6 +10,7 @@ import { openAuthModal } from "../modules/auth_modal.js";
 const sb = initSupabase();
 window.__sb = sb;
 window.setState = setState;
+window.state = state;
 
 window.switchView = (view) => {
   setState({ view });
@@ -155,7 +156,7 @@ async function start(){
   });
 }
 
-// ⭐ 关键：自动刷新绑定
+// 自动刷新绑定
 subscribe(render);
 
 start();
