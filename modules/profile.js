@@ -173,11 +173,22 @@ export function renderProfile(state){
       </div>
       <input type="file" id="avatar-input" accept="image/*" style="display:none;">
     </div>
-    <div class="stats-row">
-      <div class="stat"><div class="num">${stats.month}</div><div class="lbl">本月打卡天数</div></div>
-      <div class="stat"><div class="num">${stats.streak}</div><div class="lbl">最长连更</div></div>
-      <div class="stat"><div class="num">${stats.total}</div><div class="lbl">总张数</div></div>
-    </div>
+<div class="stats-row">
+  <div class="stat stat-block">
+    <div class="stat-title">本周</div>
+    <div class="stat-main">${stats.weekDays} 天 / ${stats.weekImages} 张</div>
+  </div>
+
+  <div class="stat stat-block">
+    <div class="stat-title">本月</div>
+    <div class="stat-main">${stats.monthDays} 天 / ${stats.monthImages} 张</div>
+  </div>
+
+  <div class="stat stat-block">
+    <div class="stat-title">总计</div>
+    <div class="stat-main">最长 ${stats.maxStreak} 天 / ${stats.totalImages} 张</div>
+  </div>
+</div>
     <div class="card">
       <div class="glabel">我的徽章</div>
       <div class="badge-row">
