@@ -155,6 +155,6 @@ async function start(){
 }
 
 // ⭐ 关键：自动刷新绑定
-subscribe();
+subscribe(render);
 
 start();
