@@ -266,24 +266,6 @@ function renderArchiveCard(tagCount, topTags, visibleMine){
   `;
 }
 
-function getGalleryImages(items){
-  const images = [];
-
-  items.forEach(item => {
-    (item.checkin_images || []).forEach(img => {
-      images.push({
-        id: img.id,
-        image_url: img.image_url,
-        created_at: item.created_at,
-        checkin_id: item.id,
-        item
-      });
-    });
-  });
-
-  return images;
-}
-
 function renderArchiveModeSwitch(){
   return `
     <div class="archive-mode-switch" id="archive-mode-switch">
