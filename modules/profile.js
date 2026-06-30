@@ -215,9 +215,23 @@ export function renderProfile(state){
     <div class="card">
       <div class="glabel">我的徽章</div>
       <div class="badge-row">
-        <div class="badge-item"><span class="badge-emoji">⭐</span><span class="badge-count">×${badges.star}</span><span class="badge-desc">单周3-4天</span></div>
-        <div class="badge-item"><span class="badge-emoji">🔥</span><span class="badge-count">×${badges.fire}</span><span class="badge-desc">单周5-6天</span></div>
-        <div class="badge-item"><span class="badge-emoji">🎨</span><span class="badge-count">×${badges.palette}</span><span class="badge-desc">单周满勤</span></div>
+        <div class="badge-item ${badges.star ? 'unlocked' : 'locked'}">
+          <span class="badge-emoji">⭐</span>
+          <span class="badge-count">×${badges.star}</span>
+          <span class="badge-desc">单周3-4天</span>
+        </div>
+    
+        <div class="badge-item ${badges.fire ? 'unlocked' : 'locked'}">
+          <span class="badge-emoji">🔥</span>
+          <span class="badge-count">×${badges.fire}</span>
+          <span class="badge-desc">单周5-6天</span>
+        </div>
+    
+        <div class="badge-item ${badges.palette ? 'unlocked' : 'locked'}">
+          <span class="badge-emoji">🎨</span>
+          <span class="badge-count">×${badges.palette}</span>
+          <span class="badge-desc">单周满勤</span>
+        </div>
       </div>
     </div>
 <div class="card">
