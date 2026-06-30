@@ -227,6 +227,7 @@ function openEditModal(item){
       <label>感想</label>
       <textarea id="edit-note">${item.note || ""}</textarea>
       <button id="edit-save">保存修改</button>
+      <button id="edit-delete" class="danger">删除打卡</button>
       <button id="edit-cancel" class="secondary">取消</button>
     </div>
   `;
