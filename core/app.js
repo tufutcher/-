@@ -1,5 +1,5 @@
-import { state } from "core/state.js";
-import { events } from "core/events.js";
+import { state } from "state.js";
+import { events } from "events.js";
 
 import { initSupabase } from "api/supabase.js";
 import { auth } from "api/auth.js";
