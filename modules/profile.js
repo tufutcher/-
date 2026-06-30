@@ -35,26 +35,20 @@ function computeBadges(mine){
 }
 
 function startOfWeek(date){
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-
-  const day = d.getDay(); // 周日=0，周一=1
-  const diff = day === 0 ? 6 : day - 1; // 周一作为一周开始
-  d.setDate(d.getDate() - diff);
-
+  const d = new Date(date); d.setHours(0,0,0,0);
+  const day = d.getDay();
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
   return d;
 }
 
 function startOfMonth(date){
-  const d = new Date(date);
-  d.setDate(1);
-  d.setHours(0, 0, 0, 0);
+  const d = new Date(date); d.setDate(1); d.setHours(0,0,0,0);
   return d;
 }
 
 function dateKey(date){
   const d = new Date(date);
-  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
 }
 
 function imageCount(item){
@@ -62,68 +56,32 @@ function imageCount(item){
 }
 
 function computeStats(mine){
-  const now = new Date();
-  const weekStart = startOfWeek(now);
-  const monthStart = startOfMonth(now);
-
-  const weekDays = new Set();
-  const monthDays = new Set();
-
-  let weekImages = 0;
-  let monthImages = 0;
-  let totalImages = 0;
+  const now = new Date(), weekStart = startOfWeek(now), monthStart = startOfMonth(now);
+  const weekDays = new Set(), monthDays = new Set();
+  let weekImages = 0, monthImages = 0, totalImages = 0;
 
   mine.forEach(item => {
-    const d = new Date(item.created_at);
-    const imgs = imageCount(item);
-
+    const d = new Date(item.created_at), imgs = imageCount(item);
     totalImages += imgs;
-
-    if(d >= weekStart){
-      weekDays.add(dateKey(d));
-      weekImages += imgs;
-    }
-
-    if(d >= monthStart){
-      monthDays.add(dateKey(d));
-      monthImages += imgs;
-    }
+    if(d >= weekStart){ weekDays.add(dateKey(d)); weekImages += imgs; }
+    if(d >= monthStart){ monthDays.add(dateKey(d)); monthImages += imgs; }
   });
 
-  const allDays = Array.from(new Set(
-    mine.map(item => dateKey(item.created_at))
-  ))
+  const allDays = Array.from(new Set(mine.map(item => dateKey(item.created_at))))
     .map(key => {
-      const [year, month, day] = key.split("-").map(Number);
-      return new Date(year, month - 1, day).getTime();
+      const [y,m,d] = key.split("-").map(Number);
+      return new Date(y, m - 1, d).getTime();
     })
-    .sort((a, b) => a - b);
+    .sort((a,b) => a - b);
 
-  let maxStreak = allDays.length ? 1 : 0;
-  let currentStreak = allDays.length ? 1 : 0;
-
-  for(let i = 1; i < allDays.length; i++){
-    const gap = allDays[i] - allDays[i - 1];
-
-    if(gap <= 86400000 * 1.5){
-      currentStreak++;
-    } else {
-      currentStreak = 1;
-    }
-
-    if(currentStreak > maxStreak){
-      maxStreak = currentStreak;
-    }
+  let maxStreak = allDays.length ? 1 : 0, cur = allDays.length ? 1 : 0;
+  for(let i=1; i<allDays.length; i++){
+    if(allDays[i] - allDays[i-1] <= 86400000 * 1.5) cur++;
+    else cur = 1;
+    if(cur > maxStreak) maxStreak = cur;
   }
 
-  return {
-    weekDays: weekDays.size,
-    weekImages,
-    monthDays: monthDays.size,
-    monthImages,
-    maxStreak,
-    totalImages
-  };
+  return { weekDays:weekDays.size, weekImages, monthDays:monthDays.size, monthImages, maxStreak, totalImages };
 }
 
 function pieSvg(tagCount, catName){
@@ -173,22 +131,11 @@ export function renderProfile(state){
       </div>
       <input type="file" id="avatar-input" accept="image/*" style="display:none;">
     </div>
-<div class="stats-row">
-  <div class="stat stat-block">
-    <div class="stat-title">本周</div>
-    <div class="stat-main">${stats.weekDays} 天 / ${stats.weekImages} 张</div>
-  </div>
-
-  <div class="stat stat-block">
-    <div class="stat-title">本月</div>
-    <div class="stat-main">${stats.monthDays} 天 / ${stats.monthImages} 张</div>
-  </div>
-
-  <div class="stat stat-block">
-    <div class="stat-title">总计</div>
-    <div class="stat-main">最长 ${stats.maxStreak} 天 / ${stats.totalImages} 张</div>
-  </div>
-</div>
+    <div class="stats-row">
+      <div class="stat stat-block"><div class="stat-title">本周</div><div class="stat-main">${stats.weekDays} 天 / ${stats.weekImages} 张</div></div>
+      <div class="stat stat-block"><div class="stat-title">本月</div><div class="stat-main">${stats.monthDays} 天 / ${stats.monthImages} 张</div></div>
+      <div class="stat stat-block"><div class="stat-title">总计</div><div class="stat-main">最长 ${stats.maxStreak} 天 / ${stats.totalImages} 张</div></div>
+    </div>
     <div class="card">
       <div class="glabel">我的徽章</div>
       <div class="badge-row">
