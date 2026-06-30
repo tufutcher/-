@@ -108,6 +108,18 @@ export function openCheckinModal(){
   renderImgList();
 }
 
+function readAsDataUrl(file){
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      resolve(e.target.result);
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
 function renderImgList(){
   const wrap = document.getElementById("ci-img-list");
   const globalWrap = document.getElementById("ci-global-tags");
