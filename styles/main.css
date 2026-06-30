@@ -47,7 +47,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .wall-card-body{padding:8px;}
 .who-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;}
 .wall-card .when{font-size:11px;color:#999;}
-.wall-card .note{font-size:12px;color:#666;margin-top:4px;line-height:1.4;}
+.wall-card .note{font-size:12px;color:#666;margin-top:4px;line-height:1.4;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;}
 .wall-card .tags{font-size:11px;color:#1a6cd9;margin-top:4px;}
 
 .group-block{margin-bottom:18px;}
@@ -132,4 +132,18 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   width:56px;height:56px;border-radius:50%;background:#1a1a1a;color:#fff;
   font-size:28px;display:flex;align-items:center;justify-content:center;
   cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:50;user-select:none;
+}
+
+/* 修复详情弹窗感想过长时不换行、撑出屏幕的问题 */
+.note{
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  line-height:1.6;
+  max-width:100%;
+}
+
+.modal-card .note{
+  display:block;
+  width:100%;
 }
