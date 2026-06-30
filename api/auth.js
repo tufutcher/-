@@ -1,4 +1,4 @@
-import { checkInvite } from "/api/invite.js";
+import { checkInvite } from "./invite.js";
 
 export async function auth(sb){
   const username = prompt("用户名");
