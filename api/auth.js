@@ -1,4 +1,3 @@
-cat > /home/claude/auth.js << 'EOF'
 import { checkInvite } from "./invite.js";
 
 // 把任意昵称（含中文）转换成邮箱安全的英文字符串，同一个昵称每次转换结果一致
@@ -51,5 +50,3 @@ export async function getCurrentUser(sb){
   const { data } = await sb.auth.getUser();
   return data?.user || null;
 }
-EOF
-echo done
