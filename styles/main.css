@@ -643,3 +643,22 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     min-height:34px;
   }
 }
+
+.person-profile-btn{
+  width:100%;
+  margin-top:10px;
+  padding:9px 12px;
+  border-radius:999px;
+  background:#111;
+  color:#fff;
+  font-size:12px;
+}
+
+/* 新增可以查看他人profile */
+.person-profile-btn:hover{
+  opacity:.9;
+}
+
+.readonly-profile .avatar-trigger{
+  cursor:default;
+}
