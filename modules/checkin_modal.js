@@ -1,5 +1,5 @@
-import { uploadImage } from "/api/storage.js";
-import { createCheckin, addCheckinImage } from "/api/checkin.js";
+import { uploadImage } from "../api/storage.js";
+import { createCheckin, addCheckinImage } from "../api/checkin.js";
 
 export function openCheckinModal(){
   const old = document.getElementById("checkin-modal");
