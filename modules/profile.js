@@ -209,7 +209,11 @@ export function renderProfile(state, options = {}){
     : `历史打卡（共 ${mine.length} 次，点图片可编辑）`;
 
   const html = `
-    <div class="card profile-hero-card ${readonly ? 'readonly-profile' : ''}">
+      ${readonly ? `
+        <button class="back-wall-btn" id="back-wall-btn">← 返回打卡墙</button>
+      ` : ''}
+  
+      <div class="card profile-hero-card ${readonly ? 'readonly-profile' : ''}">
       <div class="profile-hero-left">
         <button id="avatar-trigger" class="avatar-trigger" type="button">
           <img class="avatar-lg" id="avatar-img" src="${avatarUrl || ''}" style="background:${avatarUrl ? 'transparent' : '#ddd'};">
@@ -348,6 +352,18 @@ function openReadOnlyCheckinDetail(item){
 
 function bindProfileEvents(state, mine, options = {}){
   const readonly = !!options.readonly;
+  
+  const backWallBtn = document.getElementById("back-wall-btn");
+  if(backWallBtn){
+    backWallBtn.onclick = () => {
+      if(window.setState){
+        window.setState({
+          view: "wall",
+          viewUserId: null
+        });
+      }
+    };
+  }
 
   document.querySelectorAll(".mini-calendar").forEach((cal, index) => {
     if(index > 0){
