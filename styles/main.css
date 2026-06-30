@@ -716,24 +716,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 /* 个人页数据视图筛选器 */
-.data-filter-card{
-  padding:14px;
-}
-
-.data-filter-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.data-filter-title{
-  font-size:17px;
-  font-weight:800;
-  letter-spacing:-.03em;
-  color:#111;
-}
-
 .data-filter{
   display:inline-flex;
   padding:4px;
@@ -772,5 +754,225 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
   .data-filter span{
     flex:1;
+  }
+}
+
+/* 第二次迭代个人数据页 */
+.archive-card{
+  padding:16px;
+}
+
+.archive-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.archive-title{
+  font-size:20px;
+  font-weight:850;
+  letter-spacing:-.04em;
+  color:#111;
+}
+
+.archive-section{
+  padding-top:16px;
+  margin-top:16px;
+  border-top:1px solid rgba(0,0,0,.06);
+}
+
+.archive-section:first-of-type{
+  border-top:none;
+  margin-top:0;
+  padding-top:0;
+}
+
+.archive-pie-grid{
+  margin-top:8px;
+}
+
+.archive-pillbar span{
+  transition:transform .18s ease, background .18s ease, color .18s ease;
+}
+
+.archive-pillbar span:hover{
+  transform:translateY(-1px);
+  background:rgba(12,192,223,.12);
+  color:#087c91;
+}
+
+.archive-view-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.archive-view-subtitle{
+  font-size:12px;
+  color:#999;
+  line-height:1.5;
+}
+
+.archive-mode-switch{
+  display:inline-flex;
+  padding:4px;
+  border-radius:999px;
+  background:#f1f2f4;
+  flex:0 0 auto;
+}
+
+.archive-mode-switch span{
+  min-width:50px;
+  padding:7px 12px;
+  border-radius:999px;
+  text-align:center;
+  font-size:12px;
+  color:#777;
+  cursor:pointer;
+  user-select:none;
+}
+
+.archive-mode-switch span.on{
+  background:#111;
+  color:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
+
+/* 画廊模式：展示所有图片，完整显示，不裁切 */
+.gallery-board{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(84px,1fr));
+  gap:8px;
+  max-height:430px;
+  overflow:auto;
+  padding:4px;
+  border-radius:16px;
+  background:#f6f7f8;
+}
+
+.gallery-tile{
+  border:none;
+  padding:0;
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+  color:#777;
+  cursor:pointer;
+  box-shadow:none;
+  min-height:96px;
+  display:flex;
+  flex-direction:column;
+}
+
+.gallery-tile img{
+  width:100%;
+  height:82px;
+  object-fit:contain;
+  display:block;
+  background:#fafafa;
+}
+
+.gallery-tile span{
+  display:block;
+  padding:5px 4px 6px;
+  font-size:10px;
+  line-height:1;
+  text-align:center;
+  color:#888;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.gallery-tile:hover{
+  box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
+
+/* 打卡模式：按一次次打卡展示，隐藏标签和感想 */
+.archive-checkin-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
+}
+
+.archive-checkin-card{
+  border:none;
+  padding:0;
+  border-radius:16px;
+  overflow:hidden;
+  background:#f7f7f8;
+  color:#111;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.045);
+}
+
+.archive-checkin-cover{
+  height:140px;
+  background:#f2f3f4;
+}
+
+.archive-checkin-cover img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+}
+
+.archive-checkin-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  font-size:12px;
+  color:#777;
+}
+
+.archive-checkin-meta b{
+  color:#111;
+  font-size:12px;
+}
+
+.archive-empty{
+  padding:24px 0;
+  text-align:center;
+  color:#aaa;
+}
+
+@media (max-width:620px){
+  .archive-top,
+  .archive-view-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .data-filter,
+  .archive-mode-switch{
+    width:100%;
+  }
+
+  .data-filter span,
+  .archive-mode-switch span{
+    flex:1;
+  }
+
+  .gallery-board{
+    grid-template-columns:repeat(auto-fill,minmax(68px,1fr));
+    max-height:360px;
+  }
+
+  .gallery-tile img{
+    height:68px;
+  }
+
+  .archive-checkin-list{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .archive-checkin-cover{
+    height:120px;
   }
 }
