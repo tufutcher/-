@@ -20,12 +20,16 @@ const NOTE_PLACEHOLDERS = [
 ];
 
 let pendingImages = [];
+let globalTags = [];
+let selectedImageId = null;
 
 export function openCheckinModal(){
   const old = document.getElementById("checkin-modal");
   if(old) old.remove();
 
   pendingImages = [];
+  globalTags = [];
+  selectedImageId = null;
 
   const modal = document.createElement("div");
   modal.id = "checkin-modal";
@@ -36,13 +40,19 @@ export function openCheckinModal(){
       <h3>本次打卡</h3>
 
       <div class="upload-trigger">
-        <span>点击选择图片，可多选</span>
+        <span>点击选择图片（可多选）</span>
         <input type="file" id="ci-files" accept="image/*" multiple />
+      </div>
+
+      <div class="ci-global-tags-box">
+        <div class="ci-section-title">套用标签</div>
+        <div class="hint-text">选择的标签会自动套用到所有图片，点击图片可以单独修改。</div>
+        <div id="ci-global-tags"></div>
       </div>
 
       <div id="ci-img-list"></div>
 
-      <label>这次的感想（选填）</label>
+      <label>感想（选填）</label>
       <textarea id="ci-note" placeholder="${NOTE_PLACEHOLDERS[Math.floor(Math.random() * NOTE_PLACEHOLDERS.length)]}"></textarea>
 
       <div class="hint-text">
@@ -72,12 +82,19 @@ export function openCheckinModal(){
     for(const f of files){
       const dataUrl = await readAsDataUrl(f);
 
+      const id = "img_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+
       pendingImages.push({
-        id: "img_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        id,
         file: f,
         preview: dataUrl,
-        tags: []
+        tags: [...globalTags],
+        customTags: false
       });
+
+      if(!selectedImageId){
+        selectedImageId = id;
+      }
     }
 
     renderImgList();
@@ -87,18 +104,173 @@ export function openCheckinModal(){
   document.getElementById("ci-submit").onclick = () => {
     submitCheckin(modal);
   };
+
+  renderImgList();
 }
 
-function readAsDataUrl(file){
-  return new Promise((resolve) => {
-    const reader = new FileReader();
+function renderImgList(){
+  const wrap = document.getElementById("ci-img-list");
+  const globalWrap = document.getElementById("ci-global-tags");
+  if(!wrap || !globalWrap) return;
 
-    reader.onload = (e) => {
-      resolve(e.target.result);
+  globalWrap.innerHTML = renderTagGroups(globalTags, "global");
+
+  globalWrap.querySelectorAll(".preset-tag").forEach(btn => {
+    btn.onclick = () => {
+      const tag = btn.dataset.tag;
+      globalTags = toggleTag(globalTags, tag);
+
+      pendingImages = pendingImages.map(img => {
+        if(img.customTags) return img;
+
+        return {
+          ...img,
+          tags: [...globalTags]
+        };
+      });
+
+      renderImgList();
     };
-
-    reader.readAsDataURL(file);
   });
+
+  if(!pendingImages.length){
+    wrap.innerHTML = `
+      <div class="ci-empty">
+        还没有选择图片。选几张作品，让它们排排坐。
+      </div>
+    `;
+    return;
+  }
+
+  if(!selectedImageId || !pendingImages.some(img => img.id === selectedImageId)){
+    selectedImageId = pendingImages[0].id;
+  }
+
+  const selected = pendingImages.find(img => img.id === selectedImageId);
+
+  const gridHtml = pendingImages.map((img, index) => {
+    const selectedClass = img.id === selectedImageId ? " selected" : "";
+    const customMark = img.customTags ? '<span class="ci-custom-mark">单独</span>' : "";
+
+    return `
+      <button class="ci-thumb${selectedClass}" data-id="${img.id}" type="button">
+        <img src="${img.preview}">
+        <span class="ci-thumb-num">${index + 1}</span>
+        ${customMark}
+        <span class="ci-thumb-remove" data-remove-id="${img.id}">×</span>
+      </button>
+    `;
+  }).join("");
+
+  const singleEditorHtml = selected ? `
+    <div class="ci-single-editor">
+      <div class="ci-single-head">
+        <div>
+          <div class="ci-section-title">单张标签</div>
+          <div class="hint-text">${selected.customTags ? "这张图片正在使用单独标签。" : "这张图片目前使用本次统一标签。"}</div>
+        </div>
+
+        ${selected.customTags ? '<button id="ci-reset-tags" class="secondary small-btn" type="button">恢复统一标签</button>' : ""}
+      </div>
+
+      <div class="ci-selected-preview">
+        <img src="${selected.preview}">
+        <div class="ci-selected-tags">${tagsLabel(selected.tags)}</div>
+      </div>
+
+      <div id="ci-single-tags">
+        ${renderTagGroups(selected.tags, "single")}
+      </div>
+    </div>
+  ` : "";
+
+  wrap.innerHTML = `
+    <div class="ci-thumb-grid">
+      ${gridHtml}
+    </div>
+
+    ${singleEditorHtml}
+  `;
+
+  wrap.querySelectorAll(".ci-thumb").forEach(btn => {
+    btn.onclick = (e) => {
+      if(e.target.classList.contains("ci-thumb-remove")) return;
+      selectedImageId = btn.dataset.id;
+      renderImgList();
+    };
+  });
+
+  wrap.querySelectorAll(".ci-thumb-remove").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+
+      const id = btn.dataset.removeId;
+      pendingImages = pendingImages.filter(img => img.id !== id);
+
+      if(selectedImageId === id){
+        selectedImageId = pendingImages[0]?.id || null;
+      }
+
+      renderImgList();
+    };
+  });
+
+  const resetBtn = document.getElementById("ci-reset-tags");
+  if(resetBtn && selected){
+    resetBtn.onclick = () => {
+      selected.tags = [...globalTags];
+      selected.customTags = false;
+      renderImgList();
+    };
+  }
+
+  const singleTags = document.getElementById("ci-single-tags");
+  if(singleTags && selected){
+    singleTags.querySelectorAll(".preset-tag").forEach(btn => {
+      btn.onclick = () => {
+        const tag = btn.dataset.tag;
+        selected.tags = toggleTag(selected.tags, tag);
+        selected.customTags = true;
+        renderImgList();
+      };
+    });
+  }
+}
+
+function toggleTag(list, tag){
+  return list.includes(tag)
+    ? list.filter(x => x !== tag)
+    : [...list, tag];
+}
+
+function tagsLabel(tags){
+  if(!tags || !tags.length) return "未选标签";
+  return tags.map(t => "#" + t).join(" ");
+}
+
+function renderTagGroups(activeTags, mode){
+  let html = "";
+
+  Object.keys(TAG_CATEGORIES).forEach(cat => {
+    const opts = TAG_CATEGORIES[cat].map(tag => {
+      const onClass = activeTags.includes(tag) ? " on" : "";
+
+      return `
+        <span class="preset-tag${onClass}" data-mode="${mode}" data-tag="${tag}">
+          ${tag}
+        </span>
+      `;
+    }).join("");
+
+    html += `
+      <div class="tag-group">
+        <div class="glabel">${cat}</div>
+        <div class="preset-tags">${opts}</div>
+      </div>
+    `;
+  });
+
+  return html;
 }
 
 function renderImgList(){
@@ -234,7 +406,7 @@ async function submitCheckin(modal){
     return;
   }
 
-  btn.textContent = "🏷️ 保存图片记录中...";
+  btn.textContent = "🏷️ 保存标签中...";
 
   for(const img of uploadedImages){
     const imageRecord = await addCheckinImage(
