@@ -1,4 +1,3 @@
-cat > /home/claude/auth_modal.js << 'EOF'
 import { signIn, signUp } from "../api/auth.js";
 
 // onSuccess(user) 会在登录/注册成功后被调用
@@ -80,5 +79,3 @@ export function openAuthModal(sb, onSuccess){
     onSuccess(result.user);
   };
 }
-EOF
-echo done
