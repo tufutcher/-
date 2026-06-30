@@ -120,10 +120,6 @@ export function renderProfile(state){
   const username = state.profile?.username || "我";
 
   const html = `
-    <div class="topbar">
-      <button onclick="switchView('wall')">墙</button>
-      <button onclick="switchView('me')">我的</button>
-    </div>
     <div class="card">
       <div class="profile-head">
         <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
