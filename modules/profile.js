@@ -232,8 +232,19 @@ export function openEditModal(item){
     </div>
   `;
   document.body.appendChild(modal);
-  modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
-  document.getElementById("edit-delete").onclick = async () => {
+  
+  modal.addEventListener("click", (e) => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  });
+  
+  const cancelBtn = document.getElementById("edit-cancel");
+  if(cancelBtn){
+    cancelBtn.addEventListener("click", () => {
+      modal.remove();
+    });
+  }
     const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
     if(!ok) return;
   
