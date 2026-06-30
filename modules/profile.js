@@ -994,7 +994,7 @@ export function openEditModal(item){
       const note = noteInput ? noteInput.value.trim() : "";
 
       if(!sb){
-        alert("数据库连接失败，请刷新后重试");
+        window.showToast?.("数据库连接失败，请刷新后重试。", "保存失败", "error");
         return;
       }
 
@@ -1027,7 +1027,7 @@ export function openEditModal(item){
       const user = window.__user;
 
       if(!sb || !user){
-        alert("请先登录");
+        window.showToast?.("请先登录后再操作。", "还不能操作", "error");
         return;
       }
 
@@ -1049,7 +1049,7 @@ export function openEditModal(item){
       }
 
       modal.remove();
-      alert("已删除");
+      window.showToast?.("这次打卡已经删除。", "已删除", "success");
     };
   }
 }
