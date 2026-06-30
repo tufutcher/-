@@ -42,7 +42,6 @@ async function submitCheckin(modal){
   btn.disabled = true;
   btn.textContent = "提交中...";
 
-  // profiles 表里查用户名（注册时已写入）
   const { data: profile } = await sb.from("profiles").select("username").eq("id", user.id).single();
   const username = profile?.username || user.email.split("@")[0];
 
