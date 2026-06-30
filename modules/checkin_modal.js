@@ -126,5 +126,6 @@ async function submitCheckin(modal){
 
   modal.remove();
   alert("打卡成功！");
-  window.dispatchEvent(new CustomEvent("checkin-submitted"));
-}
+window.setState({
+  checkins: await loadCheckins(window.__sb)
+});
