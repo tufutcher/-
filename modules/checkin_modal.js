@@ -39,10 +39,12 @@ export function openCheckinModal(){
     <div class="modal-card">
       <h3>本次打卡</h3>
 
-      <div class="upload-trigger">
-        <span>点击选择图片（可多选）</span>
+      <label class="ci-upload-mini" for="ci-files">
+        <span class="ci-upload-plus">＋</span>
+        <span id="ci-upload-text">选择图片</span>
+        <em id="ci-upload-count">支持多选</em>
         <input type="file" id="ci-files" accept="image/*" multiple />
-      </div>
+      </label>
 
       <div id="ci-img-list"></div>
       <div id="ci-tag-panel"></div>
@@ -114,7 +116,20 @@ function readAsDataUrl(file){
 function renderImgList(){
   const wrap = document.getElementById("ci-img-list");
   const tagPanel = document.getElementById("ci-tag-panel");
+  const uploadText = document.getElementById("ci-upload-text");
+  const uploadCount = document.getElementById("ci-upload-count");
+  
   if(!wrap || !tagPanel) return;
+
+  if(uploadText && uploadCount){
+  if(pendingImages.length){
+    uploadText.textContent = "继续添加";
+    uploadCount.textContent = "已选择 " + pendingImages.length + " 张";
+  } else {
+    uploadText.textContent = "选择图片";
+    uploadCount.textContent = "支持多选";
+  }
+}
 
   if(!pendingImages.length){
     wrap.innerHTML = "";
@@ -129,6 +144,7 @@ function renderImgList(){
   const gridHtml = pendingImages.map((img, index) => {
     const selectedClass = img.id === selectedImageId ? " selected" : "";
     const customMark = img.customTags ? '<span class="ci-custom-mark">单独</span>' : "";
+    const pointer = img.id === selectedImageId ? '<span class="ci-thumb-pointer"></span>' : "";
 
     return `
       <button class="ci-thumb${selectedClass}" data-id="${img.id}" type="button">
@@ -136,6 +152,7 @@ function renderImgList(){
         <span class="ci-thumb-num">${index + 1}</span>
         ${customMark}
         <span class="ci-thumb-remove" data-remove-id="${img.id}">×</span>
+        ${pointer}
       </button>
     `;
   }).join("");
@@ -146,22 +163,20 @@ function renderImgList(){
     </div>
   `;
 
-  if(isSingleMode){
-    tagPanel.innerHTML = `
-      <div class="ci-single-layout">
-        <div class="ci-selected-card">
-          <img src="${selected.preview}">
-          <button id="ci-back-global" class="ci-float-btn ci-close-single" type="button">×</button>
-          <button id="ci-reset-tags" class="ci-float-btn ci-reset-single" type="button">↻</button>
-        </div>
+if(isSingleMode){
+  tagPanel.innerHTML = `
+    <div class="ci-tag-box single">
+      <div class="ci-section-title">单张标签</div>
 
-        <div class="ci-tag-box single">
-          <div class="ci-section-title">单张标签</div>
-          ${renderTagGroups(selected.tags, "single")}
-        </div>
+      ${renderTagGroups(selected.tags, "single")}
+
+      <div class="ci-single-actions">
+        <button id="ci-back-global" class="ci-icon-btn" type="button" title="返回套用标签">×</button>
+        <button id="ci-reset-tags" class="ci-icon-btn" type="button" title="恢复统一标签">↻</button>
       </div>
-    `;
-  } else {
+    </div>
+  `;
+} else {
     tagPanel.innerHTML = `
       <div class="ci-tag-box">
         <div class="ci-section-title">套用标签</div>
