@@ -207,38 +207,58 @@ function bindProfileEvents(state, mine){
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
   if(old) old.remove();
+
   const modal = document.createElement("div");
   modal.id = "edit-modal";
   modal.className = "modal-bg";
+
   const imgs = item.checkin_images || [];
+
   modal.innerHTML = `
     <div class="modal-card">
       <h3>编辑这次打卡</h3>
-      ${imgs.map((img,idx) => {
+
+      ${imgs.map((img, idx) => {
         let groupsHtml = "";
+
         Object.keys(TAG_CATEGORIES).forEach(cat => {
           const opts = TAG_CATEGORIES[cat].map(t =>
-            `<span class="preset-tag${(img.tags||[]).includes(t)?' on':''}" data-img="${idx}" data-tag="${t}">${t}</span>`
+            `<span class="preset-tag${(img.tags || []).includes(t) ? " on" : ""}" data-img="${idx}" data-tag="${t}">${t}</span>`
           ).join("");
-          groupsHtml += `<div class="tag-group"><div class="glabel">${cat}</div><div class="preset-tags">${opts}</div></div>`;
+
+          groupsHtml += `
+            <div class="tag-group">
+              <div class="glabel">${cat}</div>
+              <div class="preset-tags">${opts}</div>
+            </div>
+          `;
         });
-        return `<div class="img-card"><img src="${img.image_url}"><div class="img-card-body">${groupsHtml}</div></div>`;
+
+        return `
+          <div class="img-card">
+            <img src="${img.image_url}">
+            <div class="img-card-body">${groupsHtml}</div>
+          </div>
+        `;
       }).join("")}
+
       <label>感想</label>
       <textarea id="edit-note">${item.note || ""}</textarea>
+
       <button id="edit-save">保存修改</button>
-      <button id="edit-delete" class="danger">删除打卡</button>
+      <button id="edit-delete" class="danger">删除这次打卡</button>
       <button id="edit-cancel" class="secondary">取消</button>
     </div>
   `;
+
   document.body.appendChild(modal);
-  
+
   modal.addEventListener("click", (e) => {
     if(e.target === modal){
       modal.remove();
     }
   });
-  
+
   const cancelBtn = modal.querySelector("#edit-cancel");
   if(cancelBtn){
     cancelBtn.onclick = (e) => {
@@ -247,49 +267,20 @@ export function openEditModal(item){
       modal.remove();
     };
   }
-  
-  const deleteBtn = document.getElementById("edit-delete");
-  if(deleteBtn){
-    deleteBtn.onclick = async () => {
-      const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
-      if(!ok) return;
-  
-      const sb = window.__sb;
-      const user = window.__user;
-  
-      if(!sb || !user){
-        alert("请先登录");
-        return;
-      }
-  
-      deleteBtn.disabled = true;
-      deleteBtn.textContent = "删除中...";
-  
-      const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
-  
-      if(!deleted){
-        deleteBtn.disabled = false;
-        deleteBtn.textContent = "删除这次打卡";
-        return;
-      }
-  
-      const freshCheckins = await loadCheckins(sb);
-      if(window.setState){
-        window.setState({ checkins: freshCheckins });
-      }
-  
-      modal.remove();
-      alert("已删除");
-    };
-  }
 
-  const localTags = imgs.map(img => [...(img.tags||[])]);
+  const localTags = imgs.map(img => [...(img.tags || [])]);
+
   modal.querySelectorAll(".preset-tag").forEach(btn => {
     btn.onclick = () => {
       const idx = Number(btn.dataset.img);
-      const t = btn.dataset.tag;
-      if(localTags[idx].includes(t)) localTags[idx] = localTags[idx].filter(x=>x!==t);
-      else localTags[idx].push(t);
+      const tag = btn.dataset.tag;
+
+      if(localTags[idx].includes(tag)){
+        localTags[idx] = localTags[idx].filter(x => x !== tag);
+      } else {
+        localTags[idx].push(tag);
+      }
+
       btn.classList.toggle("on");
     };
   });
@@ -299,21 +290,64 @@ export function openEditModal(item){
     saveBtn.onclick = async () => {
       const sb = window.__sb;
       const note = modal.querySelector("#edit-note").value.trim();
-  
+
+      if(!sb){
+        alert("数据库连接失败，请刷新后重试");
+        return;
+      }
+
       saveBtn.disabled = true;
       saveBtn.textContent = "保存中...";
-  
+
       await updateCheckinNote(sb, item.id, note);
-  
-      for(let i=0; i<imgs.length; i++){
+
+      for(let i = 0; i < imgs.length; i++){
         await updateImageTags(sb, imgs[i].id, localTags[i]);
       }
-  
+
       const freshCheckins = await loadCheckins(sb);
+
       if(window.setState){
         window.setState({ checkins: freshCheckins });
       }
-  
+
       modal.remove();
     };
   }
+
+  const deleteBtn = modal.querySelector("#edit-delete");
+  if(deleteBtn){
+    deleteBtn.onclick = async () => {
+      const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
+      if(!ok) return;
+
+      const sb = window.__sb;
+      const user = window.__user;
+
+      if(!sb || !user){
+        alert("请先登录");
+        return;
+      }
+
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = "删除中...";
+
+      const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
+
+      if(!deleted){
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = "删除这次打卡";
+        return;
+      }
+
+      const freshCheckins = await loadCheckins(sb);
+
+      if(window.setState){
+        window.setState({ checkins: freshCheckins });
+      }
+
+      modal.remove();
+      alert("已删除");
+    };
+  }
+}
