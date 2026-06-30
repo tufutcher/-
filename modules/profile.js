@@ -1021,8 +1021,15 @@ export function openEditModal(item){
   const deleteBtn = modal.querySelector("#edit-delete");
   if(deleteBtn){
     deleteBtn.onclick = async () => {
-      const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
-      if(!ok) return;
+      const ok = await window.showConfirm?.({
+        title: "删除这次打卡？",
+        message: "图片也会一起删除。这个动作不能撤回。",
+        confirmText: "删除",
+        cancelText: "取消",
+        danger: true
+      });
+
+if(!ok) return;
 
       const sb = window.__sb;
       const user = window.__user;
