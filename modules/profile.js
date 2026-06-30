@@ -172,43 +172,74 @@ function pieSvg(tagCount, catName){
   return `<div class="pie-wrap"><svg width="${size}" height="${size}" viewBox="0 0 120 120">${paths}</svg><div class="pie-legend">${legend}</div></div>`;
 }
 
-export function renderProfile(state){
-  const mine = state.checkins.filter(i => i.user_id === state.user.id);
+export function renderProfile(state, options = {}){
+  const targetUserId = options.userId || state.user?.id;
+  const readonly = !!options.readonly;
+
+  const mine = state.checkins.filter(i => i.user_id === targetUserId);
   const stats = computeStats(mine);
   const badges = computeBadges(mine);
-  const tagCount = {};
-  mine.forEach(x => (x.checkin_images||[]).forEach(img => (img.tags||[]).forEach(t => { tagCount[t] = (tagCount[t]||0)+1; })));
-  const topTags = Object.entries(tagCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
 
-  const avatarUrl = state.profile?.avatar_url;
-  const username = state.profile?.username || "我";
+  const profileFromList = (state.profiles || []).find(p => p.id === targetUserId);
+  const profile = readonly ? profileFromList : (state.profile || profileFromList);
+
+  const tagCount = {};
+  mine.forEach(x => {
+    (x.checkin_images || []).forEach(img => {
+      (img.tags || []).forEach(t => {
+        tagCount[t] = (tagCount[t] || 0) + 1;
+      });
+    });
+  });
+
+  const topTags = Object.entries(tagCount).sort((a,b) => b[1] - a[1]).slice(0,6);
+  const avatarUrl = profile?.avatar_url;
+  const username = profile?.username || "匿名";
+
+  const subtitle = readonly
+    ? `留下了 ${mine.length} 次打卡，${stats.totalImages} 张作品。`
+    : "今天也留下了一点创作的证据。";
+
+  const greeting = readonly
+    ? username
+    : `你好，${username}！`;
+
+  const historyTitle = readonly
+    ? `${username}的历史打卡（共 ${mine.length} 次，点图片可查看）`
+    : `历史打卡（共 ${mine.length} 次，点图片可编辑）`;
 
   const html = `
-  <div class="card profile-hero-card">
-    <div class="profile-hero-left">
-      <button id="avatar-trigger" class="avatar-trigger" type="button">
-        <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
-      </button>
-  
-      <div class="profile-copy">
-        <div class="profile-greeting">你好，${username}！</div>
-        <div class="profile-subtitle">今天也留下了一点创作的证据。</div>
-        <div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>
+    <div class="card profile-hero-card ${readonly ? 'readonly-profile' : ''}">
+      <div class="profile-hero-left">
+        <button id="avatar-trigger" class="avatar-trigger" type="button">
+          <img class="avatar-lg" id="avatar-img" src="${avatarUrl || ''}" style="background:${avatarUrl ? 'transparent' : '#ddd'};">
+        </button>
+
+        <div class="profile-copy">
+          <div class="profile-greeting">${greeting}</div>
+          <div class="profile-subtitle">${subtitle}</div>
+
+          ${readonly ? '' : `
+            <div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>
+          `}
+        </div>
+
+        ${readonly ? '' : `
+          <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+        `}
       </div>
-  
-      <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+
+      <div class="profile-hero-calendar">
+        ${renderMiniCalendar(mine)}
+      </div>
     </div>
-  
-    <div class="profile-hero-calendar">
-      ${renderMiniCalendar(mine)}
-    </div>
-  </div>
 
     <div class="stats-row">
       <div class="stat stat-block"><div class="stat-title">本周打卡</div><div class="stat-main">${stats.weekDays}天 | ${stats.weekImages}张</div></div>
       <div class="stat stat-block"><div class="stat-title">本月打卡</div><div class="stat-main">${stats.monthDays}天 | ${stats.monthImages}张</div></div>
       <div class="stat stat-block"><div class="stat-title">总计</div><div class="stat-main">连续${stats.maxStreak}天 | 共${stats.totalImages}张</div></div>
     </div>
+
     <div class="card">
       <div class="glabel">我的徽章</div>
       <div class="badge-row">
@@ -217,13 +248,13 @@ export function renderProfile(state){
           <span class="badge-count">×${badges.star}</span>
           <span class="badge-desc">单周3-4天</span>
         </div>
-    
+
         <div class="badge-item ${badges.fire ? 'unlocked' : 'locked'}">
           <span class="badge-emoji">🔥</span>
           <span class="badge-count">×${badges.fire}</span>
           <span class="badge-desc">单周5-6天</span>
         </div>
-    
+
         <div class="badge-item ${badges.palette ? 'unlocked' : 'locked'}">
           <span class="badge-emoji">🎨</span>
           <span class="badge-count">×${badges.palette}</span>
@@ -231,94 +262,164 @@ export function renderProfile(state){
         </div>
       </div>
     </div>
-<div class="card">
-  <div class="glabel">创作分布</div>
-  <div class="pie-grid">
-    <div class="pie-panel"><div class="pie-title">内容</div>${pieSvg(tagCount,'内容')}</div>
-    <div class="pie-panel"><div class="pie-title">类型</div>${pieSvg(tagCount,'类型')}</div>
-    <div class="pie-panel"><div class="pie-title">完成度</div>${pieSvg(tagCount,'完成度')}</div>
-  </div>
-</div>
+
+    <div class="card">
+      <div class="glabel">创作分布</div>
+      <div class="pie-grid">
+        <div class="pie-panel"><div class="pie-title">内容</div>${pieSvg(tagCount,'内容')}</div>
+        <div class="pie-panel"><div class="pie-title">类型</div>${pieSvg(tagCount,'类型')}</div>
+        <div class="pie-panel"><div class="pie-title">完成度</div>${pieSvg(tagCount,'完成度')}</div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="glabel">常画标签</div>
-      <div class="pillbar">${topTags.length ? topTags.map(t=>`<span>${t[0]} ×${t[1]}</span>`).join("") : '<span class="muted">还没有打卡记录，填写标签后这里会自动统计</span>'}</div>
+      <div class="pillbar">
+        ${topTags.length ? topTags.map(t => `<span>${t[0]} ×${t[1]}</span>`).join("") : '<span class="muted">还没有打卡记录，填写标签后这里会自动统计</span>'}
+      </div>
     </div>
+
     <div class="card">
-      <div class="glabel">历史打卡（共 ${mine.length} 次，点图片可编辑）</div>
+      <div class="glabel">${historyTitle}</div>
       <div class="wall-grid" id="profile-grid">
         ${mine.slice(0,12).map(item => {
-          const cover = (item.checkin_images||[])[0];
-          return `<div class="wall-card" data-pid="${item.id}">
-            <div class="wall-card-img-wrap">${cover?`<img src="${cover.image_url}">`:''}</div>
-            <div class="wall-card-body">
-              <div class="when">${fmtDate(item.created_at)}</div>
-              ${cover && cover.tags && cover.tags.length ? `<div class="tags">${cover.tags.join(' · ')}</div>` : ''}
+          const cover = (item.checkin_images || [])[0];
+
+          return `
+            <div class="wall-card" data-pid="${item.id}">
+              <div class="wall-card-img-wrap">
+                ${cover ? `<img src="${cover.image_url}">` : ''}
+              </div>
+              <div class="wall-card-body">
+                <div class="when">${fmtDate(item.created_at)}</div>
+                ${cover && cover.tags && cover.tags.length ? `<div class="tags">${cover.tags.join(' · ')}</div>` : ''}
+              </div>
             </div>
-          </div>`;
+          `;
         }).join("") || '<div class="empty">还没有打卡记录</div>'}
       </div>
     </div>
   `;
 
-  setTimeout(() => bindProfileEvents(state, mine), 0);
+  setTimeout(() => bindProfileEvents(state, mine, { readonly }), 0);
   return html;
 }
 
-function bindProfileEvents(state, mine){
+function openReadOnlyCheckinDetail(item){
+  const old = document.getElementById("readonly-detail-modal");
+  if(old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "readonly-detail-modal";
+  modal.className = "modal-bg";
+
+  const imgs = item.checkin_images || [];
+
+  modal.innerHTML = `
+    <div class="modal-card">
+      <div class="who-row">
+        <b>${item.username || "匿名"}</b>
+        <span class="when">${fmtDate(item.created_at)}</span>
+      </div>
+
+      ${imgs.map(img => `
+        <div class="detail-img-block">
+          <img src="${img.image_url}">
+          ${(img.tags && img.tags.length) ? `<div class="tags">${img.tags.map(t => "#" + t).join(" ")}</div>` : ""}
+        </div>
+      `).join("")}
+
+      ${item.note ? `<div class="note" style="margin-top:10px;">${item.note}</div>` : ""}
+
+      <button id="readonly-detail-close" class="secondary">关闭</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  modal.onclick = (e) => {
+    if(e.target === modal) modal.remove();
+  };
+
+  document.getElementById("readonly-detail-close").onclick = () => {
+    modal.remove();
+  };
+}
+
+function bindProfileEvents(state, mine, options = {}){
+  const readonly = !!options.readonly;
+
+  document.querySelectorAll(".mini-calendar").forEach((cal, index) => {
+    if(index > 0){
+      const card = cal.closest(".card");
+      if(card) card.remove();
+      else cal.remove();
+    }
+  });
+
   const prevCal = document.getElementById("cal-prev");
   const nextCal = document.getElementById("cal-next");
-  
+
   if(prevCal){
     prevCal.onclick = () => {
       profileCalendarDate.setMonth(profileCalendarDate.getMonth() - 1);
       if(window.setState) window.setState({});
     };
   }
-  
+
   if(nextCal){
     nextCal.onclick = () => {
       profileCalendarDate.setMonth(profileCalendarDate.getMonth() + 1);
       if(window.setState) window.setState({});
     };
   }
-  const avatarTrigger = document.getElementById("avatar-trigger");
-  const link = document.getElementById("avatar-upload-link");
-  const avatarInput = document.getElementById("avatar-input");
-  
-  if(avatarTrigger && link){
-    avatarTrigger.onclick = () => {
-      link.classList.toggle("show");
-    };
-  }
-  
-  if(link && avatarInput){
-    link.onclick = () => avatarInput.click();
-  
-    avatarInput.onchange = async (e) => {
-      const f = e.target.files[0];
-      if(!f) return;
-  
-      const sb = window.__sb;
-      const path = "avatars/" + state.user.id + "_" + Date.now() + "_" + f.name;
-      const url = await uploadImage(sb, f, path);
-  
-      if(url){
-        await sb.from("profiles").update({ avatar_url: url }).eq("id", state.user.id);
-  
-        if(state.profile) state.profile.avatar_url = url;
-  
-        document.getElementById("avatar-img").src = url;
-        document.getElementById("avatar-img").style.background = "transparent";
-  
-        link.classList.remove("show");
-      }
-    };
+
+  if(!readonly){
+    const avatarTrigger = document.getElementById("avatar-trigger");
+    const link = document.getElementById("avatar-upload-link");
+    const avatarInput = document.getElementById("avatar-input");
+
+    if(avatarTrigger && link){
+      avatarTrigger.onclick = () => {
+        link.classList.toggle("show");
+      };
+    }
+
+    if(link && avatarInput){
+      link.onclick = () => avatarInput.click();
+
+      avatarInput.onchange = async (e) => {
+        const f = e.target.files[0];
+        if(!f) return;
+
+        const sb = window.__sb;
+        const path = "avatars/" + state.user.id + "_" + Date.now() + "_" + f.name;
+        const url = await uploadImage(sb, f, path);
+
+        if(url){
+          await sb.from("profiles").update({ avatar_url: url }).eq("id", state.user.id);
+
+          if(state.profile) state.profile.avatar_url = url;
+
+          document.getElementById("avatar-img").src = url;
+          document.getElementById("avatar-img").style.background = "transparent";
+
+          link.classList.remove("show");
+        }
+      };
+    }
   }
 
   document.querySelectorAll('#profile-grid .wall-card').forEach(card => {
     card.onclick = () => {
       const item = mine.find(x => x.id === card.dataset.pid);
-      if(item) openEditModal(item);
+      if(!item) return;
+
+      if(readonly){
+        openReadOnlyCheckinDetail(item);
+      } else {
+        openEditModal(item);
+      }
     };
   });
 }
