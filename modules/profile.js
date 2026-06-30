@@ -283,20 +283,36 @@ function bindProfileEvents(state, mine){
       if(window.setState) window.setState({});
     };
   }
+  const avatarTrigger = document.getElementById("avatar-trigger");
   const link = document.getElementById("avatar-upload-link");
-  if(link){
-    link.onclick = () => document.getElementById("avatar-input").click();
-    document.getElementById("avatar-input").onchange = async (e) => {
+  const avatarInput = document.getElementById("avatar-input");
+  
+  if(avatarTrigger && link){
+    avatarTrigger.onclick = () => {
+      link.classList.toggle("show");
+    };
+  }
+  
+  if(link && avatarInput){
+    link.onclick = () => avatarInput.click();
+  
+    avatarInput.onchange = async (e) => {
       const f = e.target.files[0];
       if(!f) return;
+  
       const sb = window.__sb;
       const path = "avatars/" + state.user.id + "_" + Date.now() + "_" + f.name;
       const url = await uploadImage(sb, f, path);
+  
       if(url){
         await sb.from("profiles").update({ avatar_url: url }).eq("id", state.user.id);
+  
         if(state.profile) state.profile.avatar_url = url;
+  
         document.getElementById("avatar-img").src = url;
         document.getElementById("avatar-img").style.background = "transparent";
+  
+        link.classList.remove("show");
       }
     };
   }
