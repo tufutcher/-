@@ -2,8 +2,8 @@ import { state, setState, subscribe } from "./state.js";
 import { initSupabase } from "../api/supabase.js";
 import { getCurrentUser } from "../api/auth.js";
 import { loadCheckins } from "../api/checkin.js";
-import { renderWall, bindWallEvents } from "../modules/wall.js";
-import { renderProfile } from "../modules/profile.js";
+import { Wall, bindWallEvents } from "../modules/wall.js";
+import { Profile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
 import { openAuthModal } from "../modules/auth_modal.js";
 
@@ -62,19 +62,36 @@ function render(){
         setState({ user });
 
         const profile = await loadProfile(user.id);
-        setState({ profile, view: "me" });
+        const profiles = await loadProfiles();
+
+        setState({ profile, profiles, view: "me", viewUserId: null });
       });
 
     } else {
-      app.innerHTML = renderProfile(state);
+      app.innerHTML = renderProfile(state, {
+        userId: state.user.id,
+        readonly: false
+      });
     }
+  }
+
+  if(state.view === "user"){
+    if(!state.viewUserId){
+      setState({ view: "wall" });
+      return;
+    }
+
+    app.innerHTML = renderProfile(state, {
+      userId: state.viewUserId,
+      readonly: true
+    });
   }
 
   renderFab();
 }
 
 // 浮动按钮
-function renderFab(){
+function Fab(){
   let nav = document.getElementById("bottom-nav");
 
   if(!nav){
@@ -95,8 +112,8 @@ function renderFab(){
   wallBtn.classList.toggle("on", state.view === "wall");
   meBtn.classList.toggle("on", state.view === "me");
 
-  wallBtn.onclick = () => setState({ view: "wall" });
-  meBtn.onclick = () => setState({ view: "me" });
+  wallBtn.onclick = () => setState({ view: "wall", viewUserId: null });
+  meBtn.onclick = () => setState({ view: "me", viewUserId: null });
 
   addBtn.onclick = () => {
     if(state.user){
@@ -138,6 +155,6 @@ async function start(){
 }
 
 // ⭐ 关键：自动刷新绑定
-subscribe(render);
+subscribe();
 
 start();
