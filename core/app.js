@@ -11,6 +11,12 @@ const sb = initSupabase();
 window.__sb = sb;
 window.setState = setState;
 
+window.switchView = (view) => {
+  setState({
+    view: view
+  });
+};
+
 async function loadProfile(userId){
   const { data } = await sb.from("profiles").select("*").eq("id", userId).single();
   return data || null;
