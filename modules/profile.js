@@ -60,148 +60,6 @@ function computeStats(mine){
   const now = new Date(), weekStart = startOfWeek(now), monthStart = startOfMonth(now);
   const weekDays = new Set(), monthDays = new Set();
   let weekImages = 0, monthImages = 0, totalImages = 0;
-function calKey(date){
-  const d = new Date(date);
-  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-}
-
-function renderMiniCalendar(mine){
-  const year = profileCalendarDate.getFullYear();
-  const month = profileCalendarDate.getMonth();
-
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
-  const firstDay = monthStart.getDay() === 0 ? 7 : monthStart.getDay();
-  const startOffset = firstDay - 1;
-  const totalDays = monthEnd.getDate();
-
-  const dayMap = {};
-
-  mine.forEach(item => {
-    const d = new Date(item.created_at);
-    if(d.getFullYear() !== year || d.getMonth() !== month) return;
-
-    const key = calKey(d);
-    if(!dayMap[key]) dayMap[key] = { checkins:0, images:0 };
-
-    dayMap[key].checkins += 1;
-    dayMap[key].images += item.checkin_images?.length || 0;
-  });
-
-  const cells = [];
-
-  for(let i=0; i<startOffset; i++){
-    cells.push(`<div class="cal-cell empty"></div>`);
-  }
-
-  for(let day=1; day<=totalDays; day++){
-    const d = new Date(year, month, day);
-    const key = calKey(d);
-    const info = dayMap[key];
-    const today = calKey(new Date()) === key;
-
-    const cls = [
-      "cal-cell",
-      info ? "has-checkin" : "",
-      today ? "today" : ""
-    ].join(" ");
-
-    cells.push(`
-      <div class="${cls}">
-        <div class="cal-day">${day}</div>
-        ${info ? `<div class="cal-count">${info.images}张</div>` : ""}
-      </div>
-    `);
-  }
-
-  return `
-    <div class="mini-calendar">
-      <div class="cal-head">
-        <button id="cal-prev" class="cal-nav">‹</button>
-        <div class="cal-title">${year}年${month + 1}月</div>
-        <button id="cal-next" class="cal-nav">›</button>
-      </div>
-
-      <div class="cal-week">
-        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-      </div>
-
-      <div class="cal-grid">
-        ${cells.join("")}
-      </div>
-    </div>
-  `;
-}
-  
-function calKey(date){
-  const d = new Date(date);
-  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-}
-
-function renderMiniCalendar(mine){
-  const year = profileCalendarDate.getFullYear();
-  const month = profileCalendarDate.getMonth();
-
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
-  const firstDay = monthStart.getDay() === 0 ? 7 : monthStart.getDay();
-  const startOffset = firstDay - 1;
-  const totalDays = monthEnd.getDate();
-
-  const dayMap = {};
-  mine.forEach(item => {
-    const d = new Date(item.created_at);
-    if(d.getFullYear() !== year || d.getMonth() !== month) return;
-
-    const key = calKey(d);
-    if(!dayMap[key]) dayMap[key] = { checkins:0, images:0 };
-    dayMap[key].checkins += 1;
-    dayMap[key].images += item.checkin_images?.length || 0;
-  });
-
-  const cells = [];
-
-  for(let i=0; i<startOffset; i++){
-    cells.push(`<div class="cal-cell empty"></div>`);
-  }
-
-  for(let day=1; day<=totalDays; day++){
-    const d = new Date(year, month, day);
-    const key = calKey(d);
-    const info = dayMap[key];
-    const today = calKey(new Date()) === key;
-    const cls = [
-      "cal-cell",
-      info ? "has-checkin" : "",
-      today ? "today" : ""
-    ].join(" ");
-
-    cells.push(`
-      <div class="${cls}">
-        <div class="cal-day">${day}</div>
-        ${info ? `<div class="cal-count">${info.images}张</div>` : ""}
-      </div>
-    `);
-  }
-
-  return `
-    <div class="mini-calendar">
-      <div class="cal-head">
-        <button id="cal-prev" class="cal-nav">‹</button>
-        <div class="cal-title">${year}年${month + 1}月</div>
-        <button id="cal-next" class="cal-nav">›</button>
-      </div>
-
-      <div class="cal-week">
-        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
-      </div>
-
-      <div class="cal-grid">
-        ${cells.join("")}
-      </div>
-    </div>
-  `;
-}
 
   mine.forEach(item => {
     const d = new Date(item.created_at), imgs = imageCount(item);
@@ -218,6 +76,7 @@ function renderMiniCalendar(mine){
     .sort((a,b) => a - b);
 
   let maxStreak = allDays.length ? 1 : 0, cur = allDays.length ? 1 : 0;
+
   for(let i=1; i<allDays.length; i++){
     if(allDays[i] - allDays[i-1] <= 86400000 * 1.5) cur++;
     else cur = 1;
@@ -225,6 +84,68 @@ function renderMiniCalendar(mine){
   }
 
   return { weekDays:weekDays.size, weekImages, monthDays:monthDays.size, monthImages, maxStreak, totalImages };
+}
+
+function calKey(date){
+  const d = new Date(date);
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+
+function renderMiniCalendar(mine){
+  const year = profileCalendarDate.getFullYear();
+  const month = profileCalendarDate.getMonth();
+
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month + 1, 0);
+  const firstDay = monthStart.getDay() === 0 ? 7 : monthStart.getDay();
+  const startOffset = firstDay - 1;
+  const totalDays = monthEnd.getDate();
+
+  const dayMap = {};
+  mine.forEach(item => {
+    const d = new Date(item.created_at);
+    if(d.getFullYear() !== year || d.getMonth() !== month) return;
+
+    const key = calKey(d);
+    if(!dayMap[key]) dayMap[key] = { checkins:0, images:0 };
+    dayMap[key].checkins += 1;
+    dayMap[key].images += item.checkin_images?.length || 0;
+  });
+
+  const cells = [];
+
+  for(let i=0; i<startOffset; i++){
+    cells.push(`<div class="cal-cell empty"></div>`);
+  }
+
+  for(let day=1; day<=totalDays; day++){
+    const d = new Date(year, month, day);
+    const key = calKey(d);
+    const info = dayMap[key];
+    const today = calKey(new Date()) === key;
+    const cls = ["cal-cell", info ? "has-checkin" : "", today ? "today" : ""].join(" ");
+
+    cells.push(`
+      <div class="${cls}">
+        <div class="cal-day">${day}</div>
+        ${info ? `<div class="cal-count">${info.images}张</div>` : ""}
+      </div>
+    `);
+  }
+
+  return `
+    <div class="mini-calendar">
+      <div class="cal-head">
+        <button id="cal-prev" class="cal-nav">‹</button>
+        <div class="cal-title">${year}年${month + 1}月</div>
+        <button id="cal-next" class="cal-nav">›</button>
+      </div>
+      <div class="cal-week">
+        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      </div>
+      <div class="cal-grid">${cells.join("")}</div>
+    </div>
+  `;
 }
 
 function pieSvg(tagCount, catName){
