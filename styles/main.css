@@ -1029,3 +1029,38 @@ button.cal-cell:disabled{
   margin-top:10px;
   width:100%;
 }
+
+/* 创作分析：扇形图注释居中 */
+.pie-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.pie-legend{
+  width:100%;
+  margin-top:8px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  text-align:center;
+  font-size:11px;
+  color:#666;
+}
+
+.pie-legend div{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+
+.pie-legend .dot,
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  display:inline-block;
+  flex:0 0 auto;
+}
