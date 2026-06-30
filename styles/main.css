@@ -1251,3 +1251,22 @@ button.cal-cell:disabled{
     transform:translateY(0) scale(1);
   }
 }
+/* 全站确认弹窗：替代 confirm() */
+.app-confirm-card{
+  padding-bottom:20px;
+}
+
+.app-confirm-actions{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+}
+
+.app-confirm-actions button{
+  flex:1;
+}
+
+.app-confirm-actions .danger{
+  background:#ff4d4f;
+  color:#fff;
+}
