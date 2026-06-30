@@ -3,6 +3,7 @@ import { deleteCheckinWithImages, loadCheckins } from "../api/checkin.js";
 
 let currentMode = "time";
 let allCheckins = [];
+let allProfiles = [];
 
 function fmtDate(ts){
   const d = new Date(ts);
@@ -31,38 +32,142 @@ function cardHtml(item){
   `;
 }
 
-export function renderWall(items){
+export function renderWall(items, profiles = []){
   allCheckins = items;
+  allProfiles = profiles;
+
   return `
-    <div class="topbar">
-      <button onclick="switchView('wall')">墙</button>
-      <button onclick="switchView('me')">我的</button>
-    </div>
+    <section class="wall-hero">
+      <div class="brand-kicker">DRAWING CHECK-IN CLUB</div>
+      <h1>不 画 画 真 的 要 完 了</h1>
+      <p>一款劲爆的创作习惯追踪平台</p>
+    </section>
+
     <div class="wall-controls">
       <div class="seg" id="wall-seg">
         <span data-m="time" class="${currentMode==='time'?'on':''}">最新</span>
         <span data-m="person" class="${currentMode==='person'?'on':''}">按人分组</span>
       </div>
     </div>
+
     <div id="wall-content">${renderWallContent(items, currentMode)}</div>
   `;
 }
 
+function getProfile(userId, username){
+  return allProfiles.find(p => p.id === userId) || allProfiles.find(p => p.username === username) || null;
+}
+
+function avatarHtml(profile, name){
+  if(profile?.avatar_url){
+    return `<img class="person-avatar" src="${profile.avatar_url}">`;
+  }
+
+  const first = (name || "匿").trim().slice(0, 1) || "匿";
+  return `<div class="person-avatar avatar-fallback">${first}</div>`;
+}
+
+function getWeekKey(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dayNum);
+  return d.getUTCFullYear() + "-" + d.getUTCMonth() + "-" + d.getUTCDate();
+}
+
+function computeBadgesFor(items){
+  const byWeek = {};
+
+  items.forEach(x => {
+    const d = new Date(x.created_at);
+    const key = getWeekKey(d);
+    (byWeek[key] = byWeek[key] || new Set()).add(d.toDateString());
+  });
+
+  let star = 0, fire = 0, palette = 0;
+
+  Object.values(byWeek).forEach(daySet => {
+    const days = daySet.size;
+    if(days >= 7) palette++;
+    else if(days >= 5) fire++;
+    else if(days >= 3) star++;
+  });
+
+  return { star, fire, palette };
+}
+
+function badgesHtml(badges){
+  const parts = [];
+
+  if(badges.star) parts.push(`<span>⭐ ×${badges.star}</span>`);
+  if(badges.fire) parts.push(`<span>🔥 ×${badges.fire}</span>`);
+  if(badges.palette) parts.push(`<span>🎨 ×${badges.palette}</span>`);
+
+  return parts.length ? parts.join("") : `<span class="muted">暂无徽章</span>`;
+}
+
+function personCardHtml(group){
+  const profile = getProfile(group.userId, group.name);
+  const badges = computeBadgesFor(group.items);
+
+  const thumbs = group.items
+    .filter(item => item.checkin_images && item.checkin_images.length)
+    .slice(0, 4)
+    .map(item => {
+      const img = item.checkin_images[0];
+      return `
+        <div class="person-thumb" data-id="${item.id}">
+          <img src="${img.image_url}">
+        </div>
+      `;
+    })
+    .join("");
+
+  return `
+    <div class="person-card">
+      <div class="person-head">
+        ${avatarHtml(profile, group.name)}
+        <div class="person-meta">
+          <div class="person-name">${group.name || "匿名"}</div>
+          <div class="person-badges">${badgesHtml(badges)}</div>
+        </div>
+      </div>
+
+      <div class="person-thumbs">
+        ${thumbs || `<div class="person-empty">还没有缩略图</div>`}
+      </div>
+    </div>
+  `;
+}
+
 function renderWallContent(items, mode){
-  if(!items.length) return `<div class="card empty">还没有人打卡，点右下角"＋"第一个来！</div>`;
+  if(!items.length){
+    return `<div class="card empty">还没有人打卡，点右下角"＋"第一个来！</div>`;
+  }
 
   if(mode === "time"){
     return `<div class="wall-grid">${items.map(cardHtml).join("")}</div>`;
   }
 
-  const byPerson = {};
-  items.forEach(x => { (byPerson[x.username] = byPerson[x.username] || []).push(x); });
-  return Object.keys(byPerson).map(name => `
-    <div class="group-block">
-      <div class="group-head">${name}　<span class="muted">${byPerson[name].length} 次打卡</span></div>
-      <div class="wall-grid">${byPerson[name].map(cardHtml).join("")}</div>
-    </div>
-  `).join("");
+  const groups = {};
+
+  items.forEach(item => {
+    const key = item.user_id || item.username || "anonymous";
+
+    if(!groups[key]){
+      groups[key] = {
+        userId: item.user_id,
+        name: item.username || "匿名",
+        items: []
+      };
+    }
+
+    groups[key].items.push(item);
+  });
+
+  const groupList = Object.values(groups)
+    .sort((a, b) => b.items.length - a.items.length);
+
+  return `<div class="person-grid">${groupList.map(personCardHtml).join("")}</div>`;
 }
 
 // 在 app.js render() 之后调用，绑定排序切换和点击查看详情
@@ -82,7 +187,7 @@ export function bindWallEvents(){
 }
 
 function bindCardClicks(){
-  document.querySelectorAll(".wall-card").forEach(card => {
+  document.querySelectorAll(".wall-card, .person-thumb").forEach(card => {
     card.onclick = () => {
       const item = allCheckins.find(x => x.id === card.dataset.id);
       if(item) openDetail(item);
