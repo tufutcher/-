@@ -14,6 +14,11 @@ export function setState(patch){
 }
 
 export function subscribe(fn){
+  if(typeof fn !== "function"){
+    console.error("subscribe 需要传入函数，但收到：", fn);
+    return () => {};
+  }
+
   state.listeners.add(fn);
   return () => state.listeners.delete(fn);
 }
