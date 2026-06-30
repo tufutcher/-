@@ -187,7 +187,35 @@ async function submitCheckin(modal){
   const btn = document.getElementById("ci-submit");
 
   btn.disabled = true;
-  btn.textContent = "提交中...";
+  btn.textContent = "上传图片中...";
+
+  const uploadedImages = [];
+
+  for(const img of pendingImages){
+    const safeFileName = img.file.name.replace(/[^\w.\-]/g, "_");
+    const path = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2, 8) + "_" + safeFileName;
+
+    const url = await uploadImage(sb, img.file, path);
+
+    if(!url){
+      if(uploadedImages.length){
+        await sb.storage.from("art").remove(uploadedImages.map(x => x.path));
+      }
+
+      btn.disabled = false;
+      btn.textContent = "提交打卡";
+      alert("有图片上传失败，本次打卡没有提交。请重新选择图片后再试。");
+      return;
+    }
+
+    uploadedImages.push({
+      url,
+      path,
+      tags: img.tags
+    });
+  }
+
+  btn.textContent = "创建打卡中...";
 
   const { data: profile } = await sb
     .from("profiles")
@@ -196,30 +224,36 @@ async function submitCheckin(modal){
     .single();
 
   const username = profile?.username || "匿名";
-
   const checkin = await createCheckin(sb, user.id, username, note);
 
   if(!checkin){
+    await sb.storage.from("art").remove(uploadedImages.map(x => x.path));
     btn.disabled = false;
     btn.textContent = "提交打卡";
+    alert("打卡创建失败，已取消本次提交。");
     return;
   }
 
-  for(const img of pendingImages){
-    const safeFileName = img.file.name.replace(/[^\w.\-]/g, "_");
-    const path = user.id + "/" + Date.now() + "_" + safeFileName;
+  btn.textContent = "保存图片记录中...";
 
-    const url = await uploadImage(sb, img.file, path);
+  for(const img of uploadedImages){
+    const imageRecord = await addCheckinImage(
+      sb,
+      checkin.id,
+      user.id,
+      img.url,
+      img.path,
+      img.tags
+    );
 
-    if(url){
-      await addCheckinImage(
-        sb,
-        checkin.id,
-        user.id,
-        url,
-        path,
-        img.tags
-      );
+    if(!imageRecord){
+      await sb.storage.from("art").remove(uploadedImages.map(x => x.path));
+      await sb.from("checkins").delete().eq("id", checkin.id).eq("user_id", user.id);
+
+      btn.disabled = false;
+      btn.textContent = "提交打卡";
+      alert("图片记录保存失败，本次打卡已取消。");
+      return;
     }
   }
 
