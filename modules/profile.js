@@ -184,28 +184,26 @@ export function renderProfile(state){
   const username = state.profile?.username || "我";
 
   const html = `
-    <div class="profile-overview">
-      <div class="card profile-card-apple">
-        <button id="avatar-trigger" class="avatar-trigger" type="button">
-          <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
-        </button>
-    
+  <div class="card profile-hero-card">
+    <div class="profile-hero-left">
+      <button id="avatar-trigger" class="avatar-trigger" type="button">
+        <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
+      </button>
+  
+      <div class="profile-copy">
         <div class="profile-greeting">你好，${username}！</div>
         <div class="profile-subtitle">今天也留下了一点创作的证据。</div>
-    
         <div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>
-        <input type="file" id="avatar-input" accept="image/*" style="display:none;">
       </div>
-    
-      <div class="card calendar-card-apple">
-        ${renderMiniCalendar(mine)}
-      </div>
+  
+      <input type="file" id="avatar-input" accept="image/*" style="display:none;">
     </div>
-    
-      <div class="calendar-side">
-        ${renderMiniCalendar(mine)}
-      </div>
+  
+    <div class="profile-hero-calendar">
+      ${renderMiniCalendar(mine)}
     </div>
+  </div>
+
     <div class="stats-row">
       <div class="stat stat-block"><div class="stat-title">本周打卡</div><div class="stat-main">${stats.weekDays}天 | ${stats.weekImages}张</div></div>
       <div class="stat stat-block"><div class="stat-title">本月打卡</div><div class="stat-main">${stats.monthDays}天 | ${stats.monthImages}张</div></div>
