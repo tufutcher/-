@@ -1,25 +1,18 @@
 import { state } from "./state.js";
 import { initSupabase } from "../api/supabase.js";
-import { auth } from "../api/auth.js";
+import { getCurrentUser } from "../api/auth.js";
 import { loadCheckins } from "../api/checkin.js";
 import { renderWall } from "../modules/wall.js";
 import { renderProfile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
+import { openAuthModal } from "../modules/auth_modal.js";
 
 const sb = initSupabase();
 window.__sb = sb;
 
-/* ===== AUTH ===== */
+/* ===== 启动：不强制登录，先把墙加载出来 ===== */
 async function start(){
-  const user = await auth(sb);
-  if(!user){
-    document.getElementById("app").innerHTML = `
-      <div class="card">
-        <button onclick="window.login()">登录 / 注册</button>
-      </div>
-    `;
-    return;
-  }
+  const user = await getCurrentUser(sb);
   window.__user = user;
   state.user = user;
   state.checkins = await loadCheckins(sb);
@@ -33,7 +26,18 @@ function render(){
     app.innerHTML = renderWall(state.checkins);
   }
   if(state.view === "me"){
-    app.innerHTML = renderProfile(state);
+    if(!state.user){
+      // 未登录时点"我的"，直接弹登录框
+      app.innerHTML = renderWall(state.checkins);
+      openAuthModal(sb, (user) => {
+        window.__user = user;
+        state.user = user;
+        state.view = "me";
+        render();
+      });
+    } else {
+      app.innerHTML = renderProfile(state);
+    }
   }
   renderFab();
 }
@@ -44,25 +48,26 @@ function renderFab(){
     fab = document.createElement("div");
     fab.id = "fab-add";
     fab.textContent = "＋";
-    fab.onclick = () => openCheckinModal();
     document.body.appendChild(fab);
   }
+  fab.onclick = () => {
+    if(state.user){
+      openCheckinModal();
+    } else {
+      openAuthModal(sb, (user) => {
+        window.__user = user;
+        state.user = user;
+        render();
+        openCheckinModal();
+      });
+    }
+  };
 }
 
 /* ===== GLOBAL ===== */
 window.switchView = (v) => {
   state.view = v;
   render();
-};
-
-window.login = async () => {
-  const u = await auth(sb);
-  if(u){
-    window.__user = u;
-    state.user = u;
-    state.checkins = await loadCheckins(sb);
-    render();
-  }
 };
 
 // 打卡提交成功后，重新拉取数据刷新页面
