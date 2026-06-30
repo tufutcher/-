@@ -14,7 +14,7 @@ export function usernameToEmail(username){
       safe += c.toLowerCase();
     }
   }
-  return safe + "@x.com";
+  return safe + "@drawclub.app";
 }
 
 export async function signIn(sb, username, password){
