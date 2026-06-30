@@ -1008,12 +1008,13 @@ export function openEditModal(item){
       }
 
       const freshCheckins = await loadCheckins(sb);
-
+      
       if(window.setState){
         window.setState({ checkins: freshCheckins });
       }
-
+      
       modal.remove();
+      window.showToast?.("这次打卡已经更新。", "保存成功", "success");
     };
   }
 
