@@ -266,10 +266,10 @@ function renderMiniCalendar(mine){
     const cls = ["cal-cell", info ? "has-checkin" : "", today ? "today" : ""].join(" ");
 
     cells.push(`
-      <div class="${cls}">
+      <button class="${cls}" data-cal-date="${key}" type="button" ${info ? "" : "disabled"}>
         <div class="cal-day">${day}</div>
         ${info ? `<div class="cal-count">${info.images}张</div>` : ""}
-      </div>
+      </button>
     `);
   }
 
@@ -573,6 +573,93 @@ export function renderProfile(state, options = {}){
   return html;
 }
 
+function openCalendarDayModal(dayKey, mine, readonly){
+  const old = document.getElementById("calendar-day-modal");
+  if(old) old.remove();
+
+  const items = mine.filter(item => dateKey(item.created_at) === dayKey);
+  if(!items.length) return;
+
+  const modal = document.createElement("div");
+  modal.id = "calendar-day-modal";
+  modal.className = "modal-bg";
+
+  const totalImages = items.reduce((sum, item) => {
+    return sum + (item.checkin_images?.length || 0);
+  }, 0);
+
+  let bodyHtml = "";
+
+  items.forEach(item => {
+    const imgs = item.checkin_images || [];
+
+    let imgsHtml = "";
+    imgs.forEach(img => {
+      const tagsHtml = img.tags?.length
+        ? '<div class="tags">' + img.tags.map(t => "#" + t).join(" ") + '</div>'
+        : "";
+
+      imgsHtml +=
+        '<div class="detail-img-block">' +
+          '<img src="' + img.image_url + '">' +
+          tagsHtml +
+        '</div>';
+    });
+
+    const noteHtml = item.note
+      ? '<div class="note" style="margin-top:10px;">' + item.note + '</div>'
+      : "";
+
+    const actionHtml = readonly
+      ? ""
+      : '<button class="secondary calendar-edit-btn" data-checkin-id="' + item.id + '">编辑这次打卡</button>';
+
+    bodyHtml +=
+      '<div class="calendar-day-item">' +
+        '<div class="who-row">' +
+          '<b>' + fmtDate(item.created_at) + '</b>' +
+          '<span class="when">' + imgs.length + ' 张</span>' +
+        '</div>' +
+        imgsHtml +
+        noteHtml +
+        actionHtml +
+      '</div>';
+  });
+
+  modal.innerHTML =
+    '<div class="modal-card calendar-day-card">' +
+      '<div class="who-row">' +
+        '<b>' + fmtDate(items[0].created_at) + '</b>' +
+        '<span class="when">' + items.length + ' 次打卡 / ' + totalImages + ' 张</span>' +
+      '</div>' +
+      bodyHtml +
+      '<button id="calendar-day-close" class="secondary">关闭</button>' +
+    '</div>';
+
+  document.body.appendChild(modal);
+
+  modal.onclick = (e) => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  };
+
+  const closeBtn = document.getElementById("calendar-day-close");
+  if(closeBtn){
+    closeBtn.onclick = () => modal.remove();
+  }
+
+  modal.querySelectorAll(".calendar-edit-btn").forEach(btn => {
+    btn.onclick = () => {
+      const item = mine.find(x => x.id === btn.dataset.checkinId);
+      if(!item) return;
+
+      modal.remove();
+      openEditModal(item);
+    };
+  });
+}
+
 function openReadOnlyCheckinDetail(item){
   const old = document.getElementById("readonly-detail-modal");
   if(old) old.remove();
@@ -687,6 +774,12 @@ function bindProfileEvents(state, mine, options = {}){
       if(window.setState) window.setState({});
     };
   }
+
+  document.querySelectorAll("[data-cal-date]").forEach(btn => {
+  btn.onclick = () => {
+    openCalendarDayModal(btn.dataset.calDate, mine, readonly);
+  };
+});
 
   if(!readonly){
     const avatarTrigger = document.getElementById("avatar-trigger");
