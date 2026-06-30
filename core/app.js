@@ -3,7 +3,7 @@ import { initSupabase } from "../api/supabase.js";
 import { getCurrentUser } from "../api/auth.js";
 import { loadCheckins } from "../api/checkin.js";
 import { Wall, bindWallEvents } from "../modules/wall.js";
-import { Profile } from "../modules/profile.js";
+import { renderProfile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
 import { openAuthModal } from "../modules/auth_modal.js";
 
