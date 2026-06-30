@@ -93,7 +93,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .detail-img-block{margin-top:10px;}
 .detail-img-block img{width:100%;max-height:360px;object-fit:contain;border-radius:10px;background:#f5f5f5;}
-.detail-img-block .tags{font-size:12px;color:#1a6cd9;margin-top:4px;}
+.detail-img-block .tags{font-size:12px;color:#1a6cd9;margin-top:4px; line-height:1.5;word-break:break-word;overflow-wrap:anywhere;}
 
 /* 登录/注册卡片 */
 .auth-tabs{display:flex;gap:8px;margin-bottom:6px;}
