@@ -1556,3 +1556,115 @@ button.cal-cell:disabled{
   color:#fff;
   border-color:#111;
 }
+/* 打卡弹窗：小号上传按钮 */
+.ci-upload-mini{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  min-height:54px;
+  margin:12px 0 10px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:#f6f7f8;
+  border:1px dashed rgba(0,0,0,.18);
+  color:#111;
+  cursor:pointer;
+  transition:background .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.ci-upload-mini:hover{
+  background:#f0fbfd;
+  border-color:rgba(12,192,223,.55);
+  transform:translateY(-1px);
+}
+
+.ci-upload-mini input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+
+.ci-upload-plus{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  color:#fff;
+  font-size:22px;
+  line-height:1;
+  flex:0 0 auto;
+}
+
+#ci-upload-text{
+  font-size:14px;
+  font-weight:800;
+}
+
+#ci-upload-count{
+  margin-left:auto;
+  font-style:normal;
+  font-size:12px;
+  color:#999;
+}
+/* 选中的缩略图用小箭头连接到下面的单张标签卡 */
+.ci-thumb{
+  overflow:visible;
+}
+
+.ci-thumb img{
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.ci-thumb-pointer{
+  position:absolute;
+  left:50%;
+  bottom:-15px;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:9px solid transparent;
+  border-right:9px solid transparent;
+  border-bottom:10px solid rgba(12,192,223,.28);
+  z-index:2;
+}
+
+.ci-tag-box.single{
+  position:relative;
+  margin-top:18px;
+}
+
+/* 单张标签卡底部图标按钮 */
+.ci-single-actions{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-top:14px;
+}
+
+.ci-icon-btn{
+  width:36px;
+  height:36px;
+  padding:0;
+  border:none;
+  border-radius:50%;
+  background:#f0f1f2;
+  color:#111;
+  font-size:22px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.ci-icon-btn:hover{
+  background:#111;
+  color:#fff;
+}
