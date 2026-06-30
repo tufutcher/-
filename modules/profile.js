@@ -530,82 +530,89 @@ export function renderProfile(state, options = {}){
   const username = profile?.username || "匿名";
 
   const subtitle = readonly
-    ? `留下了 ${mine.length} 次打卡，${stats.totalImages} 张作品。`
+    ? "留下了 " + mine.length + " 次打卡，" + stats.totalImages + " 张作品。"
     : "今天也留下了一点创作的证据。";
 
   const greeting = readonly
     ? username
-    : `你好，${username}！`;
+    : "你好，" + username + "！";
 
-  const historyCount = visibleMine.length;
-  const historyTitle = readonly
-    ? `${dataModeTitle()}打卡（共 ${historyCount} 次，点击查看）`
-    : `${dataModeTitle()}打卡（共 ${historyCount} 次，点击编辑）`;
+  const adminPanelHtml = (!readonly && state.profile?.is_admin)
+    ? renderAdminPanel(state)
+    : "";
 
-  const html = `
-      ${readonly ? `
-        <button class="back-wall-btn" id="back-wall-btn">← 返回打卡墙</button>
-      ` : ''}
-  
-      <div class="card profile-hero-card ${readonly ? 'readonly-profile' : ''}">
-      <div class="profile-hero-left">
-        <button id="avatar-trigger" class="avatar-trigger" type="button">
-          <img class="avatar-lg" id="avatar-img" src="${avatarUrl || ''}" style="background:${avatarUrl ? 'transparent' : '#ddd'};">
-        </button>
+  const backBtnHtml = readonly
+    ? '<button class="back-wall-btn" id="back-wall-btn">← 返回打卡墙</button>'
+    : "";
 
-        <div class="profile-copy">
-          <div class="profile-greeting">${greeting}</div>
-          <div class="profile-subtitle">${subtitle}</div>
+  const avatarActionHtml = readonly
+    ? ""
+    : '<div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>';
 
-          ${readonly ? '' : `
-            <div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>
-          `}
-        </div>
+  const avatarInputHtml = readonly
+    ? ""
+    : '<input type="file" id="avatar-input" accept="image/*" style="display:none;">';
 
-        ${readonly ? '' : `
-          <input type="file" id="avatar-input" accept="image/*" style="display:none;">
-        `}
-      </div>
+  const html =
+    backBtnHtml +
 
-      <div class="profile-hero-calendar">
-        ${renderMiniCalendar(mine)}
-      </div>
-    </div>
+    '<div class="card profile-hero-card ' + (readonly ? 'readonly-profile' : '') + '">' +
+      '<div class="profile-hero-left">' +
+        '<button id="avatar-trigger" class="avatar-trigger" type="button">' +
+          '<img class="avatar-lg" id="avatar-img" src="' + (avatarUrl || '') + '" style="background:' + (avatarUrl ? 'transparent' : '#ddd') + ';">' +
+        '</button>' +
 
-    <div class="stats-row">
-      <div class="stat stat-block"><div class="stat-title">本周打卡</div><div class="stat-main">${stats.weekDays}天 | ${stats.weekImages}张</div></div>
-      <div class="stat stat-block"><div class="stat-title">本月打卡</div><div class="stat-main">${stats.monthDays}天 | ${stats.monthImages}张</div></div>
-      <div class="stat stat-block"><div class="stat-title">总计</div><div class="stat-main">连续${stats.maxStreak}天 | 共${stats.totalImages}张</div></div>
-    </div>
+        '<div class="profile-copy">' +
+          '<div class="profile-greeting">' + greeting + '</div>' +
+          '<div class="profile-subtitle">' + subtitle + '</div>' +
+          avatarActionHtml +
+        '</div>' +
 
-    ${(!readonly && state.profile?.is_admin) ? renderAdminPanel(state) : ''}
+        avatarInputHtml +
+      '</div>' +
 
-    <div class="card">
-      <div class="glabel">我的徽章</div>
-      <div class="badge-row">
-        <div class="badge-item ${badges.star ? 'unlocked' : 'locked'}">
-          <span class="badge-emoji">⭐</span>
-          <span class="badge-count">×${badges.star}</span>
-          <span class="badge-desc">单周3-4天</span>
-        </div>
+      '<div class="profile-hero-calendar">' +
+        renderMiniCalendar(mine) +
+      '</div>' +
+    '</div>' +
 
-        <div class="badge-item ${badges.fire ? 'unlocked' : 'locked'}">
-          <span class="badge-emoji">🔥</span>
-          <span class="badge-count">×${badges.fire}</span>
-          <span class="badge-desc">单周5-6天</span>
-        </div>
+    '<div class="stats-row">' +
+      '<div class="stat stat-block"><div class="stat-title">本周打卡</div><div class="stat-main">' + stats.weekDays + '天 | ' + stats.weekImages + '张</div></div>' +
+      '<div class="stat stat-block"><div class="stat-title">本月打卡</div><div class="stat-main">' + stats.monthDays + '天 | ' + stats.monthImages + '张</div></div>' +
+      '<div class="stat stat-block"><div class="stat-title">总计</div><div class="stat-main">连续' + stats.maxStreak + '天 | 共' + stats.totalImages + '张</div></div>' +
+    '</div>' +
 
-        <div class="badge-item ${badges.palette ? 'unlocked' : 'locked'}">
-          <span class="badge-emoji">🎨</span>
-          <span class="badge-count">×${badges.palette}</span>
-          <span class="badge-desc">单周满勤</span>
-        </div>
-      </div>
-    </div>
+    adminPanelHtml +
 
-${renderArchiveCard(tagCount, topTags, visibleMine)}  
+    '<div class="card">' +
+      '<div class="glabel">我的徽章</div>' +
+      '<div class="badge-row">' +
+
+        '<div class="badge-item ' + (badges.star ? 'unlocked' : 'locked') + '">' +
+          '<span class="badge-emoji">⭐</span>' +
+          '<span class="badge-count">×' + badges.star + '</span>' +
+          '<span class="badge-desc">单周3-4天</span>' +
+        '</div>' +
+
+        '<div class="badge-item ' + (badges.fire ? 'unlocked' : 'locked') + '">' +
+          '<span class="badge-emoji">🔥</span>' +
+          '<span class="badge-count">×' + badges.fire + '</span>' +
+          '<span class="badge-desc">单周5-6天</span>' +
+        '</div>' +
+
+        '<div class="badge-item ' + (badges.palette ? 'unlocked' : 'locked') + '">' +
+          '<span class="badge-emoji">🎨</span>' +
+          '<span class="badge-count">×' + badges.palette + '</span>' +
+          '<span class="badge-desc">单周满勤</span>' +
+        '</div>' +
+
+      '</div>' +
+    '</div>' +
+
+    renderArchiveCard(tagCount, topTags, visibleMine);
 
   setTimeout(() => bindProfileEvents(state, mine, { readonly }), 0);
+
   return html;
 }
 
