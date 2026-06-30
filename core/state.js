@@ -4,6 +4,7 @@ export const state = {
   profiles: [],
   checkins: [],
   view: "wall",
+  viewUserId: null,
   listeners: new Set()
 };
 
