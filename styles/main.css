@@ -1,130 +1,128 @@
+*{box-sizing:border-box;}
 body{
   margin:0;
-  font-family:-apple-system;
+  font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+  font-size:14px;
   background:#f6f7fb;
+  color:#1a1a1a;
 }
+#app{max-width:800px;margin:0 auto;padding:14px;padding-bottom:90px;}
+
 .card{
   background:white;
   padding:14px;
-  margin:12px;
+  margin-bottom:12px;
   border-radius:14px;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
 }
-img{
-  width:100%;
-  border-radius:12px;
-  margin-top:8px;
-}
+.card.empty{color:#aaa;text-align:center;}
+.muted{color:#999;font-weight:400;font-size:12px;}
+
 button{
   padding:10px;
   border:none;
   background:#0CC0DF;
   color:white;
   border-radius:10px;
-}
-button.secondary{
-  background:#eee;
-  color:#333;
-  margin-top:8px;
-}
-.topbar{
-  display:flex;
-  gap:8px;
-  padding:12px;
-}
-
-/* 新增：悬浮加号按钮 */
-#fab-add{
-  position:fixed;
-  bottom:24px;
-  left:50%;
-  transform:translateX(-50%);
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  background:#1a1a1a;
-  color:#fff;
-  font-size:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  font-size:14px;
   cursor:pointer;
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-  z-index:50;
-  user-select:none;
 }
+button.secondary{background:#eee;color:#333;margin-top:8px;}
 
-/* 新增：打卡弹层 */
+.topbar{display:flex;gap:8px;padding:4px 0 14px;}
+.topbar button{flex:0 0 auto;padding:8px 16px;}
+
+/* 排序切换 */
+.wall-controls{margin-bottom:12px;}
+.seg{display:inline-flex;border:1px solid #ddd;border-radius:14px;overflow:hidden;background:#fff;}
+.seg span{font-size:12px;padding:6px 14px;cursor:pointer;color:#666;}
+.seg span.on{background:#1a1a1a;color:#fff;}
+
+/* 墙：卡片网格 */
+.wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.wall-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.06);cursor:pointer;}
+.wall-card-img-wrap{position:relative;height:130px;background:#f0f0f0;}
+.wall-card-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.wall-card .extra-count{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:2px 6px;border-radius:8px;}
+.wall-card-body{padding:8px;}
+.who-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;}
+.wall-card .when{font-size:11px;color:#999;}
+.wall-card .note{font-size:12px;color:#666;margin-top:4px;line-height:1.4;}
+.wall-card .tags{font-size:11px;color:#1a6cd9;margin-top:4px;}
+
+.group-block{margin-bottom:18px;}
+.group-head{font-size:13px;font-weight:600;margin-bottom:8px;}
+
+/* 弹层（登录/打卡/详情/编辑通用） */
 .modal-bg{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  z-index:100;
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;
+  display:flex;align-items:flex-end;justify-content:center;
 }
 .modal-card{
-  background:#fff;
-  width:100%;
-  max-width:480px;
-  max-height:85vh;
-  overflow-y:auto;
-  border-radius:18px 18px 0 0;
-  padding:20px 16px 30px;
+  background:#fafafa;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;
+  border-radius:18px 18px 0 0;padding:18px 16px 30px;
 }
-.modal-card input[type=file],
+.modal-card h3{margin:0 0 12px;font-size:16px;}
+.modal-card input[type=text],
+.modal-card input[type=password],
 .modal-card textarea{
-  width:100%;
-  box-sizing:border-box;
-  margin-top:10px;
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  font-family:inherit;
+  width:100%;box-sizing:border-box;margin-top:10px;padding:10px;
+  border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;
 }
-.modal-card textarea{
-  min-height:60px;
+.modal-card textarea{min-height:60px;resize:vertical;}
+.modal-card button{width:100%;margin-top:12px;}
+.modal-card label{font-size:13px;color:#555;display:block;margin-top:10px;}
+.hint-text{font-size:11px;color:#aaa;margin-top:4px;}
+
+.upload-trigger{
+  border:2px dashed #ddd;border-radius:10px;padding:18px;text-align:center;
+  cursor:pointer;font-size:13px;color:#999;position:relative;margin-top:10px;
 }
-.modal-card button{
-  width:100%;
-  margin-top:12px;
-}
+.upload-trigger input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+.img-card{border:1px solid #eee;border-radius:10px;margin-top:10px;overflow:hidden;background:#fff;}
+.img-card img{width:100%;max-height:200px;object-fit:contain;display:block;background:#f5f5f5;}
+.img-card-body{padding:10px;}
+.img-card-body .remove{font-size:12px;color:#c33;cursor:pointer;float:right;}
+.tag-group{margin-bottom:8px;clear:both;}
+.tag-group .glabel{font-size:11px;color:#aaa;margin-bottom:4px;}
+.glabel{font-size:13px;color:#888;margin-bottom:8px;font-weight:500;}
+.preset-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.preset-tag{font-size:12px;border:1px solid #ddd;border-radius:14px;padding:4px 10px;cursor:pointer;color:#555;background:#fff;}
+.preset-tag.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+
+.detail-img-block{margin-top:10px;}
+.detail-img-block img{width:100%;max-height:360px;object-fit:contain;border-radius:10px;background:#f5f5f5;}
+.detail-img-block .tags{font-size:12px;color:#1a6cd9;margin-top:4px;}
 
 /* 登录/注册卡片 */
-.auth-tabs{
-  display:flex;
-  gap:8px;
-  margin-bottom:14px;
-}
-.auth-tab{
-  flex:1;
-  text-align:center;
-  padding:8px;
-  border-radius:8px;
-  background:#f0f0f0;
-  color:#888;
-  cursor:pointer;
-  font-size:14px;
-}
-.auth-tab.on{
-  background:#1a1a1a;
-  color:#fff;
-}
-.modal-card input[type=text],
-.modal-card input[type=password]{
-  width:100%;
-  box-sizing:border-box;
-  margin-top:10px;
-  padding:10px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  font-family:inherit;
-  font-size:14px;
-}
-.auth-error{
-  color:#c33;
-  font-size:12px;
-  min-height:16px;
-  margin-top:6px;
+.auth-tabs{display:flex;gap:8px;margin-bottom:6px;}
+.auth-tab{flex:1;text-align:center;padding:8px;border-radius:8px;background:#f0f0f0;color:#888;cursor:pointer;font-size:14px;}
+.auth-tab.on{background:#1a1a1a;color:#fff;}
+.auth-error{color:#c33;font-size:12px;min-height:16px;margin-top:6px;}
+
+/* 我的主页 */
+.profile-head{display:flex;align-items:center;gap:14px;}
+.profile-head .name{font-size:17px;font-weight:600;}
+.avatar-lg{width:64px;height:64px;border-radius:50%;object-fit:cover;background:#ddd;}
+.avatar-lg[src=""]{visibility:hidden;}
+.link-text{font-size:12px;color:#1a6cd9;cursor:pointer;margin-top:4px;}
+
+.stats-row{display:flex;gap:10px;margin-bottom:14px;}
+.stat{flex:1;background:#fff;border-radius:12px;padding:12px;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.06);}
+.stat .num{font-size:20px;font-weight:600;}
+.stat .lbl{font-size:11px;color:#888;margin-top:2px;}
+
+.pie-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.pie-legend{display:flex;flex-direction:column;gap:5px;font-size:12px;}
+.pie-legend .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;}
+.pillbar{display:flex;gap:6px;flex-wrap:wrap;}
+.pillbar span{font-size:11px;background:#f3f3f3;border-radius:10px;padding:3px 9px;color:#555;}
+
+/* 悬浮加号 */
+#fab-add{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  width:56px;height:56px;border-radius:50%;background:#1a1a1a;color:#fff;
+  font-size:28px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:50;user-select:none;
 }
