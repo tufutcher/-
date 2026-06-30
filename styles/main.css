@@ -490,3 +490,143 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     font-size:8px;
   }
 }
+/* Apple-ish 个人页：资料卡 + 月历卡分离 */
+.profile-overview{
+  display:grid;
+  grid-template-columns:1fr 1.15fr;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.profile-card-apple,
+.calendar-card-apple{
+  box-shadow:0 10px 30px rgba(0,0,0,.045);
+  border:1px solid rgba(0,0,0,.04);
+  background:rgba(255,255,255,.88);
+}
+
+.profile-card-apple{
+  min-height:230px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:24px 18px;
+}
+
+.avatar-trigger{
+  width:82px;
+  height:82px;
+  padding:0;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+  position:relative;
+}
+
+.avatar-trigger:hover{
+  background:transparent;
+}
+
+.avatar-trigger .avatar-lg,
+.avatar-lg{
+  width:82px;
+  height:82px;
+  border-radius:50%;
+  object-fit:cover;
+  display:block;
+  box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+
+.profile-greeting{
+  margin-top:16px;
+  font-size:22px;
+  font-weight:750;
+  letter-spacing:-.04em;
+  color:#111;
+}
+
+.profile-subtitle{
+  margin-top:6px;
+  font-size:12px;
+  color:#888;
+  line-height:1.6;
+}
+
+.avatar-action{
+  display:none;
+  margin-top:12px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:rgba(12,192,223,.1);
+  color:#0789a0;
+  font-size:12px;
+}
+
+.avatar-action.show{
+  display:inline-flex;
+}
+
+.calendar-card-apple{
+  padding:14px;
+}
+
+.calendar-card-apple .mini-calendar{
+  background:transparent;
+  padding:0;
+}
+
+.calendar-card-apple .cal-head{
+  margin-bottom:12px;
+}
+
+.calendar-card-apple .cal-title{
+  font-size:14px;
+  letter-spacing:-.02em;
+}
+
+.calendar-card-apple .cal-cell{
+  background:#f7f7f8;
+  box-shadow:none;
+}
+
+.calendar-card-apple .cal-cell.has-checkin{
+  background:rgba(12,192,223,.14);
+  color:#087c91;
+}
+
+.calendar-card-apple .cal-cell.today{
+  box-shadow:inset 0 0 0 1.5px #111;
+}
+
+@media (max-width:620px){
+  .profile-overview{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .profile-card-apple{
+    min-height:auto;
+    padding:18px 10px;
+  }
+
+  .avatar-trigger,
+  .avatar-trigger .avatar-lg,
+  .avatar-lg{
+    width:64px;
+    height:64px;
+  }
+
+  .profile-greeting{
+    font-size:17px;
+  }
+
+  .profile-subtitle{
+    font-size:10px;
+  }
+
+  .calendar-card-apple{
+    padding:10px;
+  }
+}
