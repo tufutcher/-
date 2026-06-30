@@ -12,10 +12,23 @@ window.__sb = sb;
 window.setState = setState;
 
 window.switchView = (view) => {
-  setState({
-    view: view
-  });
+  setState({ view });
 };
+
+async function loadProfile(userId){
+  const { data, error } = await sb
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if(error){
+    console.error("loadProfile error:", error);
+    return null;
+  }
+
+  return data || null;
+}
 
 async function loadProfiles(){
   const { data, error } = await sb
