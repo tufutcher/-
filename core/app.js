@@ -10,6 +10,8 @@ import { openAuthModal } from "../modules/auth_modal.js";
 const sb = initSupabase();
 window.__sb = sb;
 
+window.setState = setState;
+
 async function loadProfile(userId){
   const { data } = await sb.from("profiles").select("*").eq("id", userId).single();
   return data || null;
