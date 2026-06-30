@@ -174,12 +174,12 @@ async function submitCheckin(modal){
   const user = window.__user;
 
   if(!sb || !user){
-    alert("请先登录");
+    window.showToast?.("请先登录后再打卡。", "还不能打卡", "error");
     return;
   }
 
   if(!pendingImages.length){
-    alert("请至少选择一张图片");
+    window.showToast?.("请至少选择一张图片。", "还没有作品", "error");
     return;
   }
 
@@ -187,7 +187,7 @@ async function submitCheckin(modal){
   const btn = document.getElementById("ci-submit");
 
   btn.disabled = true;
-  btn.textContent = "上传图片中...";
+  btn.textContent = "🖼️ 上传图片中...";
 
   const uploadedImages = [];
 
@@ -204,7 +204,7 @@ async function submitCheckin(modal){
 
       btn.disabled = false;
       btn.textContent = "提交打卡";
-      alert("有图片上传失败，本次打卡没有提交。请重新选择图片后再试。");
+      window.showToast?.("有图片上传失败，本次打卡没有提交。\n请重新选择图片后再试。", "上传失败", "error");
       return;
     }
 
@@ -215,7 +215,7 @@ async function submitCheckin(modal){
     });
   }
 
-  btn.textContent = "创建打卡中...";
+  btn.textContent = "🧾 创建打卡中...";
 
   const { data: profile } = await sb
     .from("profiles")
@@ -230,11 +230,11 @@ async function submitCheckin(modal){
     await sb.storage.from("art").remove(uploadedImages.map(x => x.path));
     btn.disabled = false;
     btn.textContent = "提交打卡";
-    alert("打卡创建失败，已取消本次提交。");
+    window.showToast?.("打卡创建失败，已取消本次提交。", "提交失败", "error");
     return;
   }
 
-  btn.textContent = "保存图片记录中...";
+  btn.textContent = "🏷️ 保存图片记录中...";
 
   for(const img of uploadedImages){
     const imageRecord = await addCheckinImage(
@@ -252,13 +252,15 @@ async function submitCheckin(modal){
 
       btn.disabled = false;
       btn.textContent = "提交打卡";
-      alert("图片记录保存失败，本次打卡已取消。");
+      window.showToast?.("图片记录保存失败，本次打卡已取消。", "保存失败", "error");
       return;
     }
   }
 
+  btn.textContent = "✨ 完成！";
+
   modal.remove();
-  alert("打卡成功！");
+  window.showConfettiSuccess?.("打卡成功！");
 
   const freshCheckins = await loadCheckins(sb);
 
