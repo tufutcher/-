@@ -1,10 +1,10 @@
-import { state } from "/core/state.js";
-import { initSupabase } from "/api/supabase.js";
-import { auth } from "/api/auth.js";
-import { loadCheckins } from "/api/checkin.js";
-import { renderWall } from "/modules/wall.js";
-import { renderProfile } from "/modules/profile.js";
-import { openCheckinModal } from "/modules/checkin_modal.js";
+import { state } from "./state.js";
+import { initSupabase } from "../api/supabase.js";
+import { auth } from "../api/auth.js";
+import { loadCheckins } from "../api/checkin.js";
+import { renderWall } from "../modules/wall.js";
+import { renderProfile } from "../modules/profile.js";
+import { openCheckinModal } from "../modules/checkin_modal.js";
 
 const sb = initSupabase();
 window.__sb = sb;
