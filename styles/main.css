@@ -715,7 +715,16 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 }
 
-/* 个人页数据视图筛选器 */
+/* =========================
+   个人页：创作档案模块
+   包含：
+   1. 本周 / 本月 / 总览 数据筛选
+   2. 创作分布饼图
+   3. 常画标签
+   4. 画廊 / 打卡 两种作品视图
+========================= */
+
+/* 时间范围切换：本周 / 本月 / 总览 */
 .data-filter{
   display:inline-flex;
   padding:4px;
@@ -742,55 +751,47 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   box-shadow:0 8px 20px rgba(0,0,0,.12);
 }
 
-@media (max-width:520px){
-  .data-filter-head{
-    align-items:flex-start;
-    flex-direction:column;
-  }
 
-  .data-filter{
-    width:100%;
-  }
-
-  .data-filter span{
-    flex:1;
-  }
-}
-
-/* 第二次迭代个人数据页 */
+/* 创作档案大卡片 */
 .archive-card{
-  padding:16px;
+  padding:20px;
 }
 
 .archive-top{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
   gap:14px;
   margin-bottom:18px;
 }
 
 .archive-title{
-  font-size:20px;
+  font-size:28px;
   font-weight:850;
-  letter-spacing:-.04em;
+  letter-spacing:-.06em;
   color:#111;
 }
 
 .archive-section{
-  padding-top:16px;
-  margin-top:16px;
+  padding-top:18px;
+  margin-top:18px;
   border-top:1px solid rgba(0,0,0,.06);
 }
 
-.archive-section:first-of-type{
-  border-top:none;
-  margin-top:0;
-  padding-top:0;
+
+/* 创作分布 */
+.archive-pie-section{
+  padding-top:8px;
 }
 
 .archive-pie-grid{
   margin-top:8px;
+}
+
+
+/* 常画标签 */
+.archive-tags-section{
+  padding-top:18px;
 }
 
 .archive-pillbar span{
@@ -803,35 +804,35 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   color:#087c91;
 }
 
-.archive-view-head{
+
+/* 作品视图区域 */
+.archive-gallery-section{
+  padding-top:16px;
+}
+
+.archive-view-bar{
   display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  gap:12px;
-  margin-bottom:12px;
+  justify-content:flex-end;
+  margin-bottom:10px;
 }
 
-.archive-view-subtitle{
-  font-size:12px;
-  color:#999;
-  line-height:1.5;
-}
 
+/* 作品视图切换：画廊 / 打卡 */
 .archive-mode-switch{
   display:inline-flex;
-  padding:4px;
+  padding:3px;
   border-radius:999px;
   background:#f1f2f4;
   flex:0 0 auto;
 }
 
 .archive-mode-switch span{
-  min-width:50px;
-  padding:7px 12px;
+  min-width:42px;
+  padding:5px 10px;
   border-radius:999px;
   text-align:center;
-  font-size:12px;
-  color:#777;
+  font-size:11px;
+  color:#888;
   cursor:pointer;
   user-select:none;
 }
@@ -839,10 +840,13 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .archive-mode-switch span.on{
   background:#111;
   color:#fff;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);
+  box-shadow:0 6px 14px rgba(0,0,0,.1);
 }
 
-/* 画廊模式：展示所有图片，完整显示，不裁切 */
+
+/* 画廊模式：
+   展示当前范围内上传过的全部图片。
+   使用 contain，保证作品完整显示，不裁切。 */
 .gallery-board{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(84px,1fr));
@@ -892,7 +896,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   box-shadow:0 10px 24px rgba(0,0,0,.08);
 }
 
-/* 打卡模式：按一次次打卡展示，隐藏标签和感想 */
+
+/* 打卡模式：
+   按每一次打卡展示。
+   只显示日期、图片数量和封面，不显示标签和感想。 */
 .archive-checkin-list{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
@@ -942,21 +949,24 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   color:#aaa;
 }
 
+
+/* 手机适配 */
 @media (max-width:620px){
-  .archive-top,
-  .archive-view-head{
+  .archive-top{
     flex-direction:column;
     align-items:flex-start;
   }
 
-  .data-filter,
-  .archive-mode-switch{
+  .data-filter{
     width:100%;
   }
 
-  .data-filter span,
-  .archive-mode-switch span{
+  .data-filter span{
     flex:1;
+  }
+
+  .archive-view-bar{
+    justify-content:flex-start;
   }
 
   .gallery-board{
