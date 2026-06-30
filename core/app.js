@@ -6,11 +6,14 @@ import { renderWall, bindWallEvents } from "../modules/wall.js";
 import { renderProfile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
 import { openAuthModal } from "../modules/auth_modal.js";
+import { showToast, showConfettiSuccess } from "../modules/feedback.js";
 
 const sb = initSupabase();
 window.__sb = sb;
 window.setState = setState;
 window.state = state;
+window.showToast = showToast;
+window.showConfettiSuccess = showConfettiSuccess;
 
 window.switchView = (view) => {
   setState({ view });
