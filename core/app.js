@@ -91,7 +91,7 @@ function render(){
 }
 
 // 浮动按钮
-function Fab(){
+function renderFab(){
   let nav = document.getElementById("bottom-nav");
 
   if(!nav){
@@ -150,7 +150,8 @@ async function start(){
   setState({
     user,
     profile,
-    checkins
+    checkins,
+    profiles
   });
 }
 
