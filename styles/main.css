@@ -714,3 +714,63 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     flex-direction:column;
   }
 }
+
+/* 个人页数据视图筛选器 */
+.data-filter-card{
+  padding:14px;
+}
+
+.data-filter-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.data-filter-title{
+  font-size:17px;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:#111;
+}
+
+.data-filter{
+  display:inline-flex;
+  padding:4px;
+  border-radius:999px;
+  background:#f1f2f4;
+  flex:0 0 auto;
+}
+
+.data-filter span{
+  min-width:54px;
+  padding:7px 12px;
+  border-radius:999px;
+  text-align:center;
+  font-size:12px;
+  color:#777;
+  cursor:pointer;
+  user-select:none;
+  transition:background .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+.data-filter span.on{
+  background:#111;
+  color:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
+
+@media (max-width:520px){
+  .data-filter-head{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .data-filter{
+    width:100%;
+  }
+
+  .data-filter span{
+    flex:1;
+  }
+}
