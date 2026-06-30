@@ -129,12 +129,44 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .pillbar{display:flex;gap:6px;flex-wrap:wrap;}
 .pillbar span{font-size:11px;background:#f3f3f3;border-radius:10px;padding:3px 9px;color:#555;}
 
-/* 徽章 */
+/* 徽章：未解锁灰色 / 已解锁高亮 */
 .badge-row{display:flex;gap:16px;}
-.badge-item{flex:1;display:flex;flex-direction:column;align-items:center;background:#fafafa;border-radius:10px;padding:12px 6px;}
-.badge-emoji{font-size:28px;}
-.badge-count{font-size:15px;font-weight:600;margin-top:4px;}
-.badge-desc{font-size:10px;color:#999;margin-top:2px;}
+.badge-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  border-radius:14px;
+  padding:14px 6px;
+  transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.badge-item.locked{
+  background:#f6f6f6;
+  color:#aaa;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.03);
+}
+
+.badge-item.locked .badge-emoji{
+  filter:grayscale(1);
+  opacity:.35;
+}
+
+.badge-item.unlocked{
+  background:linear-gradient(180deg, rgba(12,192,223,.12), #fff);
+  color:#111;
+  box-shadow:0 12px 28px rgba(12,192,223,.12), inset 0 0 0 1px rgba(12,192,223,.25);
+}
+
+.badge-item.unlocked:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 36px rgba(12,192,223,.18), inset 0 0 0 1px rgba(12,192,223,.35);
+}
+
+.badge-emoji{font-size:30px;line-height:1;}
+.badge-count{font-size:16px;font-weight:700;margin-top:7px;}
+.badge-desc{font-size:10px;color:#999;margin-top:3px;}
+.badge-item.unlocked .badge-desc{color:#0a6f80;}
 
 /* 底部导航：墙 / 加号 / 我的 */
 #bottom-nav{
