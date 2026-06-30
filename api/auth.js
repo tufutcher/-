@@ -1,4 +1,4 @@
-import { checkInvite } from "./invite.js";
+import { checkInvite } from "api/invite.js";
 
 export async function auth(sb){
 
