@@ -2,7 +2,7 @@ import { state } from "./state.js";
 import { initSupabase } from "../api/supabase.js";
 import { getCurrentUser } from "../api/auth.js";
 import { loadCheckins } from "../api/checkin.js";
-import { renderWall } from "../modules/wall.js";
+import { renderWall, bindWallEvents } from "../modules/wall.js";
 import { renderProfile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
 import { openAuthModal } from "../modules/auth_modal.js";
@@ -10,28 +10,34 @@ import { openAuthModal } from "../modules/auth_modal.js";
 const sb = initSupabase();
 window.__sb = sb;
 
-/* ===== 启动：不强制登录，先把墙加载出来 ===== */
+async function loadProfile(userId){
+  const { data } = await sb.from("profiles").select("*").eq("id", userId).single();
+  return data || null;
+}
+
 async function start(){
   const user = await getCurrentUser(sb);
   window.__user = user;
   state.user = user;
+  if(user) state.profile = await loadProfile(user.id);
   state.checkins = await loadCheckins(sb);
   render();
 }
 
-/* ===== RENDER ===== */
 function render(){
   const app = document.getElementById("app");
   if(state.view === "wall"){
     app.innerHTML = renderWall(state.checkins);
+    bindWallEvents();
   }
   if(state.view === "me"){
     if(!state.user){
-      // 未登录时点"我的"，直接弹登录框
       app.innerHTML = renderWall(state.checkins);
-      openAuthModal(sb, (user) => {
+      bindWallEvents();
+      openAuthModal(sb, async (user) => {
         window.__user = user;
         state.user = user;
+        state.profile = await loadProfile(user.id);
         state.view = "me";
         render();
       });
@@ -54,9 +60,10 @@ function renderFab(){
     if(state.user){
       openCheckinModal();
     } else {
-      openAuthModal(sb, (user) => {
+      openAuthModal(sb, async (user) => {
         window.__user = user;
         state.user = user;
+        state.profile = await loadProfile(user.id);
         render();
         openCheckinModal();
       });
@@ -64,13 +71,11 @@ function renderFab(){
   };
 }
 
-/* ===== GLOBAL ===== */
 window.switchView = (v) => {
   state.view = v;
   render();
 };
 
-// 打卡提交成功后，重新拉取数据刷新页面
 window.addEventListener("checkin-submitted", async () => {
   state.checkins = await loadCheckins(sb);
   render();
