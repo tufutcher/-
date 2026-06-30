@@ -191,12 +191,21 @@ export function renderProfile(state){
   const username = state.profile?.username || "我";
 
   const html = `
-    <div class="card">
-      <div class="profile-head">
-        <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
-        <div><div class="name">${username}</div><div class="link-text" id="avatar-upload-link">上传/更换头像</div></div>
+    <div class="card profile-calendar-card">
+      <div class="profile-side">
+        <div class="profile-head">
+          <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
+          <div>
+            <div class="name">${username}</div>
+            <div class="link-text" id="avatar-upload-link">上传/更换头像</div>
+          </div>
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none;">
       </div>
-      <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+    
+      <div class="calendar-side">
+        ${renderMiniCalendar(mine)}
+      </div>
     </div>
     <div class="stats-row">
       <div class="stat stat-block"><div class="stat-title">本周打卡</div><div class="stat-main">${stats.weekDays}天 | ${stats.weekImages}张</div></div>
@@ -245,6 +254,22 @@ export function renderProfile(state){
 }
 
 function bindProfileEvents(state, mine){
+  const prevCal = document.getElementById("cal-prev");
+  const nextCal = document.getElementById("cal-next");
+  
+  if(prevCal){
+    prevCal.onclick = () => {
+      profileCalendarDate.setMonth(profileCalendarDate.getMonth() - 1);
+      if(window.setState) window.setState({});
+    };
+  }
+  
+  if(nextCal){
+    nextCal.onclick = () => {
+      profileCalendarDate.setMonth(profileCalendarDate.getMonth() + 1);
+      if(window.setState) window.setState({});
+    };
+  }
   const link = document.getElementById("avatar-upload-link");
   if(link){
     link.onclick = () => document.getElementById("avatar-input").click();
