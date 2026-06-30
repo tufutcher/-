@@ -239,42 +239,40 @@ export function openEditModal(item){
     }
   });
   
-  const cancelBtn = document.getElementById("edit-cancel");
-  if(cancelBtn){
-    cancelBtn.addEventListener("click", () => {
+  const deleteBtn = document.getElementById("edit-delete");
+  if(deleteBtn){
+    deleteBtn.onclick = async () => {
+      const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
+      if(!ok) return;
+  
+      const sb = window.__sb;
+      const user = window.__user;
+  
+      if(!sb || !user){
+        alert("请先登录");
+        return;
+      }
+  
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = "删除中...";
+  
+      const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
+  
+      if(!deleted){
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = "删除这次打卡";
+        return;
+      }
+  
+      const freshCheckins = await loadCheckins(sb);
+      if(window.setState){
+        window.setState({ checkins: freshCheckins });
+      }
+  
       modal.remove();
-    });
+      alert("已删除");
+    };
   }
-    const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
-    if(!ok) return;
-  
-    const sb = window.__sb;
-    const user = window.__user;
-    if(!sb || !user){
-      alert("请先登录");
-      return;
-    }
-  
-    const btn = document.getElementById("edit-delete");
-    btn.disabled = true;
-    btn.textContent = "删除中...";
-  
-    const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
-  
-    if(!deleted){
-      btn.disabled = false;
-      btn.textContent = "删除这次打卡";
-      return;
-    }
-  
-    const freshCheckins = await loadCheckins(sb);
-    if(window.setState){
-      window.setState({ checkins: freshCheckins });
-    }
-  
-    modal.remove();
-    alert("已删除");
-  };
 
   const localTags = imgs.map(img => [...(img.tags||[])]);
   modal.querySelectorAll(".preset-tag").forEach(btn => {
