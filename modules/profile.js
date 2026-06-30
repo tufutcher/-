@@ -619,35 +619,49 @@ function openReadOnlyCheckinDetail(item){
 
   const imgs = item.checkin_images || [];
 
-  modal.innerHTML = `
-    <div class="modal-card">
-      <div class="who-row">
-        <b>${item.username || "匿名"}</b>
-        <span class="when">${fmtDate(item.created_at)}</span>
-      </div>
+  let imgsHtml = "";
 
-      ${imgs.map(img => `
-        <div class="detail-img-block">
-          <img src="${img.image_url}">
-          ${(img.tags && img.tags.length) ? `<div class="tags">${img.tags.map(t => "#" + t).join(" ")}</div>` : ""}
-        </div>
-      `).join("")}
+  imgs.forEach(img => {
+    const tagsHtml = (img.tags && img.tags.length)
+      ? '<div class="tags">' + img.tags.map(t => "#" + t).join(" ") + '</div>'
+      : "";
 
-      ${item.note ? `<div class="note" style="margin-top:10px;">${item.note}</div>` : ""}
+    imgsHtml +=
+      '<div class="detail-img-block">' +
+        '<img src="' + img.image_url + '">' +
+        tagsHtml +
+      '</div>';
+  });
 
-      <button id="readonly-detail-close" class="secondary">关闭</button>
-    </div>
-  `;
+  const noteHtml = item.note
+    ? '<div class="note" style="margin-top:10px;">' + item.note + '</div>'
+    : "";
+
+  modal.innerHTML =
+    '<div class="modal-card">' +
+      '<div class="who-row">' +
+        '<b>' + (item.username || "匿名") + '</b>' +
+        '<span class="when">' + fmtDate(item.created_at) + '</span>' +
+      '</div>' +
+      imgsHtml +
+      noteHtml +
+      '<button id="readonly-detail-close" class="secondary">关闭</button>' +
+    '</div>';
 
   document.body.appendChild(modal);
 
   modal.onclick = (e) => {
-    if(e.target === modal) modal.remove();
+    if(e.target === modal){
+      modal.remove();
+    }
   };
 
-  document.getElementById("readonly-detail-close").onclick = () => {
-    modal.remove();
-  };
+  const closeBtn = document.getElementById("readonly-detail-close");
+  if(closeBtn){
+    closeBtn.onclick = () => {
+      modal.remove();
+    };
+  }
 }
 
 function bindProfileEvents(state, mine, options = {}){
