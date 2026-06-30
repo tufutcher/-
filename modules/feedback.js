@@ -73,3 +73,48 @@ export function showConfettiSuccess(message = "打卡成功！"){
     modal.remove();
   }, 2300);
 }
+export function showConfirm({
+  title = "确认操作",
+  message = "确定要继续吗？",
+  confirmText = "确认",
+  cancelText = "取消",
+  danger = false
+} = {}){
+  return new Promise(resolve => {
+    const old = document.getElementById("app-confirm-modal");
+    if(old) old.remove();
+
+    const modal = document.createElement("div");
+    modal.id = "app-confirm-modal";
+    modal.className = "app-toast-bg";
+
+    modal.innerHTML =
+      '<div class="app-toast-card app-confirm-card">' +
+        '<button class="app-toast-close" id="app-confirm-close" type="button">×</button>' +
+        '<div class="app-toast-icon ' + (danger ? 'error' : 'info') + '">!</div>' +
+        '<div class="app-toast-title">' + title + '</div>' +
+        '<div class="app-toast-message">' + message + '</div>' +
+        '<div class="app-confirm-actions">' +
+          '<button id="app-confirm-cancel" class="secondary" type="button">' + cancelText + '</button>' +
+          '<button id="app-confirm-ok" class="' + (danger ? 'danger' : '') + '" type="button">' + confirmText + '</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    const close = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+
+    document.getElementById("app-confirm-close").onclick = () => close(false);
+    document.getElementById("app-confirm-cancel").onclick = () => close(false);
+    document.getElementById("app-confirm-ok").onclick = () => close(true);
+
+    modal.onclick = (e) => {
+      if(e.target === modal){
+        close(false);
+      }
+    };
+  });
+}
