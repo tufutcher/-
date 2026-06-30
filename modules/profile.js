@@ -4,6 +4,7 @@ import { uploadImage } from "../api/storage.js";
 
 const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
+let profileDataMode = "month";
 
 function fmtDate(ts){
   const d = new Date(ts);
@@ -89,6 +90,59 @@ function computeStats(mine){
 function calKey(date){
   const d = new Date(date);
   return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+
+function filterProfileItems(items){
+  if(profileDataMode === "all") return items;
+
+  if(profileDataMode === "week"){
+    const start = startOfWeek(new Date());
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+
+    return items.filter(item => {
+      const d = new Date(item.created_at);
+      return d >= start && d < end;
+    });
+  }
+
+  if(profileDataMode === "month"){
+    const start = startOfMonth(new Date());
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + 1);
+
+    return items.filter(item => {
+      const d = new Date(item.created_at);
+      return d >= start && d < end;
+    });
+  }
+
+  return items;
+}
+
+function dataModeTitle(){
+  if(profileDataMode === "week") return "本周";
+  if(profileDataMode === "month") return "本月";
+  return "全部";
+}
+
+function renderDataFilter(){
+  return `
+    <div class="card data-filter-card">
+      <div class="data-filter-head">
+        <div>
+          <div class="glabel">数据视图</div>
+          <div class="data-filter-title">${dataModeTitle()}创作分析</div>
+        </div>
+
+        <div class="data-filter" id="profile-data-filter">
+          <span data-mode="week" class="${profileDataMode === 'week' ? 'on' : ''}">本周</span>
+          <span data-mode="month" class="${profileDataMode === 'month' ? 'on' : ''}">本月</span>
+          <span data-mode="all" class="${profileDataMode === 'all' ? 'on' : ''}">总览</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderMiniCalendar(mine){
@@ -328,12 +382,13 @@ export function renderProfile(state, options = {}){
   const mine = state.checkins.filter(i => i.user_id === targetUserId);
   const stats = computeStats(mine);
   const badges = computeBadges(mine);
+  const visibleMine = filterProfileItems(mine);
 
   const profileFromList = (state.profiles || []).find(p => p.id === targetUserId);
   const profile = readonly ? profileFromList : (state.profile || profileFromList);
 
   const tagCount = {};
-  mine.forEach(x => {
+  visibleMine.forEach(x => {
     (x.checkin_images || []).forEach(img => {
       (img.tags || []).forEach(t => {
         tagCount[t] = (tagCount[t] || 0) + 1;
@@ -353,9 +408,10 @@ export function renderProfile(state, options = {}){
     ? username
     : `你好，${username}！`;
 
+  const historyCount = visibleMine.length;
   const historyTitle = readonly
-    ? `${username}的历史打卡（共 ${mine.length} 次，点图片可查看）`
-    : `历史打卡（共 ${mine.length} 次，点图片可编辑）`;
+    ? `${dataModeTitle()}打卡（共 ${historyCount} 次，点击查看）`
+    : `${dataModeTitle()}打卡（共 ${historyCount} 次，点击编辑）`;
 
   const html = `
       ${readonly ? `
@@ -417,7 +473,9 @@ export function renderProfile(state, options = {}){
         </div>
       </div>
     </div>
-
+    
+    ${renderDataFilter()}
+    
     <div class="card">
       <div class="glabel">创作分布</div>
       <div class="pie-grid">
@@ -437,7 +495,7 @@ export function renderProfile(state, options = {}){
     <div class="card">
       <div class="glabel">${historyTitle}</div>
       <div class="wall-grid" id="profile-grid">
-        ${mine.slice(0,12).map(item => {
+        ${visibleMine.slice(0,12).map(item => {
           const cover = (item.checkin_images || [])[0];
 
           return `
@@ -514,6 +572,16 @@ function bindProfileEvents(state, mine, options = {}){
         });
       }
     };
+  }
+
+  const dataFilter = document.getElementById("profile-data-filter");
+  if(dataFilter){
+    dataFilter.querySelectorAll("span").forEach(btn => {
+      btn.onclick = () => {
+        profileDataMode = btn.dataset.mode || "month";
+        if(window.setState) window.setState({});
+      };
+    });
   }
 
   const exportCsvBtn = document.getElementById("admin-export-csv");
