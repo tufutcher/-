@@ -1,12 +1,12 @@
-import { state } from "state.js";
-import { events } from "events.js";
+import { state } from "/core/state.js";
+import { events } from "/core/events.js";
 
-import { initSupabase } from "api/supabase.js";
-import { auth } from "api/auth.js";
-import { loadCheckins } from "api/checkin.js";
+import { initSupabase } from "/api/supabase.js";
+import { auth } from "/api/auth.js";
+import { loadCheckins } from "/api/checkin.js";
 
-import { renderWall } from "modules/wall.js";
-import { renderProfile } from "modules/profile.js";
+import { renderWall } from "/modules/wall.js";
+import { renderProfile } from "/modules/profile.js";
 
 const sb = initSupabase();
 
