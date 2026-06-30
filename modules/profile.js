@@ -88,11 +88,6 @@ function computeStats(mine){
   return { weekDays:weekDays.size, weekImages, monthDays:monthDays.size, monthImages, maxStreak, totalImages };
 }
 
-function calKey(date){
-  const d = new Date(date);
-  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-}
-
 function filterProfileItems(items){
   if(profileDataMode === "all") return items;
 
@@ -127,48 +122,22 @@ function dataModeTitle(){
   return "全部";
 }
 
-function renderDataFilter(){
-  return `
-    <div class="card data-filter-card">
-      <div class="data-filter-head">
-        <div>
-          <div class="glabel">数据视图</div>
-          <div class="data-filter-title">${dataModeTitle()}创作分析</div>
-        </div>
-
-        <div class="data-filter" id="profile-data-filter">
-          <span data-mode="week" class="${profileDataMode === 'week' ? 'on' : ''}">本周</span>
-          <span data-mode="month" class="${profileDataMode === 'month' ? 'on' : ''}">本月</span>
-          <span data-mode="all" class="${profileDataMode === 'all' ? 'on' : ''}">总览</span>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
 function getGalleryImages(items){
-  const images = [];
-
-  items.forEach(item => {
-    (item.checkin_images || []).forEach(img => {
-      images.push({
-        id: img.id,
-        image_url: img.image_url,
-        created_at: item.created_at,
-        checkin_id: item.id,
-        item
-      });
-    });
-  });
-
-  return images;
+  return items.flatMap(item =>
+    (item.checkin_images || []).map(img => ({
+      id: img.id,
+      image_url: img.image_url,
+      created_at: item.created_at,
+      checkin_id: item.id
+    }))
+  );
 }
 
 function renderArchiveModeSwitch(){
   return `
     <div class="archive-mode-switch" id="archive-mode-switch">
-      <span data-mode="gallery" class="${profileArchiveMode === 'gallery' ? 'on' : ''}">画廊</span>
-      <span data-mode="checkin" class="${profileArchiveMode === 'checkin' ? 'on' : ''}">打卡</span>
+      <span data-mode="gallery" class="${profileArchiveMode === "gallery" ? "on" : ""}">画廊</span>
+      <span data-mode="checkin" class="${profileArchiveMode === "checkin" ? "on" : ""}">打卡</span>
     </div>
   `;
 }
@@ -180,16 +149,16 @@ function renderGalleryView(items){
     return '<div class="empty archive-empty">这个范围内还没有作品</div>';
   }
 
-  return `
-    <div class="gallery-board">
-      ${images.map(img => `
-        <button class="gallery-tile" data-checkin-id="${img.checkin_id}" type="button">
-          <img src="${img.image_url}">
-          <span>${fmtDate(img.created_at)}</span>
-        </button>
-      `).join("")}
-    </div>
-  `;
+  return (
+    '<div class="gallery-board">' +
+      images.map(img =>
+        '<button class="gallery-tile" data-checkin-id="' + img.checkin_id + '" type="button">' +
+          '<img src="' + img.image_url + '">' +
+          '<span>' + fmtDate(img.created_at) + '</span>' +
+        '</button>'
+      ).join("") +
+    '</div>'
+  );
 }
 
 function renderCheckinArchiveView(items){
@@ -197,135 +166,69 @@ function renderCheckinArchiveView(items){
     return '<div class="empty archive-empty">这个范围内还没有打卡</div>';
   }
 
-  return `
-    <div class="archive-checkin-list">
-      ${items.map(item => {
+  return (
+    '<div class="archive-checkin-list">' +
+      items.map(item => {
         const imgs = item.checkin_images || [];
         const cover = imgs[0];
 
-        return `
-          <button class="archive-checkin-card" data-checkin-id="${item.id}" type="button">
-            <div class="archive-checkin-cover">
-              ${cover ? `<img src="${cover.image_url}">` : ""}
-            </div>
-
-            <div class="archive-checkin-meta">
-              <span>${fmtDate(item.created_at)}</span>
-              <b>${imgs.length} 张</b>
-            </div>
-          </button>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
-
-function renderArchiveContent(items){
-  if(profileArchiveMode === "gallery"){
-    return renderGalleryView(items);
-  }
-
-  return renderCheckinArchiveView(items);
-}
-
-function renderArchiveCard(tagCount, topTags, visibleMine){
-  return `
-    <div class="card archive-card">
-      <div class="archive-top">
-        <div class="archive-title">${dataModeTitle()}创作分析</div>
-
-        <div class="data-filter" id="profile-data-filter">
-          <span data-mode="week" class="${profileDataMode === 'week' ? 'on' : ''}">本周</span>
-          <span data-mode="month" class="${profileDataMode === 'month' ? 'on' : ''}">本月</span>
-          <span data-mode="all" class="${profileDataMode === 'all' ? 'on' : ''}">总览</span>
-        </div>
-      </div>
-
-      <div class="archive-section archive-pie-section">
-        <div class="pie-grid archive-pie-grid">
-          <div class="pie-panel"><div class="pie-title">内容</div>${pieSvg(tagCount,'内容')}</div>
-          <div class="pie-panel"><div class="pie-title">类型</div>${pieSvg(tagCount,'类型')}</div>
-          <div class="pie-panel"><div class="pie-title">完成度</div>${pieSvg(tagCount,'完成度')}</div>
-        </div>
-      </div>
-
-      <div class="archive-section archive-tags-section">
-        <div class="pillbar archive-pillbar">
-          ${topTags.length ? topTags.map(t => `<span>${t[0]} ×${t[1]}</span>`).join("") : '<span class="muted">这个范围内还没有标签记录</span>'}
-        </div>
-      </div>
-
-      <div class="archive-section archive-gallery-section">
-        <div class="archive-view-bar">
-          ${renderArchiveModeSwitch()}
-        </div>
-
-        ${renderArchiveContent(visibleMine)}
-      </div>
-    </div>
-  `;
-}
-
-function renderArchiveModeSwitch(){
-  return `
-    <div class="archive-mode-switch" id="archive-mode-switch">
-      <span data-mode="gallery" class="${profileArchiveMode === 'gallery' ? 'on' : ''}">画廊</span>
-      <span data-mode="checkin" class="${profileArchiveMode === 'checkin' ? 'on' : ''}">打卡</span>
-    </div>
-  `;
-}
-
-function renderGalleryView(items){
-  const images = getGalleryImages(items);
-
-  if(!images.length){
-    return `<div class="empty archive-empty">这个范围内还没有作品</div>`;
-  }
-
-  return `
-    <div class="gallery-board">
-      ${images.map(img => `
-        <button class="gallery-tile" data-checkin-id="${img.checkin_id}" type="button">
-          <img src="${img.image_url}">
-          <span>${fmtDate(img.created_at)}</span>
-        </button>
-      `).join("")}
-    </div>
-  `;
-}
-
-function renderCheckinArchiveView(items){
-  if(!items.length){
-    return `<div class="empty archive-empty">这个范围内还没有打卡</div>`;
-  }
-
-  return `
-    <div class="archive-checkin-list">
-      ${items.map(item => {
-        const imgs = item.checkin_images || [];
-        const cover = imgs[0];
-
-        return `
-          <button class="archive-checkin-card" data-checkin-id="${item.id}" type="button">
-            <div class="archive-checkin-cover">
-              ${cover ? `<img src="${cover.image_url}">` : ""}
-            </div>
-
-            <div class="archive-checkin-meta">
-              <span>${fmtDate(item.created_at)}</span>
-              <b>${imgs.length} 张</b>
-            </div>
-          </button>
-        `;
-      }).join("")}
-    </div>
-  `;
+        return (
+          '<button class="archive-checkin-card" data-checkin-id="' + item.id + '" type="button">' +
+            '<div class="archive-checkin-cover">' +
+              (cover ? '<img src="' + cover.image_url + '">' : '') +
+            '</div>' +
+            '<div class="archive-checkin-meta">' +
+              '<span>' + fmtDate(item.created_at) + '</span>' +
+              '<b>' + imgs.length + ' 张</b>' +
+            '</div>' +
+          '</button>'
+        );
+      }).join("") +
+    '</div>'
+  );
 }
 
 function renderArchiveContent(items){
   return profileArchiveMode === "gallery"
     ? renderGalleryView(items)
     : renderCheckinArchiveView(items);
+}
+
+function renderArchiveCard(tagCount, topTags, visibleMine){
+  const tagsHtml = topTags.length
+    ? topTags.map(t => '<span>' + t[0] + ' ×' + t[1] + '</span>').join("")
+    : '<span class="muted">这个范围内还没有标签记录</span>';
+
+  return `
+    <div class="card archive-card">
+      <div class="archive-top">
+        <div class="archive-title">${dataModeTitle()}创作分析</div>
+
+        <div class="data-filter" id="profile-data-filter">
+          <span data-mode="week" class="${profileDataMode === "week" ? "on" : ""}">本周</span>
+          <span data-mode="month" class="${profileDataMode === "month" ? "on" : ""}">本月</span>
+          <span data-mode="all" class="${profileDataMode === "all" ? "on" : ""}">总览</span>
+        </div>
+      </div>
+
+      <div class="archive-section archive-pie-section">
+        <div class="pie-grid archive-pie-grid">
+          <div class="pie-panel"><div class="pie-title">内容</div>${pieSvg(tagCount, "内容")}</div>
+          <div class="pie-panel"><div class="pie-title">类型</div>${pieSvg(tagCount, "类型")}</div>
+          <div class="pie-panel"><div class="pie-title">完成度</div>${pieSvg(tagCount, "完成度")}</div>
+        </div>
+      </div>
+
+      <div class="archive-section archive-tags-section">
+        <div class="pillbar archive-pillbar">${tagsHtml}</div>
+      </div>
+
+      <div class="archive-section archive-gallery-section">
+        <div class="archive-view-bar">${renderArchiveModeSwitch()}</div>
+        ${renderArchiveContent(visibleMine)}
+      </div>
+    </div>
+  `;
 }
 
 function renderMiniCalendar(mine){
@@ -343,7 +246,7 @@ function renderMiniCalendar(mine){
     const d = new Date(item.created_at);
     if(d.getFullYear() !== year || d.getMonth() !== month) return;
 
-    const key = calKey(d);
+    const key = dateKey(d);
     if(!dayMap[key]) dayMap[key] = { checkins:0, images:0 };
     dayMap[key].checkins += 1;
     dayMap[key].images += item.checkin_images?.length || 0;
@@ -357,9 +260,9 @@ function renderMiniCalendar(mine){
 
   for(let day=1; day<=totalDays; day++){
     const d = new Date(year, month, day);
-    const key = calKey(d);
+    const key = dateKey(d);
     const info = dayMap[key];
-    const today = calKey(new Date()) === key;
+    const today = dateKey(new Date()) === key;
     const cls = ["cal-cell", info ? "has-checkin" : "", today ? "today" : ""].join(" ");
 
     cells.push(`
