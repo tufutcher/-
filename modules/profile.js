@@ -393,6 +393,8 @@ export function renderProfile(state, options = {}){
       <div class="stat stat-block"><div class="stat-title">总计</div><div class="stat-main">连续${stats.maxStreak}天 | 共${stats.totalImages}张</div></div>
     </div>
 
+    ${(!readonly && state.profile?.is_admin) ? renderAdminPanel(state) : ''}
+
     <div class="card">
       <div class="glabel">我的徽章</div>
       <div class="badge-row">
@@ -513,6 +515,20 @@ function bindProfileEvents(state, mine, options = {}){
       }
     };
   }
+
+  const exportCsvBtn = document.getElementById("admin-export-csv");
+if(exportCsvBtn){
+  exportCsvBtn.onclick = () => {
+    exportAllProfilesCSV(state);
+  };
+}
+
+const exportJsonBtn = document.getElementById("admin-export-json");
+if(exportJsonBtn){
+  exportJsonBtn.onclick = () => {
+    exportAllProfilesJSON(state);
+  };
+}
 
   document.querySelectorAll(".mini-calendar").forEach((cal, index) => {
     if(index > 0){
