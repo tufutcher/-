@@ -204,7 +204,7 @@ function bindProfileEvents(state, mine){
   });
 }
 
-function openEditModal(item){
+export function openEditModal(item){
   const old = document.getElementById("edit-modal");
   if(old) old.remove();
   const modal = document.createElement("div");
