@@ -678,3 +678,39 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .back-wall-btn:hover{
   background:#fff;
 }
+
+/* 管理员通道 */
+.admin-card{
+  border:1px solid rgba(12,192,223,.18);
+  background:linear-gradient(180deg, rgba(12,192,223,.08), rgba(255,255,255,.96));
+}
+
+.admin-title{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:#111;
+}
+
+.admin-subtitle{
+  margin-top:6px;
+  color:#777;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.admin-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.admin-actions button{
+  flex:1;
+}
+
+@media (max-width:520px){
+  .admin-actions{
+    flex-direction:column;
+  }
+}
