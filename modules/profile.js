@@ -618,7 +618,6 @@ function openReadOnlyCheckinDetail(item){
   modal.className = "modal-bg";
 
   const imgs = item.checkin_images || [];
-
   let imgsHtml = "";
 
   imgs.forEach(img => {
@@ -658,24 +657,33 @@ function openReadOnlyCheckinDetail(item){
 
   const closeBtn = document.getElementById("readonly-detail-close");
   if(closeBtn){
-    closeBtn.onclick = () => {
-      modal.remove();
-    };
+    closeBtn.onclick = () => modal.remove();
   }
 }
 
 function bindProfileEvents(state, mine, options = {}){
   const readonly = !!options.readonly;
-  
+
   const backWallBtn = document.getElementById("back-wall-btn");
   if(backWallBtn){
     backWallBtn.onclick = () => {
       if(window.setState){
-        window.setState({
-          view: "wall",
-          viewUserId: null
-        });
+        window.setState({ view: "wall", viewUserId: null });
       }
+    };
+  }
+
+  const exportCsvBtn = document.getElementById("admin-export-csv");
+  if(exportCsvBtn){
+    exportCsvBtn.onclick = () => {
+      exportAllProfilesCSV(state);
+    };
+  }
+
+  const exportJsonBtn = document.getElementById("admin-export-json");
+  if(exportJsonBtn){
+    exportJsonBtn.onclick = () => {
+      exportAllProfilesJSON(state);
     };
   }
 
@@ -689,27 +697,15 @@ function bindProfileEvents(state, mine, options = {}){
     });
   }
 
-  const exportCsvBtn = document.getElementById("admin-export-csv");
-if(exportCsvBtn){
-  exportCsvBtn.onclick = () => {
-    exportAllProfilesCSV(state);
-  };
-}
-
-const exportJsonBtn = document.getElementById("admin-export-json");
-if(exportJsonBtn){
-  exportJsonBtn.onclick = () => {
-    exportAllProfilesJSON(state);
-  };
-}
-
-  document.querySelectorAll(".mini-calendar").forEach((cal, index) => {
-    if(index > 0){
-      const card = cal.closest(".card");
-      if(card) card.remove();
-      else cal.remove();
-    }
-  });
+  const archiveModeSwitch = document.getElementById("archive-mode-switch");
+  if(archiveModeSwitch){
+    archiveModeSwitch.querySelectorAll("span").forEach(btn => {
+      btn.onclick = () => {
+        profileArchiveMode = btn.dataset.mode || "gallery";
+        if(window.setState) window.setState({});
+      };
+    });
+  }
 
   const prevCal = document.getElementById("cal-prev");
   const nextCal = document.getElementById("cal-next");
@@ -747,16 +743,22 @@ if(exportJsonBtn){
         if(!f) return;
 
         const sb = window.__sb;
-        const path = "avatars/" + state.user.id + "_" + Date.now() + "_" + f.name;
+        const safeName = f.name.replace(/[^\w.\-]/g, "_");
+        const path = "avatars/" + state.user.id + "_" + Date.now() + "_" + safeName;
         const url = await uploadImage(sb, f, path);
 
         if(url){
           await sb.from("profiles").update({ avatar_url: url }).eq("id", state.user.id);
 
-          if(state.profile) state.profile.avatar_url = url;
+          if(state.profile){
+            state.profile.avatar_url = url;
+          }
 
-          document.getElementById("avatar-img").src = url;
-          document.getElementById("avatar-img").style.background = "transparent";
+          const img = document.getElementById("avatar-img");
+          if(img){
+            img.src = url;
+            img.style.background = "transparent";
+          }
 
           link.classList.remove("show");
         }
@@ -764,21 +766,11 @@ if(exportJsonBtn){
     }
   }
 
-  const archiveModeSwitch = document.getElementById("archive-mode-switch");
-  if(archiveModeSwitch){
-    archiveModeSwitch.querySelectorAll("span").forEach(btn => {
-      btn.onclick = () => {
-        profileArchiveMode = btn.dataset.mode || "gallery";
-        if(window.setState) window.setState({});
-      };
-    });
-  }
-  
   document.querySelectorAll("[data-checkin-id]").forEach(el => {
     el.onclick = () => {
       const item = mine.find(x => x.id === el.dataset.checkinId);
       if(!item) return;
-  
+
       if(readonly){
         openReadOnlyCheckinDetail(item);
       } else {
@@ -786,6 +778,7 @@ if(exportJsonBtn){
       }
     };
   });
+}
 
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
