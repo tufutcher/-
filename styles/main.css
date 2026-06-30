@@ -849,51 +849,61 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
    使用 contain，保证作品完整显示，不裁切。 */
 .gallery-board{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(84px,1fr));
-  gap:8px;
-  max-height:430px;
+  grid-template-columns:repeat(auto-fill,minmax(92px,1fr));
+  gap:6px;
+  max-height:460px;
   overflow:auto;
-  padding:4px;
-  border-radius:16px;
+  padding:6px;
+  border-radius:18px;
   background:#f6f7f8;
 }
 
 .gallery-tile{
+  position:relative;
   border:none;
   padding:0;
   border-radius:12px;
   overflow:hidden;
   background:#fff;
-  color:#777;
   cursor:pointer;
   box-shadow:none;
-  min-height:96px;
-  display:flex;
-  flex-direction:column;
+  aspect-ratio:1 / 1;
 }
 
 .gallery-tile img{
   width:100%;
-  height:82px;
+  height:100%;
   object-fit:contain;
   display:block;
   background:#fafafa;
+  transition:transform .25s ease;
 }
 
-.gallery-tile span{
-  display:block;
-  padding:5px 4px 6px;
+.gallery-date{
+  position:absolute;
+  left:6px;
+  bottom:6px;
+  padding:3px 6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(8px);
   font-size:10px;
   line-height:1;
-  text-align:center;
-  color:#888;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  color:#666;
+  opacity:.72;
+  pointer-events:none;
 }
 
 .gallery-tile:hover{
   box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
+
+.gallery-tile:hover img{
+  transform:scale(1.03);
+}
+
+.gallery-tile:hover .gallery-date{
+  opacity:1;
 }
 
 
@@ -970,12 +980,13 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .gallery-board{
-    grid-template-columns:repeat(auto-fill,minmax(68px,1fr));
-    max-height:360px;
+    grid-template-columns:repeat(auto-fill,minmax(74px,1fr));
+    max-height:380px;
   }
-
-  .gallery-tile img{
-    height:68px;
+  
+  .gallery-date{
+    font-size:9px;
+    padding:3px 5px;
   }
 
   .archive-checkin-list{
