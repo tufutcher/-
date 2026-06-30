@@ -39,10 +39,9 @@ export function openCheckinModal(){
     <div class="modal-card">
       <h3>本次打卡</h3>
 
-      <label class="ci-upload-mini" for="ci-files">
-        <span class="ci-upload-plus">＋</span>
-        <span id="ci-upload-text">选择图片</span>
-        <em id="ci-upload-count">支持多选</em>
+      <label class="ci-upload-empty" id="ci-upload-empty" for="ci-files">
+        <span>＋</span>
+        <em>支持多选图片</em>
         <input type="file" id="ci-files" accept="image/*" multiple />
       </label>
 
@@ -116,20 +115,13 @@ function readAsDataUrl(file){
 function renderImgList(){
   const wrap = document.getElementById("ci-img-list");
   const tagPanel = document.getElementById("ci-tag-panel");
-  const uploadText = document.getElementById("ci-upload-text");
-  const uploadCount = document.getElementById("ci-upload-count");
+  const uploadEmpty = document.getElementById("ci-upload-empty");
   
   if(!wrap || !tagPanel) return;
-
-  if(uploadText && uploadCount){
-  if(pendingImages.length){
-    uploadText.textContent = "继续添加";
-    uploadCount.textContent = "已选择 " + pendingImages.length + " 张";
-  } else {
-    uploadText.textContent = "选择图片";
-    uploadCount.textContent = "支持多选";
+  
+  if(uploadEmpty){
+    uploadEmpty.style.display = pendingImages.length ? "none" : "flex";
   }
-}
 
   if(!pendingImages.length){
     wrap.innerHTML = "";
@@ -160,6 +152,10 @@ function renderImgList(){
   wrap.innerHTML = `
     <div class="ci-thumb-grid">
       ${gridHtml}
+  
+      <label class="ci-thumb ci-add-thumb" for="ci-files">
+        <span>＋</span>
+      </label>
     </div>
   `;
 
