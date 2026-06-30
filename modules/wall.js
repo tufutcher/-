@@ -93,24 +93,81 @@ function bindCardClicks(){
 function openDetail(item){
   const old = document.getElementById("detail-modal");
   if(old) old.remove();
+
   const modal = document.createElement("div");
   modal.id = "detail-modal";
   modal.className = "modal-bg";
+
   const imgs = item.checkin_images || [];
+  const user = window.__user;
+  const isOwner = user && user.id === item.user_id;
+
   modal.innerHTML = `
     <div class="modal-card">
       <div class="who-row"><b>${item.username}</b><span class="when">${fmtDate(item.created_at)}</span></div>
+
       ${imgs.map(img => `
         <div class="detail-img-block">
           <img src="${img.image_url}">
           ${(img.tags && img.tags.length) ? `<div class="tags">${img.tags.map(t=>"#"+t).join(" ")}</div>` : ""}
         </div>
       `).join("")}
+
       ${item.note ? `<div class="note" style="margin-top:10px;">${item.note}</div>` : ""}
+
+      ${isOwner ? `
+        <button id="detail-edit">编辑</button>
+        <button id="detail-delete" class="danger">删除</button>
+      ` : ""}
+
       <button id="detail-close" class="secondary">关闭</button>
     </div>
   `;
+
   document.body.appendChild(modal);
-  modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+
+  modal.onclick = (e) => {
+    if(e.target === modal) modal.remove();
+  };
+
   document.getElementById("detail-close").onclick = () => modal.remove();
+
+  if(isOwner){
+    document.getElementById("detail-edit").onclick = () => {
+      modal.remove();
+      openEditModal(item);
+    };
+
+    document.getElementById("detail-delete").onclick = async () => {
+      const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
+      if(!ok) return;
+
+      const sb = window.__sb;
+      const user = window.__user;
+      if(!sb || !user){
+        alert("请先登录");
+        return;
+      }
+
+      const btn = document.getElementById("detail-delete");
+      btn.disabled = true;
+      btn.textContent = "删除中...";
+
+      const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
+
+      if(!deleted){
+        btn.disabled = false;
+        btn.textContent = "删除";
+        return;
+      }
+
+      const freshCheckins = await loadCheckins(sb);
+      if(window.setState){
+        window.setState({ checkins: freshCheckins });
+      }
+
+      modal.remove();
+      alert("已删除");
+    };
+  }
 }
