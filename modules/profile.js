@@ -226,54 +226,6 @@ function renderArchiveContent(items){
     : renderCheckinArchiveView(items);
 }
 
-function renderArchiveCard(tagCount, topTags, visibleMine){
-  return `
-    <div class="card archive-card">
-      <div class="archive-top">
-        <div>
-          <div class="glabel">创作档案</div>
-          <div class="archive-title">${dataModeTitle()}创作分析</div>
-        </div>
-
-        <div class="data-filter" id="profile-data-filter">
-          <span data-mode="week" class="${profileDataMode === 'week' ? 'on' : ''}">本周</span>
-          <span data-mode="month" class="${profileDataMode === 'month' ? 'on' : ''}">本月</span>
-          <span data-mode="all" class="${profileDataMode === 'all' ? 'on' : ''}">总览</span>
-        </div>
-      </div>
-
-      <div class="archive-section">
-        <div class="glabel">创作分布</div>
-        <div class="pie-grid archive-pie-grid">
-          <div class="pie-panel"><div class="pie-title">内容</div>${pieSvg(tagCount,'内容')}</div>
-          <div class="pie-panel"><div class="pie-title">类型</div>${pieSvg(tagCount,'类型')}</div>
-          <div class="pie-panel"><div class="pie-title">完成度</div>${pieSvg(tagCount,'完成度')}</div>
-        </div>
-      </div>
-
-      <div class="archive-section">
-        <div class="glabel">常画标签</div>
-        <div class="pillbar archive-pillbar">
-          ${topTags.length ? topTags.map(t => `<span>${t[0]} ×${t[1]}</span>`).join("") : '<span class="muted">这个范围内还没有标签记录</span>'}
-        </div>
-      </div>
-
-      <div class="archive-section">
-        <div class="archive-view-head">
-          <div>
-            <div class="glabel">作品视图</div>
-            <div class="archive-view-subtitle">${profileArchiveMode === "gallery" ? "展示这个范围内上传过的全部图片" : "按每一次打卡查看记录"}</div>
-          </div>
-
-          ${renderArchiveModeSwitch()}
-        </div>
-
-        ${renderArchiveContent(visibleMine)}
-      </div>
-    </div>
-  `;
-}
-
 function renderMiniCalendar(mine){
   const year = profileCalendarDate.getFullYear();
   const month = profileCalendarDate.getMonth();
