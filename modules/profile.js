@@ -144,9 +144,14 @@ export function renderProfile(state){
         <div class="badge-item"><span class="badge-emoji">🎨</span><span class="badge-count">×${badges.palette}</span><span class="badge-desc">单周满勤</span></div>
       </div>
     </div>
-    <div class="card"><div class="glabel">创作内容分布</div>${pieSvg(tagCount,'内容')}</div>
-    <div class="card"><div class="glabel">创作类型分布</div>${pieSvg(tagCount,'类型')}</div>
-    <div class="card"><div class="glabel">完成度分布</div>${pieSvg(tagCount,'完成度')}</div>
+<div class="card">
+  <div class="glabel">创作分布</div>
+  <div class="pie-grid">
+    <div class="pie-panel"><div class="pie-title">内容</div>${pieSvg(tagCount,'内容')}</div>
+    <div class="pie-panel"><div class="pie-title">类型</div>${pieSvg(tagCount,'类型')}</div>
+    <div class="pie-panel"><div class="pie-title">完成度</div>${pieSvg(tagCount,'完成度')}</div>
+  </div>
+</div>
     <div class="card">
       <div class="glabel">常画标签</div>
       <div class="pillbar">${topTags.length ? topTags.map(t=>`<span>${t[0]} ×${t[1]}</span>`).join("") : '<span class="muted">还没有打卡记录，填写标签后这里会自动统计</span>'}</div>
