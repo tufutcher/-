@@ -239,6 +239,15 @@ export function openEditModal(item){
     }
   });
   
+  const cancelBtn = modal.querySelector("#edit-cancel");
+  if(cancelBtn){
+    cancelBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      modal.remove();
+    };
+  }
+  
   const deleteBtn = document.getElementById("edit-delete");
   if(deleteBtn){
     deleteBtn.onclick = async () => {
@@ -285,14 +294,26 @@ export function openEditModal(item){
     };
   });
 
-  document.getElementById("edit-save").onclick = async () => {
-    const sb = window.__sb;
-    const note = document.getElementById("edit-note").value.trim();
-    await updateCheckinNote(sb, item.id, note);
-    for(let i=0;i<imgs.length;i++){
-      await updateImageTags(sb, imgs[i].id, localTags[i]);
-    }
-    modal.remove();
-    window.dispatchEvent(new CustomEvent("checkin-submitted"));
-  };
-}
+  const saveBtn = modal.querySelector("#edit-save");
+  if(saveBtn){
+    saveBtn.onclick = async () => {
+      const sb = window.__sb;
+      const note = modal.querySelector("#edit-note").value.trim();
+  
+      saveBtn.disabled = true;
+      saveBtn.textContent = "保存中...";
+  
+      await updateCheckinNote(sb, item.id, note);
+  
+      for(let i=0; i<imgs.length; i++){
+        await updateImageTags(sb, imgs[i].id, localTags[i]);
+      }
+  
+      const freshCheckins = await loadCheckins(sb);
+      if(window.setState){
+        window.setState({ checkins: freshCheckins });
+      }
+  
+      modal.remove();
+    };
+  }
