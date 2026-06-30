@@ -148,29 +148,24 @@ function renderImgList(){
 
   if(isSingleMode){
     tagPanel.innerHTML = `
-      <div class="ci-tag-box single">
-        <div class="ci-tag-head">
-          <div>
-            <div class="ci-section-title">单张标签</div>
-            <div class="hint-text">正在修改第 ${pendingImages.findIndex(x => x.id === selected.id) + 1} 张图片。</div>
-          </div>
-
-          <button id="ci-back-global" class="secondary small-btn" type="button">返回套用标签</button>
+      <div class="ci-single-layout">
+        <div class="ci-selected-card">
+          <img src="${selected.preview}">
+          <button id="ci-back-global" class="ci-float-btn ci-close-single" type="button">×</button>
+          <button id="ci-reset-tags" class="ci-float-btn ci-reset-single" type="button">↻</button>
         </div>
 
-        <div class="ci-selected-tags">${tagsLabel(selected.tags)}</div>
-
-        ${renderTagGroups(selected.tags, "single")}
-
-        ${selected.customTags ? '<button id="ci-reset-tags" class="secondary small-btn ci-reset-btn" type="button">恢复统一标签</button>' : ""}
+        <div class="ci-tag-box single">
+          <div class="ci-section-title">单张标签</div>
+          ${renderTagGroups(selected.tags, "single")}
+        </div>
       </div>
     `;
   } else {
     tagPanel.innerHTML = `
       <div class="ci-tag-box">
         <div class="ci-section-title">套用标签</div>
-        <div class="hint-text">选择的标签会套用到所有图片，点击图片可以单独套用标签。</div>
-
+        <div class="hint-text ci-tag-hint">选择的标签会套用到所有图片。点击图片可单独修改。</div>
         ${renderTagGroups(globalTags, "global")}
       </div>
     `;
@@ -179,7 +174,6 @@ function renderImgList(){
   wrap.querySelectorAll(".ci-thumb").forEach(btn => {
     btn.onclick = (e) => {
       if(e.target.classList.contains("ci-thumb-remove")) return;
-
       selectedImageId = btn.dataset.id;
       renderImgList();
     };
@@ -243,7 +237,6 @@ function renderImgList(){
     resetBtn.onclick = () => {
       selected.tags = [...globalTags];
       selected.customTags = false;
-      selectedImageId = null;
       renderImgList();
     };
   }
@@ -275,7 +268,7 @@ function renderTagGroups(activeTags, mode){
     return `
       <div class="ci-tag-row">
         <div class="ci-tag-label">${cat}</div>
-        <div class="preset-tags ci-tag-options">${opts}</div>
+        <div class="ci-tag-options">${opts}</div>
       </div>
     `;
   }).join("");
