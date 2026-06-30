@@ -1,4 +1,4 @@
-import { state } from "./state.js";
+import { state, setState, subscribe } from "./state.js";
 import { initSupabase } from "../api/supabase.js";
 import { getCurrentUser } from "../api/auth.js";
 import { loadCheckins } from "../api/checkin.js";
@@ -15,70 +15,85 @@ async function loadProfile(userId){
   return data || null;
 }
 
-async function start(){
-  const user = await getCurrentUser(sb);
-  window.__user = user;
-  state.user = user;
-  if(user) state.profile = await loadProfile(user.id);
-  state.checkins = await loadCheckins(sb);
-  render();
-}
-
+// 渲染函数（唯一入口）
 function render(){
   const app = document.getElementById("app");
+
   if(state.view === "wall"){
     app.innerHTML = renderWall(state.checkins);
     bindWallEvents();
   }
+
   if(state.view === "me"){
     if(!state.user){
       app.innerHTML = renderWall(state.checkins);
       bindWallEvents();
+
       openAuthModal(sb, async (user) => {
         window.__user = user;
-        state.user = user;
-        state.profile = await loadProfile(user.id);
-        state.view = "me";
-        render();
+        setState({ user });
+
+        const profile = await loadProfile(user.id);
+        setState({ profile, view: "me" });
       });
+
     } else {
       app.innerHTML = renderProfile(state);
     }
   }
+
   renderFab();
 }
 
+// 浮动按钮
 function renderFab(){
   let fab = document.getElementById("fab-add");
+
   if(!fab){
     fab = document.createElement("div");
     fab.id = "fab-add";
     fab.textContent = "＋";
     document.body.appendChild(fab);
   }
+
   fab.onclick = () => {
     if(state.user){
       openCheckinModal();
     } else {
       openAuthModal(sb, async (user) => {
         window.__user = user;
-        state.user = user;
-        state.profile = await loadProfile(user.id);
-        render();
+        setState({ user });
+
+        const profile = await loadProfile(user.id);
+        setState({ profile });
+
         openCheckinModal();
       });
     }
   };
 }
 
-window.switchView = (v) => {
-  state.view = v;
-  render();
-};
+// 初始化
+async function start(){
+  const user = await getCurrentUser(sb);
 
-window.addEventListener("checkin-submitted", async () => {
-  state.checkins = await loadCheckins(sb);
-  render();
-});
+  let profile = null;
+  if(user){
+    profile = await loadProfile(user.id);
+  }
+
+  const checkins = await loadCheckins(sb);
+
+  window.__user = user;
+
+  setState({
+    user,
+    profile,
+    checkins
+  });
+}
+
+// ⭐ 关键：自动刷新绑定
+subscribe(render);
 
 start();
