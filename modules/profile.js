@@ -184,17 +184,23 @@ export function renderProfile(state){
   const username = state.profile?.username || "我";
 
   const html = `
-    <div class="card profile-calendar-card">
-      <div class="profile-side">
-        <div class="profile-head">
+    <div class="profile-overview">
+      <div class="card profile-card-apple">
+        <button id="avatar-trigger" class="avatar-trigger" type="button">
           <img class="avatar-lg" id="avatar-img" src="${avatarUrl||''}" style="background:${avatarUrl?'transparent':'#ddd'};">
-          <div>
-            <div class="name">${username}</div>
-            <div class="link-text" id="avatar-upload-link">上传/更换头像</div>
-          </div>
-        </div>
+        </button>
+    
+        <div class="profile-greeting">你好，${username}！</div>
+        <div class="profile-subtitle">今天也留下了一点创作的证据。</div>
+    
+        <div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>
         <input type="file" id="avatar-input" accept="image/*" style="display:none;">
       </div>
+    
+      <div class="card calendar-card-apple">
+        ${renderMiniCalendar(mine)}
+      </div>
+    </div>
     
       <div class="calendar-side">
         ${renderMiniCalendar(mine)}
