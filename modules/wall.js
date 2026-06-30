@@ -1,3 +1,6 @@
+import { openEditModal } from "./profile.js";
+import { deleteCheckinWithImages, loadCheckins } from "../api/checkin.js";
+
 let currentMode = "time";
 let allCheckins = [];
 
