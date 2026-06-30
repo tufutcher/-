@@ -38,3 +38,40 @@ export async function updateImageTags(sb, imageId, tags){
   if(error){ alert("标签保存失败：" + error.message); return false; }
   return true;
 }
+
+export async function deleteCheckinWithImages(sb, checkinId, userId){
+  const { data: imgs, error: imgErr } = await sb
+    .from("checkin_images")
+    .select("storage_path")
+    .eq("checkin_id", checkinId)
+    .eq("user_id", userId);
+
+  if(imgErr){
+    alert("读取图片失败：" + imgErr.message);
+    return false;
+  }
+
+  const paths = (imgs || []).map(x => x.storage_path).filter(Boolean);
+
+  if(paths.length){
+    const { error: storageErr } = await sb.storage.from("art").remove(paths);
+
+    if(storageErr){
+      alert("图片文件删除失败，本次打卡没有删除。请稍后重试。\n" + storageErr.message);
+      return false;
+    }
+  }
+
+  const { error } = await sb
+    .from("checkins")
+    .delete()
+    .eq("id", checkinId)
+    .eq("user_id", userId);
+
+  if(error){
+    alert("删除打卡失败：" + error.message);
+    return false;
+  }
+
+  return true;
+}
