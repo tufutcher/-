@@ -1167,12 +1167,15 @@ button.cal-cell:disabled{
   justify-content:center;
   pointer-events:none;
   opacity:0;
-  background:rgba(255,255,255,.1);
-  backdrop-filter:blur(3px);
+  background:rgba(255,255,255,0);
+  backdrop-filter:blur(0);
+  transition:opacity .28s ease, background .28s ease, backdrop-filter .28s ease;
 }
 
 .confetti-bg.show{
   opacity:1;
+  background:rgba(255,255,255,.1);
+  backdrop-filter:blur(3px);
 }
 
 .confetti-field{
@@ -1210,7 +1213,7 @@ button.cal-cell:disabled{
   text-align:center;
   box-shadow:0 24px 70px rgba(0,0,0,.16);
   transform:translateY(8px) scale(.96);
-  animation:confetti-card-pop .35s ease-out forwards;
+  animation:confetti-card-pop .42s cubic-bezier(.2,.9,.2,1) forwards;
 }
 
 .confetti-emoji{
