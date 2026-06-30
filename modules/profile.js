@@ -796,43 +796,47 @@ export function openEditModal(item){
   modal.className = "modal-bg";
 
   const imgs = item.checkin_images || [];
+  let imgsHtml = "";
 
-  modal.innerHTML = `
-    <div class="modal-card">
-      <h3>编辑这次打卡</h3>
+  imgs.forEach((img, idx) => {
+    let groupsHtml = "";
 
-      ${imgs.map((img, idx) => {
-        let groupsHtml = "";
+    Object.keys(TAG_CATEGORIES).forEach(cat => {
+      let optsHtml = "";
 
-        Object.keys(TAG_CATEGORIES).forEach(cat => {
-          const opts = TAG_CATEGORIES[cat].map(t =>
-            `<span class="preset-tag${(img.tags || []).includes(t) ? " on" : ""}" data-img="${idx}" data-tag="${t}">${t}</span>`
-          ).join("");
+      TAG_CATEGORIES[cat].forEach(t => {
+        const onClass = (img.tags || []).includes(t) ? " on" : "";
 
-          groupsHtml += `
-            <div class="tag-group">
-              <div class="glabel">${cat}</div>
-              <div class="preset-tags">${opts}</div>
-            </div>
-          `;
-        });
+        optsHtml +=
+          '<span class="preset-tag' + onClass + '" data-img="' + idx + '" data-tag="' + t + '">' +
+            t +
+          '</span>';
+      });
 
-        return `
-          <div class="img-card">
-            <img src="${img.image_url}">
-            <div class="img-card-body">${groupsHtml}</div>
-          </div>
-        `;
-      }).join("")}
+      groupsHtml +=
+        '<div class="tag-group">' +
+          '<div class="glabel">' + cat + '</div>' +
+          '<div class="preset-tags">' + optsHtml + '</div>' +
+        '</div>';
+    });
 
-      <label>感想</label>
-      <textarea id="edit-note">${item.note || ""}</textarea>
+    imgsHtml +=
+      '<div class="img-card">' +
+        '<img src="' + img.image_url + '">' +
+        '<div class="img-card-body">' + groupsHtml + '</div>' +
+      '</div>';
+  });
 
-      <button id="edit-save">保存修改</button>
-      <button id="edit-delete" class="danger">删除这次打卡</button>
-      <button id="edit-cancel" class="secondary">取消</button>
-    </div>
-  `;
+  modal.innerHTML =
+    '<div class="modal-card">' +
+      '<h3>编辑这次打卡</h3>' +
+      imgsHtml +
+      '<label>感想</label>' +
+      '<textarea id="edit-note">' + (item.note || "") + '</textarea>' +
+      '<button id="edit-save">保存修改</button>' +
+      '<button id="edit-delete" class="danger">删除这次打卡</button>' +
+      '<button id="edit-cancel" class="secondary">取消</button>' +
+    '</div>';
 
   document.body.appendChild(modal);
 
@@ -872,7 +876,8 @@ export function openEditModal(item){
   if(saveBtn){
     saveBtn.onclick = async () => {
       const sb = window.__sb;
-      const note = modal.querySelector("#edit-note").value.trim();
+      const noteInput = modal.querySelector("#edit-note");
+      const note = noteInput ? noteInput.value.trim() : "";
 
       if(!sb){
         alert("数据库连接失败，请刷新后重试");
