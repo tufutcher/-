@@ -769,6 +769,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 /* 作品视图区域 */
 .archive-gallery-section{
   padding-top:16px;
+}
+
 /* 个人页作品画廊：
    固定高度缩略图墙，图片正方形填满，框内滚动。
    列数根据容器宽度自动变化；手机最多 6 列。 */
@@ -919,7 +921,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     grid-template-columns:repeat(auto-fill, minmax(62px, 1fr));
   }
 }
-/* 手机适配 */
+
+/* 个人报告三按钮手机适配 */
 @media (max-width:620px){
   .archive-top{
     flex-direction:column;
@@ -933,8 +936,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   .data-filter span{
     flex:1;
   }
-}
-  /* 月历：点击日期查看当天打卡 */
+
+}/* 月历：点击日期查看当天打卡 */
 .cal-cell{
   border:none;
   font:inherit;
