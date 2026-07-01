@@ -167,33 +167,15 @@ function renderGalleryView(items){
     return '<div class="empty archive-empty">这个范围内还没有作品</div>';
   }
 
- let sizeClass = "gallery-size-3";
-
-if(images.length > 80){
-  sizeClass = "gallery-size-10";
-} else if(images.length > 60){
-  sizeClass = "gallery-size-9";
-} else if(images.length > 45){
-  sizeClass = "gallery-size-8";
-} else if(images.length > 32){
-  sizeClass = "gallery-size-7";
-} else if(images.length > 24){
-  sizeClass = "gallery-size-6";
-} else if(images.length > 14){
-  sizeClass = "gallery-size-5";
-} else if(images.length > 8){
-  sizeClass = "gallery-size-4";
-}
-
-  const modeClass = profileDataMode === "all"
-    ? "gallery-board-scroll"
-    : "gallery-board-fixed";
+  const boardClass = profileDataMode === "all"
+    ? "gallery-board gallery-board-scroll"
+    : "gallery-board gallery-board-fixed";
 
   return (
-    '<div class="gallery-board ' + modeClass + ' ' + sizeClass + '">' +
+    '<div class="' + boardClass + '">' +
       images.map(img =>
         '<button class="gallery-tile" data-checkin-id="' + img.checkin_id + '" type="button">' +
-          '<img src="' + img.image_url + '">' +
+          '<img src="' + img.image_url + '" alt="">' +
           '<span class="gallery-date">' + fmtDate(img.created_at) + '</span>' +
         '</button>'
       ).join("") +
