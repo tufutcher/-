@@ -102,6 +102,20 @@ function computeStats(mine){
   return { weekDays:weekDays.size, weekImages, monthDays:monthDays.size, monthImages, maxStreak, totalImages };
 }
 
+function computeCurrentStreak(mine){
+  const days = new Set(mine.map(item => dateKey(item.created_at)));
+
+  let streak = 0;
+  const d = new Date();
+  d.setHours(0,0,0,0);
+
+  while(days.has(dateKey(d))){
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
 function filterProfileItems(items){
   if(profileDataMode === "all") return items;
 
