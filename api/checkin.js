@@ -47,6 +47,20 @@ export async function updateCheckinNote(sb, checkinId, note){
   return true;
 }
 
+export async function updateCheckinDate(sb, checkinId, createdAt){
+  const { error } = await sb
+    .from("checkins")
+    .update({ created_at: createdAt })
+    .eq("id", checkinId);
+
+  if(error){
+    window.showToast?.("日期保存失败：" + error.message, "保存失败", "error");
+    return false;
+  }
+
+  return true;
+}
+
 export async function updateImageTags(sb, imageId, tags){
   const { error } = await sb.from("checkin_images").update({ tags }).eq("id", imageId);
   if(error){ alert("标签保存失败：" + error.message); return false; }
