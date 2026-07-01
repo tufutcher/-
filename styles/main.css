@@ -1331,6 +1331,10 @@ button.cal-cell:disabled{
    打卡弹窗：小图网格 + 标签面板
 ========================= */
 
+#checkin-modal [hidden]{
+  display:none !important;
+}
+
 .ci-thumb-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(68px,1fr));
