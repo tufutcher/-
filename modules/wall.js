@@ -31,7 +31,10 @@ export function renderWall(items, profiles = []){
 
   return `
     <section class="wall-hero">
-      <h1>不 画 画 真 的 要 完 了</h1>
+      <h1>
+        <span>不画画，</span>
+        <span>真的要完了。</span>
+      </h1>
     </section>
 
     <div class="wall-controls">
