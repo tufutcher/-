@@ -77,5 +77,9 @@ export function openAuthModal(sb, onSuccess){
 
     modal.remove();
     onSuccess(result.user);
+    
+    if(mode === "register"){
+      window.showConfettiSuccess?.("欢迎来到这个社区！");
+    }
   };
 }
