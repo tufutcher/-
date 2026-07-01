@@ -1534,7 +1534,7 @@ button.cal-cell:disabled{
 }
 
 /* 打卡弹窗：未选图时的上传入口 */
-.ci-upload-empty{
+#checkin-modal .ci-upload-empty{
   position:relative;
   display:flex;
   flex-direction:column;
@@ -1551,7 +1551,7 @@ button.cal-cell:disabled{
   cursor:pointer;
 }
 
-.ci-upload-empty span{
+#checkin-modal .ci-upload-empty > span{
   width:44px;
   height:44px;
   margin:0 auto;
@@ -1563,8 +1563,8 @@ button.cal-cell:disabled{
   color:#fff;
   font-size:34px;
   line-height:1;
+  font-weight:400;
 }
-
 .ci-upload-empty em{
   display:block;
   width:100%;
