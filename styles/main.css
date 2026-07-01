@@ -948,6 +948,7 @@ button.cal-cell:disabled{
   overflow:hidden;
 }
 
+/* 当前选中图片预览 */
 .edit-selected-preview{
   width:100%;
   max-height:48vh;
@@ -961,16 +962,19 @@ button.cal-cell:disabled{
 
 .edit-selected-preview img{
   width:100%;
+  max-width:100%;
   max-height:48vh;
   object-fit:contain;
   display:block;
   background:#f7f8f9;
 }
 
+/* 标签面板沿用发布打卡的 ci-tag-box / ci-tag-row / preset-tag */
 .edit-tag-panel{
   margin:0;
 }
 
+/* 感想输入框：从旧编辑器保留 */
 .edit-note-box{
   margin-top:0;
 }
@@ -997,6 +1001,7 @@ button.cal-cell:disabled{
   outline:none;
 }
 
+/* 保存 / 删除 */
 .edit-actions{
   margin-top:0;
 }
