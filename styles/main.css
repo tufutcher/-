@@ -99,7 +99,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 /* 图片容器不固定高度 */
 .wall-card.gallery-card .wall-card-img-wrap{
   position:relative;
-  background:#f7f7f8;
+  background:transparent;
   overflow:hidden;
 }
 
@@ -109,7 +109,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   height:auto;
   display:block;
   object-fit:initial;
-  background:#f7f7f8;
+  background:transparent;
 }
 
 /* 多图角标 */
@@ -158,8 +158,14 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .wall-card.gallery-card{
-    margin-bottom:10px;
+    display:block;
+    break-inside:avoid;
+    margin:0 0 14px;
     border-radius:18px;
+    overflow:hidden;
+    background:transparent;
+    box-shadow:none;
+    cursor:pointer;
   }
 }
 
