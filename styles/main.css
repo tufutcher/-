@@ -167,7 +167,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .badge-count{font-size:16px;font-weight:700;margin-top:7px;}
 .badge-desc{font-size:10px;color:#999;margin-top:3px;}
 .badge-item.unlocked .badge-desc{color:#0a6f80;}
-/* 底部导航：图标 / 加号 / 图标 */
+/* 底部导航：玻璃浮岛 */
 #bottom-nav{
   position:fixed;
   left:50%;
@@ -177,41 +177,42 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:4px;
-  padding:8px;
+  gap:10px;
+  padding:8px 10px;
   border-radius:999px;
-  background:rgba(255,255,255,.68);
-  border:1px solid rgba(255,255,255,.55);
-  box-shadow:0 18px 50px rgba(0,0,0,.16);
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
+  background:rgba(255,255,255,.42);
+  border:1px solid rgba(255,255,255,.42);
+  box-shadow:0 18px 50px rgba(0,0,0,.14);
+  backdrop-filter:blur(28px) saturate(140%);
+  -webkit-backdrop-filter:blur(28px) saturate(140%);
 }
 
 #bottom-nav .nav-btn{
-  width:54px;
-  height:42px;
-  min-width:54px;
+  width:48px;
+  height:48px;
+  min-width:48px;
   padding:0;
-  border-radius:999px;
+  border-radius:50%;
   background:transparent;
-  color:rgba(17,17,17,.48);
+  color:rgba(17,17,17,.55);
   display:flex;
   align-items:center;
   justify-content:center;
+  box-shadow:none;
 }
 
 #bottom-nav .nav-btn.on{
-  background:rgba(12,192,223,.95);
+  background:rgba(12,192,223,.88);
   color:#fff;
+  box-shadow:0 8px 22px rgba(12,192,223,.28);
 }
 
 #bottom-nav .nav-btn svg{
   width:22px;
   height:22px;
   display:block;
-  fill:none;
-  stroke:currentColor;
-  stroke-width:2;
+  fill:currentColor;
+  stroke:none;
 }
 
 #bottom-nav .nav-btn svg rect,
@@ -223,16 +224,19 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 #bottom-nav #fab-add{
   position:static;
   transform:none;
-  width:64px;
-  height:64px;
+  width:66px;
+  height:66px;
+  min-width:66px;
+  padding:0;
   border-radius:50%;
-  background:rgba(17,17,17,.92);
+  background:rgba(17,17,17,.94);
   color:#fff;
-  font-size:30px;
+  font-size:34px;
+  line-height:1;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 12px 30px rgba(0,0,0,.22);
+  box-shadow:0 16px 36px rgba(0,0,0,.24);
 }
 /* 打卡墙顶部：一行标题 */
 .wall-hero{
@@ -1770,15 +1774,6 @@ button.cal-cell:disabled{
 #checkin-modal .ci-add-thumb span{
   margin:0 auto;
 }
-/* 底部导航：玻璃感 */
-#bottom-nav{
-  background:rgba(255,255,255,.68);
-  border:1px solid rgba(255,255,255,.55);
-  box-shadow:0 18px 50px rgba(0,0,0,.16);
-  backdrop-filter:blur(22px);
-  -webkit-backdrop-filter:blur(22px);
-}
-
 #bottom-nav #fab-add{
   background:rgba(17,17,17,.92);
   box-shadow:0 12px 30px rgba(0,0,0,.22);
