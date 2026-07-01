@@ -730,10 +730,6 @@ export function renderProfile(state, options = {}){
     ? renderAdminPanel(state)
     : "";
 
-  const backBtnHtml = readonly
-    ? '<button class="back-wall-btn" id="back-wall-btn">← 返回打卡墙</button>'
-    : "";
-
   const avatarActionHtml = readonly
     ? ""
     : '<div class="link-text avatar-action" id="avatar-upload-link">上传/更换头像</div>';
@@ -1109,15 +1105,6 @@ export function openReadonlyProfileModal(userId){
   document.getElementById("readonly-profile-close").onclick = () => {
     modal.remove();
   };
-
-  setTimeout(() => {
-    const backBtn = modal.querySelector("#profile-back");
-    if(backBtn){
-      backBtn.onclick = () => {
-        modal.remove();
-      };
-    }
-  }, 20);
 }
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
