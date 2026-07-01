@@ -739,7 +739,6 @@ export function renderProfile(state, options = {}){
     : '<input type="file" id="avatar-input" accept="image/*" style="display:none;">';
 
   const html =
-    backBtnHtml +
 
     '<div class="card profile-hero-card ' + (readonly ? 'readonly-profile' : '') + '">' +
       (currentStreak ? '<div class="streak-corner"><span>连续打卡</span><b>' + currentStreak + '天</b></div>' : '') +
