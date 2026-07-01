@@ -1441,69 +1441,6 @@ export function openReadonlyProfileModal(userId){
   renderReadonlyContent();
 }
 
-  function bindReadonlyProfileModalEvents(){
-    const mine = (state.checkins || []).filter(item => item.user_id === userId);
-
-    const dataFilter = modal.querySelector("#profile-data-filter");
-    if(dataFilter){
-      dataFilter.querySelectorAll("span").forEach(btn => {
-        btn.onclick = () => {
-          profileDataMode = btn.dataset.mode || "month";
-          renderReadonlyContent();
-        };
-      });
-    }
-
-    const prevCal = modal.querySelector("#cal-prev");
-    if(prevCal){
-      prevCal.onclick = () => {
-        profileCalendarDate.setMonth(profileCalendarDate.getMonth() - 1);
-        renderReadonlyContent();
-      };
-    }
-
-    const nextCal = modal.querySelector("#cal-next");
-    if(nextCal){
-      nextCal.onclick = () => {
-        profileCalendarDate.setMonth(profileCalendarDate.getMonth() + 1);
-        renderReadonlyContent();
-      };
-    }
-
-    modal.querySelectorAll("[data-cal-date]").forEach(btn => {
-      btn.onclick = () => {
-        openCalendarDayModal(btn.dataset.calDate, mine, true);
-      };
-    });
-
-    modal.querySelectorAll("[data-checkin-id]").forEach(el => {
-      el.onclick = () => {
-        const item = mine.find(x => x.id === el.dataset.checkinId);
-        if(!item) return;
-
-        openProfileCheckinDetail(item, true);
-      };
-    });
-  }
-
-  modal.onclick = (e) => {
-    if(e.target === modal){
-      modal.remove();
-    }
-  };
-
-  const escClose = (e) => {
-    if(e.key === "Escape"){
-      modal.remove();
-      document.removeEventListener("keydown", escClose);
-    }
-  };
-
-  document.addEventListener("keydown", escClose);
-
-  renderReadonlyContent();
-}
-
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
   if(old) old.remove();
