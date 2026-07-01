@@ -20,6 +20,24 @@ function fmtDate(date){
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+function dateInputValue(date){
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function localTodayString(){
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 function getWeekKey(date){
   // 以周一为一周起点，返回 "年-第几周" 作为分组key
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -1462,7 +1480,7 @@ export function openEditModal(item){
   let globalTags = editImages[0] ? [...editImages[0].tags] : [];
   let selectedImageId = null;
   let noteValue = item.note || "";
-  let dateValue = new Date(item.created_at).toISOString().slice(0, 10);
+  let dateValue = dateInputValue(item.created_at);
 
   function selectedImage(){
     return editImages.find(img => img.id === selectedImageId);
@@ -1670,7 +1688,14 @@ export function openEditModal(item){
         const note = noteInput ? noteInput.value.trim() : noteValue.trim();
         
         const dateInput = document.getElementById("edit-date");
-        const pickedDate = dateInput?.value || dateValue || new Date(item.created_at).toISOString().slice(0, 10);
+        const pickedDate = dateInput?.value || dateValue || dateInputValue(item.created_at);
+        const today = localTodayString();
+        
+        if(pickedDate > today){
+          window.showToast?.("不能选择未来日期。", "日期不对", "error");
+          return;
+        }
+        
         const createdAt = pickedDate + "T12:00:00";
 
         if(!sb){
