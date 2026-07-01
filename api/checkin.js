@@ -121,7 +121,7 @@ export async function adminDeleteCheckinWithImages(sb, checkinId){
 
     if(storageErr){
       window.showToast?.(
-        "图片文件删除失败，本次打卡没有删除。\n" + storageErr.message,
+        "图片文件删除失败，数据库记录没有删除。\n" + storageErr.message,
         "删除失败",
         "error"
       );
@@ -129,23 +129,24 @@ export async function adminDeleteCheckinWithImages(sb, checkinId){
     }
   }
 
-  const { error } = await sb.rpc("admin_delete_checkin", {
+  const { error } = await sb.rpc("admin_delete_checkin_db", {
     target_checkin_id: checkinId
   });
 
   if(error){
-    window.showToast?.("管理员删除失败：" + error.message, "删除失败", "error");
+    window.showToast?.("数据库记录删除失败：" + error.message, "删除失败", "error");
     return false;
   }
 
   return true;
 }
+
 export async function adminPurgeUserData(sb, userId){
   const { data: profile, error: profileErr } = await sb
     .from("profiles")
     .select("avatar_url")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
   if(profileErr){
     window.showToast?.("读取用户资料失败：" + profileErr.message, "清理失败", "error");
@@ -169,7 +170,7 @@ export async function adminPurgeUserData(sb, userId){
 
     if(storageErr){
       window.showToast?.(
-        "作品图片删除失败，清理已停止。\n" + storageErr.message,
+        "作品图片删除失败，数据库记录没有删除。\n" + storageErr.message,
         "清理失败",
         "error"
       );
@@ -177,14 +178,14 @@ export async function adminPurgeUserData(sb, userId){
     }
   }
 
-  const avatarPath = getStoragePathFromPublicUrl(profile?.avatar_url);
+  const avatarPath = getStoragePathFromPublicUrl(profile?.avatar_url, "avatars");
 
   if(avatarPath){
     const { error: avatarErr } = await sb.storage.from("avatars").remove([avatarPath]);
 
     if(avatarErr){
       window.showToast?.(
-        "头像文件删除失败，清理已停止。\n" + avatarErr.message,
+        "头像文件删除失败，数据库记录没有删除。\n" + avatarErr.message,
         "清理失败",
         "error"
       );
@@ -192,37 +193,27 @@ export async function adminPurgeUserData(sb, userId){
     }
   }
 
-  const { error: imageRowsErr } = await sb
-    .from("checkin_images")
-    .delete()
-    .eq("user_id", userId);
+  const { error: purgeErr } = await sb.rpc("admin_purge_user_db", {
+    target_user_id: userId
+  });
 
-  if(imageRowsErr){
-    window.showToast?.("图片记录删除失败：" + imageRowsErr.message, "清理失败", "error");
-    return false;
-  }
-
-  const { error: checkinErr } = await sb
-    .from("checkins")
-    .delete()
-    .eq("user_id", userId);
-
-  if(checkinErr){
-    window.showToast?.("打卡记录删除失败：" + checkinErr.message, "清理失败", "error");
-    return false;
-  }
-
-  const { error: profileDeleteErr } = await sb
-    .from("profiles")
-    .delete()
-    .eq("id", userId);
-
-  if(profileDeleteErr){
-    window.showToast?.("个人资料删除失败：" + profileDeleteErr.message, "清理失败", "error");
+  if(purgeErr){
+    window.showToast?.("数据库清理失败：" + purgeErr.message, "清理失败", "error");
     return false;
   }
 
   return true;
+}
+
+function getStoragePathFromPublicUrl(url, bucket){
+  if(!url || !bucket) return "";
+
+  const marker = "/storage/v1/object/public/" + bucket + "/";
+  const index = url.indexOf(marker);
+
+  if(index === -1) return "";
+
+  return decodeURIComponent(url.slice(index + marker.length));
 }
 
 function getStoragePathFromPublicUrl(url){
