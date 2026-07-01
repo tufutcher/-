@@ -533,6 +533,8 @@ function openAdminCheckinManager(state){
   const profiles = state.profiles || [];
 
   let selectedUserId = "all";
+  let selectedDate = "";
+  let searchText = "";
 
   const modal = document.createElement("div");
   modal.id = "admin-checkin-manager";
@@ -543,10 +545,26 @@ function openAdminCheckinManager(state){
     return profile?.username || "匿名";
   }
 
+  function getFilteredCheckins(){
+    return checkins.filter(item => {
+      const imgs = item.checkin_images || [];
+      const username = item.username || userNameById(item.user_id);
+      const note = item.note || "";
+      const day = dateKey(item.created_at);
+
+      const matchUser = selectedUserId === "all" || item.user_id === selectedUserId;
+      const matchDate = !selectedDate || day === selectedDate;
+      const matchSearch = !searchText ||
+        username.toLowerCase().includes(searchText.toLowerCase()) ||
+        note.toLowerCase().includes(searchText.toLowerCase()) ||
+        imgs.some(img => (img.tags || []).join(" ").toLowerCase().includes(searchText.toLowerCase()));
+
+      return matchUser && matchDate && matchSearch;
+    });
+  }
+
   function renderRows(){
-    const filtered = selectedUserId === "all"
-      ? checkins
-      : checkins.filter(item => item.user_id === selectedUserId);
+    const filtered = getFilteredCheckins();
 
     const rowsHtml = filtered.map(item => {
       const imgs = item.checkin_images || [];
@@ -577,9 +595,7 @@ function openAdminCheckinManager(state){
     const count = modal.querySelector("#admin-checkin-count");
 
     if(count){
-      count.textContent = selectedUserId === "all"
-        ? `共 ${checkins.length} 次打卡`
-        : `筛选后 ${filtered.length} 次打卡`;
+      count.textContent = `筛选后 ${filtered.length} / 全部 ${checkins.length} 次打卡`;
     }
 
     if(list){
@@ -625,15 +641,15 @@ function openAdminCheckinManager(state){
         }
 
         const freshCheckins = await loadCheckins(sb);
-        
+
         checkins = [...freshCheckins];
-        
+
         if(window.setState){
           window.setState({ checkins: freshCheckins });
         }
-        
+
         renderRows();
-        
+
         window.showToast?.("这次打卡已经删除。", "已删除", "success");
       };
     });
@@ -656,10 +672,23 @@ function openAdminCheckinManager(state){
           <div class="detail-author">批量管理打卡</div>
           <div class="detail-date" id="admin-checkin-count">共 ${checkins.length} 次打卡</div>
         </div>
+      </div>
 
+      <div class="admin-filter-bar">
         <select id="admin-user-filter" class="admin-user-filter">
           ${userOptions}
         </select>
+
+        <input type="date" id="admin-date-filter" class="admin-date-filter">
+
+        <input
+          type="search"
+          id="admin-search-filter"
+          class="admin-search-filter"
+          placeholder="搜用户名 / 感想 / 标签"
+        >
+
+        <button id="admin-clear-filter" class="secondary" type="button">清空</button>
       </div>
 
       <div class="admin-checkin-list"></div>
@@ -678,10 +707,42 @@ function openAdminCheckinManager(state){
     modal.remove();
   };
 
-  const filter = document.getElementById("admin-user-filter");
-  if(filter){
-    filter.onchange = () => {
-      selectedUserId = filter.value;
+  const userFilter = document.getElementById("admin-user-filter");
+  const dateFilter = document.getElementById("admin-date-filter");
+  const searchFilter = document.getElementById("admin-search-filter");
+  const clearBtn = document.getElementById("admin-clear-filter");
+
+  if(userFilter){
+    userFilter.onchange = () => {
+      selectedUserId = userFilter.value;
+      renderRows();
+    };
+  }
+
+  if(dateFilter){
+    dateFilter.onchange = () => {
+      selectedDate = dateFilter.value;
+      renderRows();
+    };
+  }
+
+  if(searchFilter){
+    searchFilter.oninput = () => {
+      searchText = searchFilter.value.trim();
+      renderRows();
+    };
+  }
+
+  if(clearBtn){
+    clearBtn.onclick = () => {
+      selectedUserId = "all";
+      selectedDate = "";
+      searchText = "";
+
+      if(userFilter) userFilter.value = "all";
+      if(dateFilter) dateFilter.value = "";
+      if(searchFilter) searchFilter.value = "";
+
       renderRows();
     };
   }
