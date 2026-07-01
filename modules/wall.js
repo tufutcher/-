@@ -243,7 +243,6 @@ function openDetail(item){
 
   modal.innerHTML = `
     <div class="detail-viewer-card">
-      <button id="detail-close" class="detail-x" type="button">×</button>
 
       <div class="detail-viewer-head">
         <button class="detail-author-card" data-profile-user-id="${item.user_id}" type="button">
@@ -274,8 +273,6 @@ function openDetail(item){
   modal.onclick = (e) => {
     if(e.target === modal) modal.remove();
   };
-
-  document.getElementById("detail-close").onclick = () => modal.remove();
 
   const authorCard = modal.querySelector(".detail-author-card");
   if(authorCard){
