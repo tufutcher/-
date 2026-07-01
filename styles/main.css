@@ -791,7 +791,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   border-radius:18px;
   background:#f6f7f8;
   align-content:start;
-  scrollbar-width:thin;
 }
 
 .gallery-board-fixed{
@@ -804,27 +803,30 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-tile{
   position:relative;
-  display:block;
-  width:100%;
+  display:block !important;
+  width:100% !important;
   aspect-ratio:1 / 1;
-  border:none;
-  padding:0;
-  margin:0;
+  min-height:0;
+  border:none !important;
+  padding:0 !important;
+  margin:0 !important;
   border-radius:10px;
   overflow:hidden;
-  background:#fff;
+  background:#fff !important;
   cursor:pointer;
-  box-shadow:none;
+  box-shadow:none !important;
   font-size:0;
+  line-height:0;
+  color:transparent;
 }
 
 .gallery-tile img{
   position:absolute;
   inset:0;
-  width:100%;
-  height:100%;
-  max-width:none;
-  max-height:none;
+  width:100% !important;
+  height:100% !important;
+  max-width:none !important;
+  max-height:none !important;
   object-fit:cover;
   display:block;
   background:#fafafa;
@@ -860,7 +862,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   opacity:1;
 }
 
-/* 中等宽度：格子略小，自动多列 */
 @media (max-width:760px){
   .gallery-board{
     grid-template-columns:repeat(auto-fill, minmax(64px, 1fr));
@@ -878,7 +879,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 }
 
-/* 手机：通常 5-6 列 */
 @media (max-width:620px){
   .archive-top{
     flex-direction:column;
@@ -913,7 +913,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 }
 
-/* 很窄手机：避免缩略图小到看不清 */
 @media (max-width:390px){
   .gallery-board{
     grid-template-columns:repeat(auto-fill, minmax(62px, 1fr));
