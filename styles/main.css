@@ -927,44 +927,52 @@ button.cal-cell:disabled{
 }
 
 /* =========================
-   编辑打卡：新版作品编辑器
+   编辑打卡：发布页同款编辑器
 ========================= */
 
-.edit-viewer-card{
-  width:min(820px, 96vw);
+.edit-checkin-card{
+  width:min(720px, 96vw);
 }
 
-.edit-art-list{
+.edit-checkin-body{
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:14px;
 }
 
-.edit-art-block{
-  border-radius:22px;
-  background:#f7f8f9;
-  padding:12px;
+.edit-thumb-grid{
+  margin:4px 0 2px;
 }
 
-.edit-art-block > img{
+.edit-thumb{
+  overflow:hidden;
+}
+
+.edit-selected-preview{
   width:100%;
-  max-width:100%;
-  max-height:58vh;
+  max-height:48vh;
+  border-radius:22px;
+  overflow:hidden;
+  background:#f7f8f9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.edit-selected-preview img{
+  width:100%;
+  max-height:48vh;
   object-fit:contain;
   display:block;
-  border-radius:18px;
-  background:#fff;
+  background:#f7f8f9;
 }
 
-.edit-tag-box{
-  margin-top:12px;
-  padding:12px;
-  border-radius:18px;
-  background:#fff;
+.edit-tag-panel{
+  margin:0;
 }
 
 .edit-note-box{
-  margin-top:18px;
+  margin-top:0;
 }
 
 .edit-note-box label{
@@ -989,6 +997,20 @@ button.cal-cell:disabled{
   outline:none;
 }
 
+.edit-actions{
+  margin-top:0;
+}
+
+@media (max-width:620px){
+  .edit-selected-preview{
+    max-height:36vh;
+    border-radius:18px;
+  }
+
+  .edit-selected-preview img{
+    max-height:36vh;
+  }
+}
 
 /* =========================
    月历当天：瀑布流画廊
