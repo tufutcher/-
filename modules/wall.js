@@ -105,10 +105,11 @@ function personCardHtml(group){
     .slice(0, 4)
     .map(item => {
       const img = item.checkin_images[0];
+
       return `
-        <div class="person-thumb" data-id="${item.id}">
+        <button class="person-thumb" data-id="${item.id}" type="button">
           <img src="${img.image_url}">
-        </div>
+        </button>
       `;
     })
     .join("");
@@ -119,17 +120,19 @@ function personCardHtml(group){
         ${avatarHtml(profile, group.name)}
         <div class="person-meta">
           <div class="person-name">${group.name || "匿名"}</div>
-          <div class="person-badges">${badgesHtml(badges)}</div>
+          <div class="person-count">${group.items.length} 次打卡</div>
         </div>
+
+        <button class="person-profile-btn" data-user-id="${group.userId}" title="查看主页">
+          →
+        </button>
       </div>
 
       <div class="person-thumbs">
-        ${thumbs || `<div class="person-empty">还没有缩略图</div>`}
+        ${thumbs || `<div class="person-empty">还没有作品</div>`}
       </div>
-      
-      <button class="person-profile-btn" data-user-id="${group.userId}">
-        查看主页
-      </button>
+
+      <div class="person-badges">${badgesHtml(badges)}</div>
     </div>
   `;
 }
@@ -220,35 +223,52 @@ function openDetail(item){
 
   const modal = document.createElement("div");
   modal.id = "detail-modal";
-  modal.className = "modal-bg";
+  modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
   const user = window.__user;
   const isOwner = user && user.id === item.user_id;
 
-  modal.innerHTML = `
-    <div class="modal-card">
-      <div class="who-row"><b>${item.username}</b><span class="when">${fmtDate(item.created_at)}</span></div>
-
-      ${imgs.map(img => `
-        <div class="detail-img-block">
-          <img src="${img.image_url}">
-          ${(img.tags && img.tags.length) ? `
-            <div class="tags detail-tags">
-              ${img.tags.map(t => `<span>#${t}</span>`).join("")}
-            </div>
-          ` : ""}
+  const imagesHtml = imgs.map(img => {
+    const tagsHtml = img.tags?.length
+      ? `
+        <div class="tags detail-tags">
+          ${img.tags.map(t => `<span>#${t}</span>`).join("")}
         </div>
-      `).join("")}
+      `
+      : "";
 
-      ${item.note ? `<div class="note" style="margin-top:10px;">${item.note}</div>` : ""}
+    return `
+      <div class="detail-art-block">
+        <img src="${img.image_url}">
+        ${tagsHtml}
+      </div>
+    `;
+  }).join("");
+
+  modal.innerHTML = `
+    <div class="detail-viewer-card">
+      <button id="detail-close" class="detail-x" type="button">×</button>
+
+      <div class="detail-viewer-head">
+        <div>
+          <div class="detail-author">${item.username || "匿名"}</div>
+          <div class="detail-date">${fmtDate(item.created_at)}</div>
+        </div>
+      </div>
+
+      <div class="detail-art-list">
+        ${imagesHtml}
+      </div>
+
+      ${item.note ? `<div class="note detail-note">${item.note}</div>` : ""}
 
       ${isOwner ? `
-        <button id="detail-edit">编辑</button>
-        <button id="detail-delete" class="danger">删除</button>
+        <div class="detail-actions">
+          <button id="detail-edit">编辑</button>
+          <button id="detail-delete" class="danger">删除</button>
+        </div>
       ` : ""}
-
-      <button id="detail-close" class="secondary">关闭</button>
     </div>
   `;
 
@@ -274,11 +294,12 @@ function openDetail(item){
         cancelText: "取消",
         danger: true
       });
-      
+
       if(!ok) return;
 
       const sb = window.__sb;
       const user = window.__user;
+
       if(!sb || !user){
         window.showToast?.("请先登录后再操作。", "还不能操作", "error");
         return;
@@ -297,6 +318,7 @@ function openDetail(item){
       }
 
       const freshCheckins = await loadCheckins(sb);
+
       if(window.setState){
         window.setState({ checkins: freshCheckins });
       }
