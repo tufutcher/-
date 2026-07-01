@@ -36,19 +36,81 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .topbar{display:flex;gap:8px;padding:4px 0 14px;}
 .topbar button{flex:0 0 auto;padding:8px 16px;}
 
-/* 排序切换 */
-.wall-controls{margin-bottom:12px;}
-.seg{display:inline-flex;border:1px solid #ddd;border-radius:14px;overflow:hidden;background:#fff;}
-.seg span{font-size:12px;padding:6px 14px;cursor:pointer;color:#666;}
-.seg span.on{background:#1a1a1a;color:#fff;}
+/* 打卡墙切换：最新 / 按人分组 */
+.wall-controls{
+  display:flex;
+  justify-content:center;
+  margin:0 0 22px;
+}
+
+.seg{
+  display:inline-flex;
+  gap:4px;
+  padding:5px;
+  border-radius:999px;
+  background:rgba(255,255,255,.48);
+  border:1px solid rgba(0,0,0,.06);
+  box-shadow:0 10px 28px rgba(0,0,0,.045);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+.seg span{
+  position:relative;
+  min-width:78px;
+  padding:8px 12px 10px;
+  border-radius:999px;
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.08em;
+  cursor:pointer;
+  color:rgba(17,17,17,.45);
+  user-select:none;
+}
+
+.seg span.on{
+  background:rgba(255,255,255,.82);
+  color:#111;
+  box-shadow:0 8px 18px rgba(0,0,0,.055);
+}
+
+.seg span.on::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:5px;
+  width:4px;
+  height:4px;
+  border-radius:50%;
+  background:#0CC0DF;
+  transform:translateX(-50%);
+}
+@media (max-width:620px){
+  .wall-hero{
+    padding:28px 4px 22px;
+  }
+
+  .wall-hero h1{
+    font-size:26px;
+    letter-spacing:.1em;
+    gap:7px;
+  }
+
+  .seg span{
+    min-width:72px;
+    font-size:11px;
+  }
+}
 
 /* =========================
    打卡墙：拼图瀑布流
 ========================= */
 
-/* 顶部：只留一行标题 */
+/* 打卡墙顶部：居中标题 */
 .wall-hero{
-  padding:30px 4px 18px;
+  padding:34px 4px 26px;
+  text-align:center;
 }
 
 .wall-hero .brand-kicker,
@@ -57,25 +119,31 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 .wall-hero h1{
-  margin:0;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
   font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif;
-  font-size:44px;
-  line-height:.96;
-  letter-spacing:-.09em;
-  font-weight:950;
+  font-size:30px;
+  line-height:1.18;
+  letter-spacing:.12em;
+  font-weight:780;
   color:#111;
+}
+
+.wall-hero h1 span{
+  display:block;
 }
 
 .wall-hero h1::after{
   content:"";
-  display:inline-block;
-  width:7px;
-  height:7px;
-  margin-left:10px;
-  border-radius:50%;
+  width:26px;
+  height:3px;
+  margin-top:12px;
+  border-radius:999px;
   background:#0CC0DF;
-  vertical-align:middle;
-  transform:translateY(-3px);
+  opacity:.9;
 }
 
 /* 瀑布流：图片按原始比例排列 */
