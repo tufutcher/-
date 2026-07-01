@@ -15,22 +15,10 @@ function cardHtml(item){
   const cover = imgs[0];
   const extra = imgs.length > 1 ? `<div class="extra-count">+${imgs.length - 1}</div>` : "";
 
-  const profile = getProfile(item.user_id, item.username);
-  const avatar = profile?.avatar_url
-    ? `<img src="${profile.avatar_url}">`
-    : `<span>${(item.username || "匿").trim().slice(0, 1) || "匿"}</span>`;
-
   return `
     <div class="wall-card gallery-card" data-id="${item.id}">
       <div class="wall-card-img-wrap">
         ${cover ? `<img src="${cover.image_url}">` : ""}
-
-        <div class="wall-avatar-chip" title="${item.username || "匿名"}">
-          ${avatar}
-        </div>
-
-        <div class="wall-date-chip">${fmtDate(item.created_at)}</div>
-
         ${extra}
       </div>
     </div>
