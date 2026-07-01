@@ -682,80 +682,97 @@ function openCalendarDayModal(dayKey, mine, readonly){
 
   const modal = document.createElement("div");
   modal.id = "calendar-day-modal";
-  modal.className = "modal-bg";
+  modal.className = "modal-bg detail-viewer-bg";
 
   const totalImages = items.reduce((sum, item) => {
     return sum + (item.checkin_images?.length || 0);
   }, 0);
 
-  let bodyHtml = "";
-
-  items.forEach(item => {
+  const bodyHtml = items.map(item => {
     const imgs = item.checkin_images || [];
+    const cover = imgs[0];
 
-    let imgsHtml = "";
-    imgs.forEach(img => {
-      const tagsHtml = img.tags?.length
-        ? '<div class="tags">' + img.tags.map(t => "#" + t).join(" ") + '</div>'
-        : "";
+    const thumbsHtml = imgs.slice(0, 6).map(img => {
+      return '<img src="' + img.image_url + '">';
+    }).join("");
 
-      imgsHtml +=
-        '<div class="detail-img-block">' +
-          '<img src="' + img.image_url + '">' +
-          tagsHtml +
-        '</div>';
-    });
+    const actionText = readonly ? "查看" : "编辑";
 
-    const noteHtml = item.note
-      ? '<div class="note" style="margin-top:10px;">' + item.note + '</div>'
-      : "";
-
-    const actionHtml = readonly
-      ? ""
-      : '<button class="secondary calendar-edit-btn" data-checkin-id="' + item.id + '">编辑这次打卡</button>';
-
-    bodyHtml +=
-      '<div class="calendar-day-item">' +
-        '<div class="who-row">' +
-          '<b>' + fmtDate(item.created_at) + '</b>' +
-          '<span class="when">' + imgs.length + ' 张</span>' +
+    return (
+      '<div class="calendar-modern-item" data-checkin-id="' + item.id + '">' +
+        '<div class="calendar-modern-cover">' +
+          (cover ? '<img src="' + cover.image_url + '">' : '') +
         '</div>' +
-        imgsHtml +
-        noteHtml +
-        actionHtml +
-      '</div>';
-  });
+
+        '<div class="calendar-modern-info">' +
+          '<div class="calendar-modern-title">' + fmtDate(item.created_at) + '</div>' +
+          '<div class="calendar-modern-sub">' + imgs.length + ' 张作品</div>' +
+
+          '<div class="calendar-modern-thumbs">' +
+            thumbsHtml +
+          '</div>' +
+
+          (item.note ? '<div class="calendar-modern-note">' + item.note + '</div>' : '') +
+
+          '<button class="calendar-open-btn" data-checkin-id="' + item.id + '">' + actionText + '</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
 
   modal.innerHTML =
-    '<div class="modal-card calendar-day-card">' +
-      '<div class="who-row">' +
-        '<b>' + fmtDate(items[0].created_at) + '</b>' +
-        '<span class="when">' + items.length + ' 次打卡 / ' + totalImages + ' 张</span>' +
+    '<div class="detail-viewer-card calendar-modern-card">' +
+      '<button id="calendar-day-close" class="detail-x" type="button">×</button>' +
+
+      '<div class="detail-viewer-head">' +
+        '<div>' +
+          '<div class="detail-author">' + fmtDate(items[0].created_at) + '</div>' +
+          '<div class="detail-date">' + items.length + ' 次打卡 / ' + totalImages + ' 张作品</div>' +
+        '</div>' +
       '</div>' +
-      bodyHtml +
-      '<button id="calendar-day-close" class="secondary">关闭</button>' +
+
+      '<div class="calendar-modern-list">' +
+        bodyHtml +
+      '</div>' +
     '</div>';
 
   document.body.appendChild(modal);
 
   modal.onclick = (e) => {
-    if(e.target === modal){
-      modal.remove();
-    }
+    if(e.target === modal) modal.remove();
   };
 
-  const closeBtn = document.getElementById("calendar-day-close");
-  if(closeBtn){
-    closeBtn.onclick = () => modal.remove();
-  }
+  document.getElementById("calendar-day-close").onclick = () => modal.remove();
 
-  modal.querySelectorAll(".calendar-edit-btn").forEach(btn => {
-    btn.onclick = () => {
-      const item = mine.find(x => x.id === btn.dataset.checkinId);
+  modal.querySelectorAll(".calendar-open-btn").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+
+      const item = items.find(x => x.id === btn.dataset.checkinId);
       if(!item) return;
 
       modal.remove();
-      openEditModal(item);
+
+      if(readonly){
+        openReadOnlyCheckinDetail(item);
+      } else {
+        openEditModal(item);
+      }
+    };
+  });
+
+  modal.querySelectorAll(".calendar-modern-item").forEach(card => {
+    card.onclick = () => {
+      const item = items.find(x => x.id === card.dataset.checkinId);
+      if(!item) return;
+
+      modal.remove();
+
+      if(readonly){
+        openReadOnlyCheckinDetail(item);
+      } else {
+        openEditModal(item);
+      }
     };
   });
 }
@@ -766,50 +783,52 @@ function openReadOnlyCheckinDetail(item){
 
   const modal = document.createElement("div");
   modal.id = "readonly-detail-modal";
-  modal.className = "modal-bg";
+  modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
-  let imgsHtml = "";
 
-  imgs.forEach(img => {
-    const tagsHtml = (img.tags && img.tags.length)
-      ? '<div class="tags">' + img.tags.map(t => "#" + t).join(" ") + '</div>'
+  const imagesHtml = imgs.map(img => {
+    const tagsHtml = img.tags?.length
+      ? (
+        '<div class="tags detail-tags">' +
+          img.tags.map(t => '<span>#' + t + '</span>').join("") +
+        '</div>'
+      )
       : "";
 
-    imgsHtml +=
-      '<div class="detail-img-block">' +
+    return (
+      '<div class="detail-art-block">' +
         '<img src="' + img.image_url + '">' +
         tagsHtml +
-      '</div>';
-  });
-
-  const noteHtml = item.note
-    ? '<div class="note" style="margin-top:10px;">' + item.note + '</div>'
-    : "";
+      '</div>'
+    );
+  }).join("");
 
   modal.innerHTML =
-    '<div class="modal-card">' +
-      '<div class="who-row">' +
-        '<b>' + (item.username || "匿名") + '</b>' +
-        '<span class="when">' + fmtDate(item.created_at) + '</span>' +
+    '<div class="detail-viewer-card">' +
+      '<button id="readonly-detail-close" class="detail-x" type="button">×</button>' +
+
+      '<div class="detail-viewer-head">' +
+        '<div>' +
+          '<div class="detail-author">' + (item.username || "匿名") + '</div>' +
+          '<div class="detail-date">' + fmtDate(item.created_at) + '</div>' +
+        '</div>' +
       '</div>' +
-      imgsHtml +
-      noteHtml +
-      '<button id="readonly-detail-close" class="secondary">关闭</button>' +
+
+      '<div class="detail-art-list">' +
+        imagesHtml +
+      '</div>' +
+
+      (item.note ? '<div class="note detail-note">' + item.note + '</div>' : '') +
     '</div>';
 
   document.body.appendChild(modal);
 
   modal.onclick = (e) => {
-    if(e.target === modal){
-      modal.remove();
-    }
+    if(e.target === modal) modal.remove();
   };
 
-  const closeBtn = document.getElementById("readonly-detail-close");
-  if(closeBtn){
-    closeBtn.onclick = () => modal.remove();
-  }
+  document.getElementById("readonly-detail-close").onclick = () => modal.remove();
 }
 
 function bindProfileEvents(state, mine, options = {}){
@@ -943,69 +962,77 @@ export function openEditModal(item){
 
   const modal = document.createElement("div");
   modal.id = "edit-modal";
-  modal.className = "modal-bg";
+  modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
-  let imgsHtml = "";
+  const localTags = imgs.map(img => [...(img.tags || [])]);
 
-  imgs.forEach((img, idx) => {
-    let groupsHtml = "";
+  function renderTagGroups(imgIndex){
+    return Object.keys(TAG_CATEGORIES).map(cat => {
+      const opts = TAG_CATEGORIES[cat].map(tag => {
+        const onClass = localTags[imgIndex].includes(tag) ? " on" : "";
 
-    Object.keys(TAG_CATEGORIES).forEach(cat => {
-      let optsHtml = "";
+        return (
+          '<span class="preset-tag' + onClass + '" data-img="' + imgIndex + '" data-tag="' + tag + '">' +
+            tag +
+          '</span>'
+        );
+      }).join("");
 
-      TAG_CATEGORIES[cat].forEach(t => {
-        const onClass = (img.tags || []).includes(t) ? " on" : "";
+      return (
+        '<div class="ci-tag-row">' +
+          '<div class="ci-tag-label">' + cat + '</div>' +
+          '<div class="ci-tag-options">' + opts + '</div>' +
+        '</div>'
+      );
+    }).join("");
+  }
 
-        optsHtml +=
-          '<span class="preset-tag' + onClass + '" data-img="' + idx + '" data-tag="' + t + '">' +
-            t +
-          '</span>';
-      });
-
-      groupsHtml +=
-        '<div class="tag-group">' +
-          '<div class="glabel">' + cat + '</div>' +
-          '<div class="preset-tags">' + optsHtml + '</div>' +
-        '</div>';
-    });
-
-    imgsHtml +=
-      '<div class="img-card">' +
+  const imagesHtml = imgs.map((img, idx) => {
+    return (
+      '<div class="edit-art-block">' +
         '<img src="' + img.image_url + '">' +
-        '<div class="img-card-body">' + groupsHtml + '</div>' +
-      '</div>';
-  });
+        '<div class="edit-tag-box">' +
+          '<div class="ci-section-title">第 ' + (idx + 1) + ' 张标签</div>' +
+          renderTagGroups(idx) +
+        '</div>' +
+      '</div>'
+    );
+  }).join("");
 
   modal.innerHTML =
-    '<div class="modal-card">' +
-      '<h3>编辑这次打卡</h3>' +
-      imgsHtml +
-      '<label>感想</label>' +
-      '<textarea id="edit-note">' + (item.note || "") + '</textarea>' +
-      '<button id="edit-save">保存修改</button>' +
-      '<button id="edit-delete" class="danger">删除这次打卡</button>' +
-      '<button id="edit-cancel" class="secondary">取消</button>' +
+    '<div class="detail-viewer-card edit-viewer-card">' +
+      '<button id="edit-close" class="detail-x" type="button">×</button>' +
+
+      '<div class="detail-viewer-head">' +
+        '<div>' +
+          '<div class="detail-author">编辑这次打卡</div>' +
+          '<div class="detail-date">' + fmtDate(item.created_at) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="edit-art-list">' +
+        imagesHtml +
+      '</div>' +
+
+      '<div class="edit-note-box">' +
+        '<label>感想</label>' +
+        '<textarea id="edit-note">' + (item.note || "") + '</textarea>' +
+      '</div>' +
+
+      '<div class="detail-actions">' +
+        '<button id="edit-save">保存修改</button>' +
+        '<button id="edit-delete" class="danger">删除</button>' +
+      '</div>' +
     '</div>';
 
   document.body.appendChild(modal);
 
-  modal.addEventListener("click", (e) => {
-    if(e.target === modal){
-      modal.remove();
-    }
-  });
+  modal.onclick = (e) => {
+    if(e.target === modal) modal.remove();
+  };
 
-  const cancelBtn = modal.querySelector("#edit-cancel");
-  if(cancelBtn){
-    cancelBtn.onclick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      modal.remove();
-    };
-  }
-
-  const localTags = imgs.map(img => [...(img.tags || [])]);
+  document.getElementById("edit-close").onclick = () => modal.remove();
 
   modal.querySelectorAll(".preset-tag").forEach(btn => {
     btn.onclick = () => {
@@ -1022,78 +1049,74 @@ export function openEditModal(item){
     };
   });
 
-  const saveBtn = modal.querySelector("#edit-save");
-  if(saveBtn){
-    saveBtn.onclick = async () => {
-      const sb = window.__sb;
-      const noteInput = modal.querySelector("#edit-note");
-      const note = noteInput ? noteInput.value.trim() : "";
+  const saveBtn = document.getElementById("edit-save");
+  saveBtn.onclick = async () => {
+    const sb = window.__sb;
+    const noteInput = document.getElementById("edit-note");
+    const note = noteInput ? noteInput.value.trim() : "";
 
-      if(!sb){
-        window.showToast?.("数据库连接失败，请刷新后重试。", "保存失败", "error");
-        return;
-      }
+    if(!sb){
+      window.showToast?.("数据库连接失败，请刷新后重试。", "保存失败", "error");
+      return;
+    }
 
-      saveBtn.disabled = true;
-      saveBtn.textContent = "保存中...";
+    saveBtn.disabled = true;
+    saveBtn.textContent = "保存中...";
 
-      await updateCheckinNote(sb, item.id, note);
+    await updateCheckinNote(sb, item.id, note);
 
-      for(let i = 0; i < imgs.length; i++){
-        await updateImageTags(sb, imgs[i].id, localTags[i]);
-      }
+    for(let i = 0; i < imgs.length; i++){
+      await updateImageTags(sb, imgs[i].id, localTags[i]);
+    }
 
-      const freshCheckins = await loadCheckins(sb);
-      
-      if(window.setState){
-        window.setState({ checkins: freshCheckins });
-      }
-      
-      modal.remove();
-      window.showToast?.("这次打卡已经更新。", "保存成功", "success");
-    };
-  }
+    const freshCheckins = await loadCheckins(sb);
 
-  const deleteBtn = modal.querySelector("#edit-delete");
-  if(deleteBtn){
-    deleteBtn.onclick = async () => {
-      const ok = await window.showConfirm?.({
-        title: "删除这次打卡？",
-        message: "图片也会一起删除。这个动作不能撤回。",
-        confirmText: "删除",
-        cancelText: "取消",
-        danger: true
-      });
+    if(window.setState){
+      window.setState({ checkins: freshCheckins });
+    }
 
-if(!ok) return;
+    modal.remove();
+    window.showToast?.("这次打卡已经更新。", "保存成功", "success");
+  };
 
-      const sb = window.__sb;
-      const user = window.__user;
+  const deleteBtn = document.getElementById("edit-delete");
+  deleteBtn.onclick = async () => {
+    const ok = await window.showConfirm?.({
+      title: "删除这次打卡？",
+      message: "图片也会一起删除。这个动作不能撤回。",
+      confirmText: "删除",
+      cancelText: "取消",
+      danger: true
+    });
 
-      if(!sb || !user){
-        window.showToast?.("请先登录后再操作。", "还不能操作", "error");
-        return;
-      }
+    if(!ok) return;
 
-      deleteBtn.disabled = true;
-      deleteBtn.textContent = "删除中...";
+    const sb = window.__sb;
+    const user = window.__user;
 
-      const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
+    if(!sb || !user){
+      window.showToast?.("请先登录后再操作。", "还不能操作", "error");
+      return;
+    }
 
-      if(!deleted){
-        deleteBtn.disabled = false;
-        deleteBtn.textContent = "删除这次打卡";
-        return;
-      }
+    deleteBtn.disabled = true;
+    deleteBtn.textContent = "删除中...";
 
-      const freshCheckins = await loadCheckins(sb);
+    const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
 
-      if(window.setState){
-        window.setState({ checkins: freshCheckins });
-      }
+    if(!deleted){
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = "删除";
+      return;
+    }
 
-      modal.remove();
-      window.showToast?.("这次打卡已经删除。", "已删除", "success");
-    };
-  }
+    const freshCheckins = await loadCheckins(sb);
+
+    if(window.setState){
+      window.setState({ checkins: freshCheckins });
+    }
+
+    modal.remove();
+    window.showToast?.("这次打卡已经删除。", "已删除", "success");
+  };
 }
