@@ -2150,3 +2150,56 @@ button.cal-cell:disabled{
   outline:none;
 }
 
+/* 详情页作者头像 */
+.detail-author-card{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0;
+  border:none;
+  background:transparent;
+  color:inherit;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:none !important;
+}
+
+.detail-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  flex:0 0 auto;
+  background:#eee;
+}
+
+.detail-avatar-fallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  color:#fff;
+  font-size:17px;
+  font-weight:850;
+}
+
+.readonly-profile-card{
+  width:min(920px, 96vw);
+  padding:18px;
+}
+
+.readonly-profile-content{
+  padding-top:8px;
+}
+
+.person-card{
+  cursor:pointer;
+}
+
+.person-thumb{
+  cursor:pointer;
+}
+
+.person-profile-btn{
+  display:none !important;
+}
