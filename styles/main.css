@@ -217,35 +217,31 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   justify-content:center;
   box-shadow:0 12px 30px rgba(0,0,0,.22);
 }
-
-/* 打卡墙顶部品牌区 */
+/* 打卡墙顶部：一行标题 */
 .wall-hero{
-  padding:30px 4px 22px;
-}
-
-.brand-kicker{
-  font-size:11px;
-  letter-spacing:.18em;
-  color:#0CC0DF;
-  font-weight:700;
-  margin-bottom:8px;
+  padding:28px 4px 18px;
 }
 
 .wall-hero h1{
   margin:0;
-  font-size:34px;
-  line-height:1.05;
-  letter-spacing:-.04em;
-  font-weight:800;
+  font-size:38px;
+  line-height:1;
+  letter-spacing:-.075em;
+  font-weight:900;
+  color:#111;
 }
 
-.wall-hero p{
-  margin:12px 0 0;
-  color:#777;
-  font-size:13px;
-  line-height:1.7;
+.wall-hero h1::after{
+  content:"";
+  display:inline-block;
+  width:8px;
+  height:8px;
+  margin-left:10px;
+  border-radius:50%;
+  background:#0CC0DF;
+  vertical-align:middle;
+  transform:translateY(-2px);
 }
-
 /* 按人分组：成员卡片 */
 .person-grid{
   display:grid;
