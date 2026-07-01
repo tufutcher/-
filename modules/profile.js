@@ -548,7 +548,11 @@ export function renderProfile(state, options = {}){
 
   const topTags = Object.entries(tagCount).sort((a,b) => b[1] - a[1]).slice(0,6);
   const avatarUrl = profile?.avatar_url;
-  const username = profile?.username || "匿名";
+  const avatarLetter = username.trim().slice(0, 1) || "匿";
+  
+  const profileAvatarHtml = avatarUrl
+    ? '<img class="avatar-lg" id="avatar-img" src="' + avatarUrl + '" style="background:transparent;">'
+    : '<div class="avatar-lg profile-avatar-fallback" id="avatar-img">' + avatarLetter + '</div>';
 
   const subtitle = readonly
     ? "留下了 " + mine.length + " 次打卡，" + stats.totalImages + " 张作品。"
@@ -580,7 +584,7 @@ export function renderProfile(state, options = {}){
     '<div class="card profile-hero-card ' + (readonly ? 'readonly-profile' : '') + '">' +
       '<div class="profile-hero-left">' +
         '<button id="avatar-trigger" class="avatar-trigger" type="button">' +
-          '<img class="avatar-lg" id="avatar-img" src="' + (avatarUrl || '') + '" style="background:' + (avatarUrl ? 'transparent' : '#ddd') + ';">' +
+          profileAvatarHtml +
         '</button>' +
 
         '<div class="profile-copy">' +
