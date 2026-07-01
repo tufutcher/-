@@ -1908,3 +1908,17 @@ button.cal-cell:disabled{
   transform:rotate(-45deg);
   transform-origin:center;
 }
+@media (max-width:720px){
+  .streak-corner{
+    left:auto;
+    right:0;
+    border-right:none;
+    border-left:118px solid transparent;
+  }
+
+  .streak-corner::after{
+    left:auto;
+    right:12px;
+    transform:rotate(45deg);
+  }
+}
