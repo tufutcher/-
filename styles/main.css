@@ -1888,37 +1888,60 @@ button.cal-cell:disabled{
   z-index:4;
   width:0;
   height:0;
-  border-top:118px solid #111;
-  border-right:118px solid transparent;
+  border-top:126px solid #111;
+  border-right:126px solid transparent;
   pointer-events:none;
 }
 
-.streak-corner::after{
-  content:attr(data-text);
+.streak-corner span,
+.streak-corner b{
   position:absolute;
-  left:12px;
-  top:-92px;
-  width:90px;
+  display:block;
+  width:82px;
   color:#fff;
-  font-size:12px;
-  font-weight:900;
-  letter-spacing:.02em;
-  line-height:1.2;
   text-align:center;
+  line-height:1.15;
   transform:rotate(-45deg);
   transform-origin:center;
+}
+
+.streak-corner span{
+  left:7px;
+  top:-96px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+}
+
+.streak-corner b{
+  left:16px;
+  top:-78px;
+  font-size:18px;
+  font-weight:950;
+  letter-spacing:-.04em;
 }
 @media (max-width:720px){
   .streak-corner{
     left:auto;
     right:0;
     border-right:none;
-    border-left:118px solid transparent;
+    border-left:126px solid transparent;
   }
 
-  .streak-corner::after{
-    left:auto;
-    right:12px;
+  .streak-corner span,
+  .streak-corner b{
     transform:rotate(45deg);
+  }
+
+  .streak-corner span{
+    left:auto;
+    right:7px;
+    top:-96px;
+  }
+
+  .streak-corner b{
+    left:auto;
+    right:16px;
+    top:-78px;
   }
 }
