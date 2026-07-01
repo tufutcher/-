@@ -107,43 +107,19 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
    打卡墙：拼图瀑布流
 ========================= */
 
-/* 打卡墙顶部：居中标题 */
-.wall-hero{
-  padding:34px 4px 26px;
-  text-align:center;
-}
-
-.wall-hero .brand-kicker,
-.wall-hero p{
-  display:none;
-}
-
-.wall-hero h1{
-  margin:0 auto;
+/* 打卡墙顶部 Logo */
+.wall-logo-hero{
+  padding:34px 4px 24px;
   display:flex;
-  flex-direction:column;
+  justify-content:center;
   align-items:center;
-  gap:8px;
-  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif;
-  font-size:30px;
-  line-height:1.18;
-  letter-spacing:.12em;
-  font-weight:780;
-  color:#111;
 }
 
-.wall-hero h1 span{
+.wall-logo{
   display:block;
-}
-
-.wall-hero h1::after{
-  content:"";
-  width:26px;
-  height:3px;
-  margin-top:12px;
-  border-radius:999px;
-  background:#0CC0DF;
-  opacity:.9;
+  width:min(360px, 82vw);
+  height:auto;
+  object-fit:contain;
 }
 
 /* 瀑布流：图片按原始比例排列 */
@@ -234,6 +210,12 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     background:transparent;
     box-shadow:none;
     cursor:pointer;
+  }
+  .wall-logo-hero{
+    padding:28px 4px 20px;
+  }
+  .wall-logo{
+    width:min(300px, 82vw);
   }
 }
 
