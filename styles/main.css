@@ -1658,10 +1658,6 @@ button.cal-cell:disabled{
   opacity:0;
   cursor:pointer;
 }
-/* 选图后隐藏顶部上传入口，但保留功能给右侧加号 */
-.ci-upload-empty.has-images{
-  display:none;
-}
 
 /* 缩略图右侧加号自己的 input */
 .ci-add-thumb{
