@@ -15,9 +15,9 @@ const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
 let profileDataMode = "month";
 
-function fmtDate(ts){
-  const d = new Date(ts);
-  return (d.getMonth()+1) + "月" + d.getDate() + "日";
+function fmtDate(date){
+  const d = new Date(date);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 function getWeekKey(date){
