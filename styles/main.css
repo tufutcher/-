@@ -771,43 +771,16 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   padding-top:16px;
 }
 
-.archive-view-bar{
-  display:flex;
-  justify-content:flex-end;
-  margin-bottom:10px;
-}
-
-
-/* 作品视图切换：画廊 / 打卡 */
-.archive-mode-switch{
-  display:inline-flex;
-  padding:3px;
-  border-radius:999px;
-  background:#f1f2f4;
-  flex:0 0 auto;
-}
-
-.archive-mode-switch span{
-  min-width:42px;
-  padding:5px 10px;
-  border-radius:999px;
-  text-align:center;
-  font-size:11px;
-  color:#888;
-  cursor:pointer;
-  user-select:none;
-}
-
-.archive-mode-switch span.on{
-  background:#111;
-  color:#fff;
-  box-shadow:0 6px 14px rgba(0,0,0,.1);
-}
-
-
-/* 画廊模式：
+/* 个人页作品画廊：
    展示当前范围内上传过的全部图片。
    使用 contain，保证作品完整显示，不裁切。 */
+
+.archive-empty{
+  padding:24px 0;
+  text-align:center;
+  color:#aaa;
+}
+
 .gallery-board{
   column-count:3;
   column-gap:8px;
@@ -871,63 +844,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   opacity:1;
 }
 
-
-/* 打卡模式：
-   按每一次打卡展示。
-   只显示日期、图片数量和封面，不显示标签和感想。 */
-.archive-checkin-list{
-  column-count:2;
-  column-gap:10px;
-}
-
-.archive-checkin-card{
-  display:block;
-  width:100%;
-  break-inside:avoid;
-  margin:0 0 10px;
-  border:none;
-  padding:0;
-  border-radius:16px;
-  overflow:hidden;
-  background:#f7f7f8;
-  color:#111;
-  cursor:pointer;
-  box-shadow:none;
-}
-
-.archive-checkin-cover{
-  background:#f2f3f4;
-}
-
-.archive-checkin-cover img{
-  width:100%;
-  max-width:100%;
-  max-height:340px;
-  height:auto;
-  object-fit:contain;
-  display:block;
-}
-.archive-checkin-meta{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  font-size:12px;
-  color:#777;
-}
-
-.archive-checkin-meta b{
-  color:#111;
-  font-size:12px;
-}
-
-.archive-empty{
-  padding:24px 0;
-  text-align:center;
-  color:#aaa;
-}
-
-
 /* 手机适配 */
 @media (max-width:620px){
   .archive-top{
@@ -943,10 +859,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     flex:1;
   }
 
-  .archive-view-bar{
-    justify-content:flex-start;
-  }
-
   .gallery-board{
     column-count:2;
     column-gap:6px;
@@ -958,15 +870,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   .gallery-date{
     font-size:9px;
     padding:3px 5px;
-  }
-
-  .archive-checkin-list{
-    column-count:2;
-    column-gap:8px;
-  }
-  
-  .archive-checkin-cover img{
-    max-height:260px;
   }
 }
 /* 月历：点击日期查看当天打卡 */
