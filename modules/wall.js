@@ -1,4 +1,4 @@
-import { openEditModal } from "./profile.js";
+import { openEditModal, openReadonlyProfileModal } from "./profile.js";
 import { deleteCheckinWithImages, loadCheckins } from "../api/checkin.js";
 
 let currentMode = "time";
@@ -115,17 +115,13 @@ function personCardHtml(group){
     .join("");
 
   return `
-    <div class="person-card">
+    <div class="person-card" data-profile-user-id="${group.userId}">
       <div class="person-head">
         ${avatarHtml(profile, group.name)}
         <div class="person-meta">
           <div class="person-name">${group.name || "匿名"}</div>
           <div class="person-count">${group.items.length} 次打卡</div>
         </div>
-
-        <button class="person-profile-btn" data-user-id="${group.userId}" title="查看主页">
-          →
-        </button>
       </div>
 
       <div class="person-thumbs">
@@ -185,34 +181,31 @@ export function bindWallEvents(){
 }
 
 function bindCardClicks(){
-  document.querySelectorAll(".wall-card, .person-thumb").forEach(card => {
+  // 普通打卡墙：点作品卡片，打开作品详情
+  document.querySelectorAll(".wall-card").forEach(card => {
     card.onclick = () => {
       const item = allCheckins.find(x => x.id === card.dataset.id);
       if(item) openDetail(item);
     };
   });
 
-  document.querySelectorAll(".person-profile-btn").forEach(btn => {
+  // 按人分组：点作品缩略图，打开作品详情
+  document.querySelectorAll(".person-thumb").forEach(btn => {
     btn.onclick = (e) => {
-      e.preventDefault();
       e.stopPropagation();
 
-      const userId = btn.dataset.userId;
+      const item = allCheckins.find(x => x.id === btn.dataset.id);
+      if(item) openDetail(item);
+    };
+  });
+
+  // 按人分组：点头像、名字、卡片空白区域，打开这个人的主页弹窗
+  document.querySelectorAll(".person-card").forEach(card => {
+    card.onclick = () => {
+      const userId = card.dataset.profileUserId;
       if(!userId) return;
 
-      const currentUser = window.__user;
-
-      if(currentUser && currentUser.id === userId){
-        window.setState?.({
-          view: "me",
-          viewUserId: null
-        });
-      } else {
-        window.setState?.({
-          view: "user",
-          viewUserId: userId
-        });
-      }
+      openReadonlyProfileModal(userId);
     };
   });
 }
@@ -226,6 +219,8 @@ function openDetail(item){
   modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
+  const profile = getProfile(item.user_id, item.username);
+  const username = item.username || profile?.username || "匿名";
   const user = window.__user;
   const isOwner = user && user.id === item.user_id;
 
@@ -251,10 +246,13 @@ function openDetail(item){
       <button id="detail-close" class="detail-x" type="button">×</button>
 
       <div class="detail-viewer-head">
-        <div>
-          <div class="detail-author">${item.username || "匿名"}</div>
-          <div class="detail-date">${fmtDate(item.created_at)}</div>
-        </div>
+        <button class="detail-author-card" data-profile-user-id="${item.user_id}" type="button">
+          ${avatarHtml(profile, username).replace("person-avatar", "detail-avatar")}
+          <div>
+            <div class="detail-author">${username}</div>
+            <div class="detail-date">${fmtDate(item.created_at)}</div>
+          </div>
+        </button>
       </div>
 
       <div class="detail-art-list">
@@ -278,6 +276,17 @@ function openDetail(item){
   };
 
   document.getElementById("detail-close").onclick = () => modal.remove();
+
+  const authorCard = modal.querySelector(".detail-author-card");
+  if(authorCard){
+    authorCard.onclick = () => {
+      const userId = authorCard.dataset.profileUserId;
+      if(!userId) return;
+  
+      modal.remove();
+      openReadonlyProfileModal(userId);
+    };
+  }
 
   if(isOwner){
     document.getElementById("detail-edit").onclick = () => {
