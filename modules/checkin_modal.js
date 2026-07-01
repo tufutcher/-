@@ -120,7 +120,7 @@ function renderImgList(){
   if(!wrap || !tagPanel) return;
   
   if(uploadEmpty){
-    uploadEmpty.classList.toggle("has-images", pendingImages.length > 0);
+    uploadEmpty.hidden = pendingImages.length > 0;
   }
 
   if(!pendingImages.length){
