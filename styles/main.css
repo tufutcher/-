@@ -1916,3 +1916,229 @@ button.cal-cell:disabled{
 #checkin-modal .ci-add-thumb span{
   margin:0 auto;
 }
+/* =========================
+   按人分组：轻作品集卡片
+========================= */
+
+.person-card{
+  background:rgba(255,255,255,.78);
+  border-radius:22px;
+  padding:12px;
+  box-shadow:0 12px 34px rgba(0,0,0,.055);
+  border:1px solid rgba(255,255,255,.65);
+  backdrop-filter:blur(18px);
+}
+
+.person-head{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.person-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  flex:0 0 auto;
+  background:#eee;
+}
+
+.avatar-fallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  color:#fff;
+  font-weight:800;
+  font-size:17px;
+}
+
+.person-meta{
+  flex:1;
+  min-width:0;
+}
+
+.person-name{
+  font-size:15px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.person-count{
+  margin-top:3px;
+  font-size:11px;
+  color:#999;
+}
+
+.person-profile-btn{
+  width:32px;
+  height:32px;
+  min-width:32px;
+  padding:0;
+  border-radius:50%;
+  background:#111;
+  color:#fff;
+  font-size:18px;
+  line-height:1;
+}
+
+.person-thumbs{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+
+.person-thumb{
+  aspect-ratio:1 / 1;
+  border:none;
+  padding:0;
+  border-radius:12px;
+  overflow:hidden;
+  background:#f1f1f1;
+  cursor:pointer;
+}
+
+.person-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.person-badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:10px;
+  font-size:11px;
+}
+
+.person-badges span{
+  background:rgba(12,192,223,.1);
+  color:#087c91;
+  border-radius:999px;
+  padding:4px 7px;
+}
+
+.person-empty{
+  grid-column:1 / -1;
+  padding:18px 0;
+  text-align:center;
+  color:#aaa;
+  font-size:12px;
+  background:#f7f8f9;
+  border-radius:12px;
+}
+
+
+/* =========================
+   打卡详情：作品查看器
+========================= */
+
+.detail-viewer-bg{
+  align-items:center;
+  padding:18px;
+}
+
+.detail-viewer-card{
+  position:relative;
+  width:min(760px, 96vw);
+  max-height:90vh;
+  overflow:auto;
+  border-radius:28px;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 28px 80px rgba(0,0,0,.22);
+  padding:18px;
+}
+
+.detail-x{
+  position:sticky;
+  top:0;
+  float:right;
+  z-index:5;
+  width:34px !important;
+  height:34px !important;
+  min-width:34px;
+  padding:0 !important;
+  border-radius:50%;
+  background:rgba(240,240,240,.92);
+  color:#111;
+  font-size:22px;
+  line-height:1;
+}
+
+.detail-viewer-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+  padding-right:42px;
+}
+
+.detail-author{
+  font-size:18px;
+  font-weight:850;
+  color:#111;
+}
+
+.detail-date{
+  margin-top:3px;
+  font-size:12px;
+  color:#999;
+}
+
+.detail-art-list{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.detail-art-block img{
+  width:100%;
+  max-height:72vh;
+  object-fit:contain;
+  display:block;
+  border-radius:20px;
+  background:#f6f7f8;
+}
+
+.detail-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+
+.detail-tags span{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(12,192,223,.12);
+  color:#087c91;
+  font-size:12px;
+  line-height:1;
+}
+
+.detail-note{
+  margin-top:16px;
+  padding:14px;
+  border-radius:18px;
+  background:#f7f8f9;
+  color:#555;
+  line-height:1.7;
+}
+
+.detail-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.detail-actions button{
+  flex:1;
+}
