@@ -120,7 +120,7 @@ function renderImgList(){
   if(!wrap || !tagPanel) return;
   
   if(uploadEmpty){
-    uploadEmpty.style.display = pendingImages.length ? "none" : "flex";
+    uploadEmpty.classList.toggle("has-images", pendingImages.length > 0);
   }
 
   if(!pendingImages.length){
@@ -155,6 +155,7 @@ function renderImgList(){
   
       <label class="ci-thumb ci-add-thumb" for="ci-files">
         <span>＋</span>
+        <input type="file" id="ci-files-more" accept="image/*" multiple>
       </label>
     </div>
   `;
@@ -181,7 +182,28 @@ if(isSingleMode){
       </div>
     `;
   }
+  const moreInput = document.getElementById("ci-files-more");
+if(moreInput){
+  moreInput.onchange = async (e) => {
+    const files = Array.from(e.target.files);
 
+    for(const f of files){
+      const dataUrl = await readAsDataUrl(f);
+      const id = "img_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+
+      pendingImages.push({
+        id,
+        file: f,
+        preview: dataUrl,
+        tags: [...globalTags],
+        customTags: false
+      });
+    }
+
+    renderImgList();
+    e.target.value = "";
+  };
+}
   wrap.querySelectorAll(".ci-thumb").forEach(btn => {
     btn.onclick = (e) => {
       if(e.target.classList.contains("ci-thumb-remove")) return;
