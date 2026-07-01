@@ -89,3 +89,40 @@ export async function deleteCheckinWithImages(sb, checkinId, userId){
 
   return true;
 }
+export async function adminDeleteCheckinWithImages(sb, checkinId){
+  const { data: imgs, error: imgErr } = await sb
+    .from("checkin_images")
+    .select("storage_path")
+    .eq("checkin_id", checkinId);
+
+  if(imgErr){
+    window.showToast?.("读取图片失败：" + imgErr.message, "删除失败", "error");
+    return false;
+  }
+
+  const paths = (imgs || []).map(x => x.storage_path).filter(Boolean);
+
+  if(paths.length){
+    const { error: storageErr } = await sb.storage.from("art").remove(paths);
+
+    if(storageErr){
+      window.showToast?.(
+        "图片文件删除失败，本次打卡没有删除。\n" + storageErr.message,
+        "删除失败",
+        "error"
+      );
+      return false;
+    }
+  }
+
+  const { error } = await sb.rpc("admin_delete_checkin", {
+    target_checkin_id: checkinId
+  });
+
+  if(error){
+    window.showToast?.("管理员删除失败：" + error.message, "删除失败", "error");
+    return false;
+  }
+
+  return true;
+}
