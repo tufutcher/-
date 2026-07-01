@@ -782,13 +782,25 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 .gallery-board{
-  column-count:3;
-  column-gap:8px;
-  max-height:520px;
-  overflow:auto;
+  column-count:4;
+  column-gap:7px;
   padding:6px;
   border-radius:18px;
   background:#f6f7f8;
+}
+
+/* 本周 / 本月：跟随内容变高，但最多到一定高度 */
+.gallery-board-fluid{
+  max-height:min(760px, 78vh);
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+
+/* 总览：在框内上下滚动 */
+.gallery-board-scroll{
+  max-height:560px;
+  overflow-y:auto;
+  overflow-x:hidden;
 }
 
 .gallery-tile{
@@ -796,10 +808,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   display:block;
   width:100%;
   break-inside:avoid;
-  margin:0 0 8px;
+  margin:0 0 7px;
   border:none;
   padding:0;
-  border-radius:12px;
+  border-radius:10px;
   overflow:hidden;
   background:#fff;
   cursor:pointer;
@@ -809,7 +821,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .gallery-tile img{
   width:100%;
   max-width:100%;
-  max-height:320px;
+  max-height:220px;
   height:auto;
   object-fit:contain;
   display:block;
@@ -859,13 +871,25 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     flex:1;
   }
 
+@media (max-width:620px){
   .gallery-board{
-    column-count:2;
+    column-count:3;
     column-gap:6px;
+  }
+
+  .gallery-board-scroll{
     max-height:420px;
   }
-    max-height:380px;
+
+  .gallery-tile{
+    margin-bottom:6px;
+    border-radius:9px;
   }
+
+  .gallery-tile img{
+    max-height:170px;
+  }
+}
   
   .gallery-date{
     font-size:9px;
