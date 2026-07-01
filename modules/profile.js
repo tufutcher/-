@@ -167,8 +167,12 @@ function renderGalleryView(items){
     return '<div class="empty archive-empty">这个范围内还没有作品</div>';
   }
 
+  const boardClass = profileDataMode === "all"
+    ? "gallery-board gallery-board-scroll"
+    : "gallery-board gallery-board-fluid";
+  
   return (
-    '<div class="gallery-board">' +
+    '<div class="' + boardClass + '">' +
       images.map(img =>
         '<button class="gallery-tile" data-checkin-id="' + img.checkin_id + '" type="button">' +
           '<img src="' + img.image_url + '">' +
