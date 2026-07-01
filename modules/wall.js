@@ -12,20 +12,38 @@ function fmtDate(ts){
 
 function cardHtml(item){
   const tagSet = new Set();
-  (item.checkin_images || []).forEach(img => (img.tags||[]).forEach(t => tagSet.add(t)));
-  const tagsHtml = tagSet.size ? `<div class="tags">${Array.from(tagSet).map(t=>"#"+t).join(" ")}</div>` : "";
+
+  (item.checkin_images || []).forEach(img => {
+    (img.tags || []).forEach(t => tagSet.add(t));
+  });
+
+  const tags = Array.from(tagSet).slice(0, 4);
+
+  const tagsHtml = tags.length
+    ? `
+      <div class="tags wall-tags">
+        ${tags.map(t => `<span>#${t}</span>`).join("")}
+      </div>
+    `
+    : "";
+
   const imgs = item.checkin_images || [];
   const cover = imgs[0];
   const extra = imgs.length > 1 ? `<div class="extra-count">+${imgs.length - 1}</div>` : "";
+
   return `
     <div class="wall-card" data-id="${item.id}">
       <div class="wall-card-img-wrap">
         ${cover ? `<img src="${cover.image_url}">` : ""}
         ${extra}
       </div>
+
       <div class="wall-card-body">
-        <div class="who-row"><b>${item.username || "匿名"}</b><span class="when">${fmtDate(item.created_at)}</span></div>
-        ${item.note ? `<div class="note">${item.note}</div>` : ""}
+        <div class="who-row">
+          <b>${item.username || "匿名"}</b>
+          <span class="when">${fmtDate(item.created_at)}</span>
+        </div>
+
         ${tagsHtml}
       </div>
     </div>
@@ -38,7 +56,7 @@ export function renderWall(items, profiles = []){
 
   return `
     <section class="wall-hero">
-      <div class="brand-kicker">DRAWING CHECK-IN CLUB</div>
+      <div class="brand-kicker">DRAWING LOG</div>
       <h1>不 画 画 真 的 要 完 了</h1>
       <p>一款劲爆的创作习惯追踪平台</p>
     </section>
@@ -242,7 +260,11 @@ function openDetail(item){
       ${imgs.map(img => `
         <div class="detail-img-block">
           <img src="${img.image_url}">
-          ${(img.tags && img.tags.length) ? `<div class="tags">${img.tags.map(t=>"#"+t).join(" ")}</div>` : ""}
+          ${(img.tags && img.tags.length) ? `
+            <div class="tags detail-tags">
+              ${img.tags.map(t => `<span>#${t}</span>`).join("")}
+            </div>
+          ` : ""}
         </div>
       `).join("")}
 
@@ -272,13 +294,20 @@ function openDetail(item){
     };
 
     document.getElementById("detail-delete").onclick = async () => {
-      const ok = confirm("确定删除这次打卡吗？图片也会一起删除。");
+      const ok = await window.showConfirm?.({
+        title: "删除这次打卡？",
+        message: "图片也会一起删除。这个动作不能撤回。",
+        confirmText: "删除",
+        cancelText: "取消",
+        danger: true
+      });
+      
       if(!ok) return;
 
       const sb = window.__sb;
       const user = window.__user;
       if(!sb || !user){
-        alert("请先登录");
+        window.showToast?.("请先登录后再操作。", "还不能操作", "error");
         return;
       }
 
@@ -300,7 +329,7 @@ function openDetail(item){
       }
 
       modal.remove();
-      alert("已删除");
+      window.showToast?.("这次打卡已经删除。", "已删除", "success");
     };
   }
 }
