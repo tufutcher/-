@@ -167,15 +167,23 @@ function renderGalleryView(items){
     return '<div class="empty archive-empty">这个范围内还没有作品</div>';
   }
 
-  let sizeClass = "gallery-size-3";
+ let sizeClass = "gallery-size-3";
 
-  if(images.length > 24){
-    sizeClass = "gallery-size-6";
-  } else if(images.length > 14){
-    sizeClass = "gallery-size-5";
-  } else if(images.length > 8){
-    sizeClass = "gallery-size-4";
-  }
+if(images.length > 80){
+  sizeClass = "gallery-size-10";
+} else if(images.length > 60){
+  sizeClass = "gallery-size-9";
+} else if(images.length > 45){
+  sizeClass = "gallery-size-8";
+} else if(images.length > 32){
+  sizeClass = "gallery-size-7";
+} else if(images.length > 24){
+  sizeClass = "gallery-size-6";
+} else if(images.length > 14){
+  sizeClass = "gallery-size-5";
+} else if(images.length > 8){
+  sizeClass = "gallery-size-4";
+}
 
   const modeClass = profileDataMode === "all"
     ? "gallery-board-scroll"
