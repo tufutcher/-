@@ -113,12 +113,16 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   display:flex;
   justify-content:center;
   align-items:center;
+  width:100%;
+  overflow:hidden;
 }
 
 .wall-logo{
   display:block;
-  width:min(360px, 82vw);
+  width:auto;
+  max-width:min(360px, 82vw);
   height:auto;
+  max-height:120px;
   object-fit:contain;
 }
 
@@ -215,7 +219,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     padding:28px 4px 20px;
   }
   .wall-logo{
-    width:min(300px, 82vw);
+    max-width:82vw;
+    max-height:100px;
   }
 }
 
