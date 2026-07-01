@@ -215,14 +215,3 @@ function getStoragePathFromPublicUrl(url, bucket){
 
   return decodeURIComponent(url.slice(index + marker.length));
 }
-
-function getStoragePathFromPublicUrl(url){
-  if(!url) return "";
-
-  const marker = "/storage/v1/object/public/avatars/";
-  const index = url.indexOf(marker);
-
-  if(index === -1) return "";
-
-  return decodeURIComponent(url.slice(index + marker.length));
-}
