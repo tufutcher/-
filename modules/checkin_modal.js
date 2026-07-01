@@ -38,6 +38,10 @@ export function openCheckinModal(){
   modal.innerHTML = `
     <div class="modal-card">
       <h3>本次打卡</h3>
+      <div class="ci-date-row">
+        <label for="ci-date">打卡日期</label>
+        <input type="date" id="ci-date">
+      </div>
 
       <label class="ci-upload-empty" id="ci-upload-empty" for="ci-files">
         <span>＋</span>
@@ -61,6 +65,13 @@ export function openCheckinModal(){
   `;
 
   document.body.appendChild(modal);
+
+  const dateInput = document.getElementById("ci-date");
+  if(dateInput){
+    const today = new Date().toISOString().slice(0, 10);
+    dateInput.value = today;
+    dateInput.max = today;
+  }
 
   modal.onclick = (e) => {
     if(e.target === modal){
@@ -322,6 +333,11 @@ async function submitCheckin(modal){
   }
 
   const note = document.getElementById("ci-note").value.trim();
+  
+  const dateInput = document.getElementById("ci-date");
+  const pickedDate = dateInput?.value || new Date().toISOString().slice(0, 10);
+  const createdAt = pickedDate + "T12:00:00";
+  
   const btn = document.getElementById("ci-submit");
 
   btn.disabled = true;
@@ -362,7 +378,7 @@ async function submitCheckin(modal){
     .single();
 
   const username = profile?.username || "匿名";
-  const checkin = await createCheckin(sb, user.id, username, note);
+  const checkin = await createCheckin(sb, user.id, username, note, createdAt);
 
   if(!checkin){
     await sb.storage.from("art").remove(uploadedImages.map(x => x.path));
