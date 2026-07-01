@@ -116,17 +116,17 @@ function renderImgList(){
   const wrap = document.getElementById("ci-img-list");
   const tagPanel = document.getElementById("ci-tag-panel");
   const uploadEmpty = document.getElementById("ci-upload-empty");
-  
-  if(!wrap || !tagPanel) return;
-  
+
   if(uploadEmpty){
     uploadEmpty.hidden = pendingImages.length > 0;
   }
 
+  if(!wrap || !tagPanel) return;
+
   if(!pendingImages.length){
+    selectedImageId = null;
     wrap.innerHTML = "";
     tagPanel.innerHTML = "";
-    selectedImageId = null;
     return;
   }
 
