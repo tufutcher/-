@@ -782,36 +782,55 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 .gallery-board{
-  column-count:4;
-  column-gap:7px;
-  padding:6px;
+  display:grid;
+  gap:7px;
+  height:520px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:7px;
   border-radius:18px;
   background:#f6f7f8;
+  align-content:start;
 }
 
-/* 本周 / 本月：跟随内容变高，但最多到一定高度 */
-.gallery-board-fluid{
-  max-height:min(760px, 78vh);
-  overflow-y:auto;
-  overflow-x:hidden;
+/* 本周 / 本月：框固定，图片根据数量缩小 */
+.gallery-board-fixed{
+  height:520px;
 }
 
-/* 总览：在框内上下滚动 */
+/* 总览：同样在框内上下滚动 */
 .gallery-board-scroll{
-  max-height:560px;
-  overflow-y:auto;
-  overflow-x:hidden;
+  height:560px;
+}
+
+/* 图片少：3列 */
+.gallery-size-3{
+  grid-template-columns:repeat(3, 1fr);
+}
+
+/* 图片中等：4列 */
+.gallery-size-4{
+  grid-template-columns:repeat(4, 1fr);
+}
+
+/* 图片更多：5列 */
+.gallery-size-5{
+  grid-template-columns:repeat(5, 1fr);
+}
+
+/* 图片很多：6列 */
+.gallery-size-6{
+  grid-template-columns:repeat(6, 1fr);
 }
 
 .gallery-tile{
   position:relative;
   display:block;
   width:100%;
-  break-inside:avoid;
-  margin:0 0 7px;
+  aspect-ratio:1 / 1;
   border:none;
   padding:0;
-  border-radius:10px;
+  border-radius:11px;
   overflow:hidden;
   background:#fff;
   cursor:pointer;
@@ -820,9 +839,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-tile img{
   width:100%;
+  height:100%;
   max-width:100%;
-  max-height:220px;
-  height:auto;
   object-fit:contain;
   display:block;
   background:#fafafa;
@@ -873,12 +891,27 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 @media (max-width:620px){
   .gallery-board{
-    column-count:3;
-    column-gap:6px;
+    height:420px;
+    gap:6px;
+    padding:6px;
   }
 
   .gallery-board-scroll{
-    max-height:420px;
+    height:460px;
+  }
+
+  .gallery-size-3{
+    grid-template-columns:repeat(3, 1fr);
+  }
+
+  .gallery-size-4,
+  .gallery-size-5,
+  .gallery-size-6{
+    grid-template-columns:repeat(4, 1fr);
+  }
+
+  .gallery-tile{
+    border-radius:9px;
   }
 
   .gallery-tile{
