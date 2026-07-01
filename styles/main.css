@@ -2264,7 +2264,7 @@ button.cal-cell:disabled{
 .readonly-profile-card{
   position:relative;
   width:min(920px, 96vw);
-  padding:78px 18px 18px;
+  padding:18px;
 }
 
 .readonly-profile-content{
@@ -2280,5 +2280,9 @@ button.cal-cell:disabled{
 }
 
 .person-profile-btn{
+  display:none !important;
+}
+/* 弹窗统一不显示右上角/顶部关闭 X，点击外层关闭 之后有空再慢慢把 HTML 里的 detail-x 清干净，不然现在逐个搜会比较烦。 */
+.detail-x{
   display:none !important;
 }
