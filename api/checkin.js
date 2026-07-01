@@ -7,16 +7,30 @@ export async function loadCheckins(sb){
   return data || [];
 }
 
-export async function createCheckin(sb, userId, username, note){
+export async function createCheckin(sb, userId, username, note, createdAt){
+  const payload = {
+    user_id: userId,
+    username,
+    note
+  };
+
+  if(createdAt){
+    payload.created_at = createdAt;
+  }
+
   const { data, error } = await sb
     .from("checkins")
-    .insert({ user_id: userId, username, note })
+    .insert(payload)
     .select()
     .single();
-  if(error){ alert("打卡失败：" + error.message); return null; }
+
+  if(error){
+    window.showToast?.("打卡失败：" + error.message, "提交失败", "error");
+    return null;
+  }
+
   return data;
 }
-
 export async function addCheckinImage(sb, checkinId, userId, imageUrl, storagePath, tags){
   const { data, error } = await sb
     .from("checkin_images")
