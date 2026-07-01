@@ -809,10 +809,9 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
    展示当前范围内上传过的全部图片。
    使用 contain，保证作品完整显示，不裁切。 */
 .gallery-board{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(92px,1fr));
-  gap:6px;
-  max-height:460px;
+  column-count:3;
+  column-gap:8px;
+  max-height:520px;
   overflow:auto;
   padding:6px;
   border-radius:18px;
@@ -821,6 +820,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-tile{
   position:relative;
+  display:block;
+  width:100%;
+  break-inside:avoid;
+  margin:0 0 8px;
   border:none;
   padding:0;
   border-radius:12px;
@@ -828,12 +831,13 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   background:#fff;
   cursor:pointer;
   box-shadow:none;
-  aspect-ratio:1 / 1;
 }
 
 .gallery-tile img{
   width:100%;
-  height:100%;
+  max-width:100%;
+  max-height:320px;
+  height:auto;
   object-fit:contain;
   display:block;
   background:#fafafa;
@@ -872,12 +876,15 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
    按每一次打卡展示。
    只显示日期、图片数量和封面，不显示标签和感想。 */
 .archive-checkin-list{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:10px;
+  column-count:2;
+  column-gap:10px;
 }
 
 .archive-checkin-card{
+  display:block;
+  width:100%;
+  break-inside:avoid;
+  margin:0 0 10px;
   border:none;
   padding:0;
   border-radius:16px;
@@ -885,21 +892,21 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   background:#f7f7f8;
   color:#111;
   cursor:pointer;
-  box-shadow:0 8px 20px rgba(0,0,0,.045);
+  box-shadow:none;
 }
 
 .archive-checkin-cover{
-  height:140px;
   background:#f2f3f4;
 }
 
 .archive-checkin-cover img{
   width:100%;
-  height:100%;
+  max-width:100%;
+  max-height:340px;
+  height:auto;
   object-fit:contain;
   display:block;
 }
-
 .archive-checkin-meta{
   display:flex;
   justify-content:space-between;
@@ -941,7 +948,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .gallery-board{
-    grid-template-columns:repeat(auto-fill,minmax(74px,1fr));
+    column-count:2;
+    column-gap:6px;
+    max-height:420px;
+  }
     max-height:380px;
   }
   
@@ -951,11 +961,12 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .archive-checkin-list{
-    grid-template-columns:repeat(2,1fr);
+    column-count:2;
+    column-gap:8px;
   }
-
-  .archive-checkin-cover{
-    height:120px;
+  
+  .archive-checkin-cover img{
+    max-height:260px;
   }
 }
 /* 月历：点击日期查看当天打卡 */
@@ -1037,122 +1048,68 @@ button.cal-cell:disabled{
 
 
 /* =========================
-   月历当天打卡：新版列表
+   月历当天：瀑布流画廊
 ========================= */
 
-.calendar-modern-card{
-  width:min(760px, 96vw);
+.calendar-gallery-card{
+  width:min(820px, 96vw);
 }
 
-.calendar-modern-list{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
+.calendar-gallery-board{
+  column-count:2;
+  column-gap:12px;
 }
 
-.calendar-modern-item{
-  display:grid;
-  grid-template-columns:150px 1fr;
-  gap:14px;
-  padding:12px;
-  border-radius:22px;
-  background:#f7f8f9;
-  cursor:pointer;
-}
-
-.calendar-modern-cover{
-  aspect-ratio:1 / 1;
+.calendar-gallery-tile{
+  display:block;
+  width:100%;
+  break-inside:avoid;
+  margin:0 0 12px;
+  padding:0;
+  border:none;
   border-radius:18px;
   overflow:hidden;
-  background:#fff;
-}
-
-.calendar-modern-cover img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.calendar-modern-info{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-}
-
-.calendar-modern-title{
-  font-size:18px;
-  font-weight:850;
+  background:#f7f8f9;
   color:#111;
+  cursor:pointer;
+  box-shadow:none;
 }
 
-.calendar-modern-sub{
-  margin-top:4px;
+.calendar-gallery-tile img{
+  width:100%;
+  max-width:100%;
+  max-height:360px;
+  height:auto;
+  object-fit:contain;
+  display:block;
+  background:#f7f8f9;
+}
+
+.calendar-gallery-note{
+  display:block;
+  padding:9px 10px 10px;
   font-size:12px;
-  color:#999;
-}
-
-.calendar-modern-thumbs{
-  display:flex;
-  gap:6px;
-  margin-top:10px;
-}
-
-.calendar-modern-thumbs img{
-  width:36px;
-  height:36px;
-  border-radius:9px;
-  object-fit:cover;
-  background:#fff;
-}
-
-.calendar-modern-note{
-  margin-top:10px;
   color:#666;
-  font-size:13px;
-  line-height:1.6;
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
+  line-height:1.5;
+  text-align:left;
+  white-space:nowrap;
   overflow:hidden;
-}
-
-.calendar-open-btn{
-  width:max-content !important;
-  min-width:74px;
-  margin-top:auto;
-  padding:8px 14px;
-  border-radius:999px;
-  background:#111;
-  color:#fff;
-  font-size:12px;
+  text-overflow:ellipsis;
 }
 
 @media (max-width:620px){
-  .calendar-modern-item{
-    grid-template-columns:92px 1fr;
-    gap:10px;
-    padding:10px;
-    border-radius:18px;
+  .calendar-gallery-board{
+    column-count:2;
+    column-gap:10px;
   }
 
-  .calendar-modern-title{
-    font-size:15px;
+  .calendar-gallery-tile{
+    margin-bottom:10px;
+    border-radius:16px;
   }
 
-  .calendar-modern-thumbs img{
-    width:30px;
-    height:30px;
-    border-radius:8px;
-  }
-
-  .edit-art-block{
-    padding:10px;
-    border-radius:18px;
-  }
-
-  .edit-tag-box{
-    padding:10px;
+  .calendar-gallery-tile img{
+    max-height:280px;
   }
 }
 
