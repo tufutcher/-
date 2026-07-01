@@ -772,14 +772,14 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 /* 个人页作品画廊：
-   展示当前范围内上传过的全部图片。
-   使用 contain，保证作品完整显示，不裁切。 */
+   固定高度缩略图墙，图片正方形填满，框内滚动。 */
 
 .archive-empty{
   padding:24px 0;
   text-align:center;
   color:#aaa;
 }
+
 .gallery-board{
   display:grid;
   gap:7px;
@@ -792,48 +792,25 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   align-content:start;
 }
 
-/* 本周 / 本月：固定高度框 */
+/* 本周 / 本月 */
 .gallery-board-fixed{
   height:520px;
 }
 
-/* 总览：稍微高一点 */
+/* 总览 */
 .gallery-board-scroll{
   height:560px;
 }
 
-/* 图片-列数 */
-.gallery-size-3{
-  grid-template-columns:repeat(3, minmax(0, 1fr));
-}
-
-.gallery-size-4{
-  grid-template-columns:repeat(4, minmax(0, 1fr));
-}
-
-.gallery-size-5{
-  grid-template-columns:repeat(5, minmax(0, 1fr));
-}
-
-.gallery-size-6{
-  grid-template-columns:repeat(6, minmax(0, 1fr));
-}
-
-.gallery-size-7{
-  grid-template-columns:repeat(7, minmax(0, 1fr));
-}
-
-.gallery-size-8{
-  grid-template-columns:repeat(8, minmax(0, 1fr));
-}
-
-.gallery-size-9{
-  grid-template-columns:repeat(9, minmax(0, 1fr));
-}
-
-.gallery-size-10{
-  grid-template-columns:repeat(10, minmax(0, 1fr));
-}
+/* 桌面端：最多 10 列 */
+.gallery-size-3{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+.gallery-size-4{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+.gallery-size-5{ grid-template-columns:repeat(5, minmax(0, 1fr)); }
+.gallery-size-6{ grid-template-columns:repeat(6, minmax(0, 1fr)); }
+.gallery-size-7{ grid-template-columns:repeat(7, minmax(0, 1fr)); }
+.gallery-size-8{ grid-template-columns:repeat(8, minmax(0, 1fr)); }
+.gallery-size-9{ grid-template-columns:repeat(9, minmax(0, 1fr)); }
+.gallery-size-10{ grid-template-columns:repeat(10, minmax(0, 1fr)); }
 
 .gallery-tile{
   position:relative;
@@ -842,26 +819,33 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   aspect-ratio:1 / 1;
   border:none;
   padding:0;
+  margin:0;
   border-radius:11px;
   overflow:hidden;
   background:#fff;
   cursor:pointer;
   box-shadow:none;
+  font-size:0;
 }
 
 .gallery-tile img{
+  position:absolute;
+  inset:0;
   width:100%;
   height:100%;
-  max-width:100%;
+  max-width:none;
+  max-height:none;
   object-fit:cover;
   display:block;
   background:#fafafa;
   transition:transform .25s ease;
 }
+
 .gallery-date{
   position:absolute;
   left:6px;
   bottom:6px;
+  z-index:2;
   padding:3px 6px;
   border-radius:999px;
   background:rgba(255,255,255,.78);
@@ -879,11 +863,82 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 .gallery-tile:hover img{
-  transform:scale(1.03);
+  transform:scale(1.04);
 }
 
 .gallery-tile:hover .gallery-date{
   opacity:1;
+}
+
+/* 平板 / 小屏：最多 6 列 */
+@media (max-width:620px){
+  .archive-top{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .data-filter{
+    width:100%;
+  }
+
+  .data-filter span{
+    flex:1;
+  }
+
+  .gallery-board{
+    height:420px;
+    gap:5px;
+    padding:6px;
+  }
+
+  .gallery-board-scroll{
+    height:460px;
+  }
+
+  .gallery-size-3{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .gallery-size-4{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+  .gallery-size-5{ grid-template-columns:repeat(5, minmax(0, 1fr)); }
+
+  .gallery-size-6,
+  .gallery-size-7,
+  .gallery-size-8,
+  .gallery-size-9,
+  .gallery-size-10{
+    grid-template-columns:repeat(6, minmax(0, 1fr));
+  }
+
+  .gallery-tile{
+    border-radius:7px;
+  }
+
+  .gallery-date{
+    display:none;
+  }
+}
+
+/* 更窄手机：最多 5 列 */
+@media (max-width:430px){
+  .gallery-size-5,
+  .gallery-size-6,
+  .gallery-size-7,
+  .gallery-size-8,
+  .gallery-size-9,
+  .gallery-size-10{
+    grid-template-columns:repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* 很窄手机：最多 4 列 */
+@media (max-width:360px){
+  .gallery-size-4,
+  .gallery-size-5,
+  .gallery-size-6,
+  .gallery-size-7,
+  .gallery-size-8,
+  .gallery-size-9,
+  .gallery-size-10{
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* 手机适配 */
@@ -927,10 +982,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
   .gallery-tile{
     border-radius:10px;
-  }
-
-  .gallery-tile img{
-    max-height:180px;
   }
 
   .gallery-date{
