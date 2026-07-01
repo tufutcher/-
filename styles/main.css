@@ -42,20 +42,183 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .seg span{font-size:12px;padding:6px 14px;cursor:pointer;color:#666;}
 .seg span.on{background:#1a1a1a;color:#fff;}
 
-/* 墙：卡片网格 */
-.wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
-.wall-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.06);cursor:pointer;}
-.wall-card-img-wrap{position:relative;height:130px;background:#f0f0f0;}
-.wall-card-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
-.wall-card .extra-count{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:2px 6px;border-radius:8px;}
-.wall-card-body{padding:8px;}
-.who-row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;}
-.wall-card .when{font-size:11px;color:#999;}
-.wall-card .note{font-size:12px;color:#666;margin-top:4px;line-height:1.4;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
-.wall-card .tags{font-size:11px;color:#1a6cd9;margin-top:4px;line-height:1.4;word-break:break-word;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+/* =========================
+   打卡墙：画廊模式
+========================= */
 
-.group-block{margin-bottom:18px;}
-.group-head{font-size:13px;font-weight:600;margin-bottom:8px;}
+/* 顶部：只留一行标题 */
+.wall-hero{
+  padding:30px 4px 18px;
+}
+
+.wall-hero .brand-kicker,
+.wall-hero p{
+  display:none;
+}
+
+.wall-hero h1{
+  margin:0;
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", Arial, sans-serif;
+  font-size:44px;
+  line-height:.96;
+  letter-spacing:-.09em;
+  font-weight:950;
+  color:#111;
+}
+
+.wall-hero h1::after{
+  content:"";
+  display:inline-block;
+  width:7px;
+  height:7px;
+  margin-left:10px;
+  border-radius:50%;
+  background:#0CC0DF;
+  vertical-align:middle;
+  transform:translateY(-3px);
+}
+
+/* 墙：作品流网格 */
+.wall-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:14px;
+}
+
+/* 卡片变成纯图片 */
+.wall-card.gallery-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:22px;
+  background:#f6f7f8;
+  box-shadow:0 10px 34px rgba(0,0,0,.055);
+  cursor:pointer;
+}
+
+.wall-card.gallery-card .wall-card-img-wrap{
+  position:relative;
+  height:240px;
+  background:#f7f7f8;
+  overflow:hidden;
+}
+
+.wall-card.gallery-card .wall-card-img-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  background:#f7f7f8;
+}
+
+/* 不显示白色信息区 */
+.wall-card.gallery-card .wall-card-body{
+  display:none;
+}
+
+/* 左上角头像角签 */
+.wall-avatar-chip{
+  position:absolute;
+  left:10px;
+  top:10px;
+  z-index:3;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(255,255,255,.7);
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+
+.wall-avatar-chip img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.wall-avatar-chip span{
+  font-size:13px;
+  font-weight:850;
+  color:#111;
+}
+
+/* 日期：右下角轻浮层 */
+.wall-date-chip{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  z-index:3;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  color:rgba(17,17,17,.58);
+  font-size:11px;
+  line-height:1;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.6);
+}
+
+/* 多图数量角标 */
+.wall-card.gallery-card .extra-count{
+  position:absolute;
+  right:10px;
+  top:10px;
+  z-index:3;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(0,0,0,.5);
+  color:#fff;
+  font-size:11px;
+  line-height:1;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+
+/* 详情标签：完整显示，但也用胶囊 */
+.detail-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+
+.detail-tags span{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(12,192,223,.12);
+  color:#087c91;
+  font-size:12px;
+  line-height:1;
+}
+
+@media (max-width:620px){
+  .wall-hero h1{
+    font-size:38px;
+  }
+
+  .wall-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:12px;
+  }
+
+  .wall-card.gallery-card .wall-card-img-wrap{
+    height:210px;
+  }
+
+  .wall-avatar-chip{
+    width:32px;
+    height:32px;
+  }
+}
 
 /* 弹层（登录/打卡/详情/编辑通用） */
 .modal-bg{
@@ -254,31 +417,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   align-items:center;
   justify-content:center;
   box-shadow:0 16px 36px rgba(0,0,0,.24);
-}
-/* 打卡墙顶部：一行标题 */
-.wall-hero{
-  padding:28px 4px 18px;
-}
-
-.wall-hero h1{
-  margin:0;
-  font-size:38px;
-  line-height:1;
-  letter-spacing:-.075em;
-  font-weight:900;
-  color:#111;
-}
-
-.wall-hero h1::after{
-  content:"";
-  display:inline-block;
-  width:8px;
-  height:8px;
-  margin-left:10px;
-  border-radius:50%;
-  background:#0CC0DF;
-  vertical-align:middle;
-  transform:translateY(-2px);
 }
 /* 按人分组：成员卡片 */
 .person-grid{
@@ -1386,16 +1524,6 @@ button.cal-cell:disabled{
   box-shadow:0 4px 12px rgba(0,0,0,.12);
 }
 
-
-/* 单张图片模式：选中图片卡片 + 标签卡片 */
-.ci-single-layout{
-  display:grid;
-  grid-template-columns:112px 1fr;
-  gap:12px;
-  align-items:stretch;
-  margin:12px 0 18px;
-}
-
 .ci-selected-card{
   position:relative;
   min-height:112px;
@@ -1790,107 +1918,4 @@ button.cal-cell:disabled{
 
 #checkin-modal .ci-add-thumb span{
   margin:0 auto;
-}
-#bottom-nav #fab-add{
-  background:rgba(17,17,17,.92);
-  box-shadow:0 12px 30px rgba(0,0,0,.22);
-}
-/* =========================
-   打卡墙：Apple-ish 降噪版
-========================= */
-
-/* 顶部更安静 */
-.wall-hero{
-  padding:34px 4px 24px;
-}
-
-.wall-hero .brand-kicker{
-  font-size:11px;
-  letter-spacing:.2em;
-  color:rgba(12,192,223,.9);
-  font-weight:800;
-  margin-bottom:10px;
-}
-
-.wall-hero h1{
-  max-width:430px;
-  margin:0;
-  font-size:42px;
-  line-height:1;
-  letter-spacing:-.075em;
-  font-weight:900;
-  color:#111;
-}
-
-.wall-hero p{
-  margin:14px 0 0;
-  max-width:320px;
-  color:#8a8a8a;
-  font-size:15px;
-  line-height:1.6;
-}
-
-/* 墙卡片：让图片做主角 */
-.wall-card{
-  overflow:hidden;
-}
-
-.wall-card-body{
-  padding:12px 14px 14px;
-}
-
-/* 墙上不显示感想 */
-.wall-card .note{
-  display:none;
-}
-
-/* 墙上标签：半透明胶囊，只显示一行 */
-.wall-card .wall-tags{
-  display:flex;
-  flex-wrap:nowrap;
-  gap:6px;
-  margin-top:8px;
-  overflow:hidden;
-  white-space:nowrap;
-}
-
-.wall-card .wall-tags span{
-  display:inline-flex;
-  align-items:center;
-  max-width:92px;
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(12,192,223,.12);
-  color:#087c91;
-  font-size:11px;
-  line-height:1;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  backdrop-filter:blur(8px);
-}
-
-/* 详情标签：完整显示，但也用胶囊 */
-.detail-tags{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  margin-top:8px;
-}
-
-.detail-tags span{
-  display:inline-flex;
-  align-items:center;
-  padding:5px 8px;
-  border-radius:999px;
-  background:rgba(12,192,223,.12);
-  color:#087c91;
-  font-size:12px;
-  line-height:1;
-}
-
-/* 图片张数浮层更轻 */
-.extra-count{
-  background:rgba(0,0,0,.55);
-  backdrop-filter:blur(8px);
 }
