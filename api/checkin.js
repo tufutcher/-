@@ -213,5 +213,5 @@ function getStoragePathFromPublicUrl(url, bucket){
 
   if(index === -1) return "";
 
-  return decodeURIComponent(url.slice(index + marker.length));
+  return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
 }
