@@ -803,24 +803,30 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   height:560px;
 }
 
-/* 图片少：3列 */
+/* 图片-列数 */
 .gallery-size-3{
   grid-template-columns:repeat(3, 1fr);
 }
-
-/* 图片中等：4列 */
 .gallery-size-4{
   grid-template-columns:repeat(4, 1fr);
 }
-
-/* 图片更多：5列 */
 .gallery-size-5{
   grid-template-columns:repeat(5, 1fr);
 }
-
-/* 图片很多：6列 */
 .gallery-size-6{
   grid-template-columns:repeat(6, 1fr);
+}
+.gallery-size-7{
+  grid-template-columns:repeat(7, 1fr);
+}
+.gallery-size-8{
+  grid-template-columns:repeat(8, 1fr);
+}
+.gallery-size-9{
+  grid-template-columns:repeat(9, 1fr);
+}
+.gallery-size-10{
+  grid-template-columns:repeat(10, 1fr);
 }
 
 .gallery-tile{
@@ -905,9 +911,16 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .gallery-size-4,
-  .gallery-size-5,
-  .gallery-size-6{
+  .gallery-size-5{
     grid-template-columns:repeat(4, 1fr);
+  }
+  
+  .gallery-size-6,
+  .gallery-size-7,
+  .gallery-size-8,
+  .gallery-size-9,
+  .gallery-size-10{
+    grid-template-columns:repeat(5, 1fr);
   }
 
   .gallery-tile{
