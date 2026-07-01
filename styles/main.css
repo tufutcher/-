@@ -782,11 +782,11 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 .gallery-board{
   display:grid;
-  gap:10px;
+  gap:7px;
   height:520px;
   overflow-y:auto;
   overflow-x:hidden;
-  padding:8px;
+  padding:7px;
   border-radius:18px;
   background:#f6f7f8;
   align-content:start;
@@ -797,7 +797,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   height:520px;
 }
 
-/* 总览：稍微高一点，也在框内滚动 */
+/* 总览：稍微高一点 */
 .gallery-board-scroll{
   height:560px;
 }
@@ -837,14 +837,12 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-tile{
   position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:block;
   width:100%;
-  min-height:0;
+  aspect-ratio:1 / 1;
   border:none;
   padding:0;
-  border-radius:12px;
+  border-radius:11px;
   overflow:hidden;
   background:#fff;
   cursor:pointer;
@@ -853,10 +851,9 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-tile img{
   width:100%;
-  height:auto;
+  height:100%;
   max-width:100%;
-  max-height:260px;
-  object-fit:contain;
+  object-fit:cover;
   display:block;
   background:#fafafa;
   transition:transform .25s ease;
