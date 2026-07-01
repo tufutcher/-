@@ -103,9 +103,23 @@ function renderFab(){
     nav = document.createElement("div");
     nav.id = "bottom-nav";
     nav.innerHTML = `
-      <button id="nav-wall" class="nav-btn">墙</button>
-      <button id="fab-add">＋</button>
-      <button id="nav-me" class="nav-btn">我的</button>
+      <button id="nav-wall" class="nav-btn" aria-label="打卡墙">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="4" width="7" height="7" rx="2"></rect>
+          <rect x="13" y="4" width="7" height="7" rx="2"></rect>
+          <rect x="4" y="13" width="7" height="7" rx="2"></rect>
+          <rect x="13" y="13" width="7" height="7" rx="2"></rect>
+        </svg>
+      </button>
+    
+      <button id="fab-add" aria-label="新增打卡">＋</button>
+    
+      <button id="nav-me" class="nav-btn" aria-label="我的主页">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4.5 20c1.4-4 4-6 7.5-6s6.1 2 7.5 6"></path>
+        </svg>
+      </button>
     `;
     document.body.appendChild(nav);
   }
