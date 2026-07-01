@@ -167,7 +167,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .badge-count{font-size:16px;font-weight:700;margin-top:7px;}
 .badge-desc{font-size:10px;color:#999;margin-top:3px;}
 .badge-item.unlocked .badge-desc{color:#0a6f80;}
-/* 底部导航：玻璃浮岛 */
+/* ============
+   底部导航
+============ */
+
 #bottom-nav{
   position:fixed;
   left:50%;
@@ -177,34 +180,47 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding:8px 10px;
+  gap:12px;
+  padding:8px 12px;
   border-radius:999px;
-  background:rgba(255,255,255,.42);
-  border:1px solid rgba(255,255,255,.42);
+  background:rgba(255,255,255,.38);
+  border:1px solid rgba(255,255,255,.48);
   box-shadow:0 18px 50px rgba(0,0,0,.14);
   backdrop-filter:blur(28px) saturate(140%);
   -webkit-backdrop-filter:blur(28px) saturate(140%);
 }
 
 #bottom-nav .nav-btn{
-  width:48px;
-  height:48px;
-  min-width:48px;
-  padding:0;
-  border-radius:50%;
-  background:transparent;
-  color:rgba(17,17,17,.55);
+  position:relative;
+  width:46px !important;
+  height:46px !important;
+  min-width:46px !important;
+  max-width:46px !important;
+  padding:0 !important;
+  border-radius:50% !important;
+  background:transparent !important;
+  color:rgba(17,17,17,.46);
+  box-shadow:none !important;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:none;
 }
 
 #bottom-nav .nav-btn.on{
-  background:rgba(12,192,223,.88);
-  color:#fff;
-  box-shadow:0 8px 22px rgba(12,192,223,.28);
+  background:transparent !important;
+  color:#111;
+}
+
+#bottom-nav .nav-btn.on::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:4px;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#0CC0DF;
+  transform:translateX(-50%);
 }
 
 #bottom-nav .nav-btn svg{
@@ -224,11 +240,12 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 #bottom-nav #fab-add{
   position:static;
   transform:none;
-  width:66px;
-  height:66px;
-  min-width:66px;
-  padding:0;
-  border-radius:50%;
+  width:66px !important;
+  height:66px !important;
+  min-width:66px !important;
+  max-width:66px !important;
+  padding:0 !important;
+  border-radius:50% !important;
   background:rgba(17,17,17,.94);
   color:#fff;
   font-size:34px;
