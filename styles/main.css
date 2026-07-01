@@ -780,15 +780,16 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   text-align:center;
   color:#aaa;
 }
-
 .gallery-board{
+  display:grid;
+  gap:10px;
   height:520px;
   overflow-y:auto;
   overflow-x:hidden;
   padding:8px;
   border-radius:18px;
   background:#f6f7f8;
-  column-gap:10px;
+  align-content:start;
 }
 
 /* 本周 / 本月：固定高度框 */
@@ -803,43 +804,44 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 /* 图片-列数 */
 .gallery-size-3{
-  column-count:3;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
 }
 
 .gallery-size-4{
-  column-count:4;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
 }
 
 .gallery-size-5{
-  column-count:5;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
 }
 
 .gallery-size-6{
-  column-count:6;
+  grid-template-columns:repeat(6, minmax(0, 1fr));
 }
 
 .gallery-size-7{
-  column-count:7;
+  grid-template-columns:repeat(7, minmax(0, 1fr));
 }
 
 .gallery-size-8{
-  column-count:8;
+  grid-template-columns:repeat(8, minmax(0, 1fr));
 }
 
 .gallery-size-9{
-  column-count:9;
+  grid-template-columns:repeat(9, minmax(0, 1fr));
 }
 
 .gallery-size-10{
-  column-count:10;
+  grid-template-columns:repeat(10, minmax(0, 1fr));
 }
 
 .gallery-tile{
   position:relative;
-  display:block;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   width:100%;
-  break-inside:avoid;
-  margin:0 0 10px;
+  min-height:0;
   border:none;
   padding:0;
   border-radius:12px;
@@ -859,7 +861,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   background:#fafafa;
   transition:transform .25s ease;
 }
-
 .gallery-date{
   position:absolute;
   left:6px;
@@ -905,8 +906,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
   .gallery-board{
     height:420px;
+    gap:8px;
     padding:7px;
-    column-gap:8px;
   }
 
   .gallery-board-scroll{
@@ -914,7 +915,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .gallery-size-3{
-    column-count:3;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
   }
 
   .gallery-size-4,
@@ -924,11 +925,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   .gallery-size-8,
   .gallery-size-9,
   .gallery-size-10{
-    column-count:4;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
   }
 
   .gallery-tile{
-    margin-bottom:8px;
     border-radius:10px;
   }
 
@@ -940,9 +940,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     font-size:9px;
     padding:3px 5px;
   }
-}
-
-/* 月历：点击日期查看当天打卡 */
+}/* 月历：点击日期查看当天打卡 */
 .cal-cell{
   border:none;
   font:inherit;
