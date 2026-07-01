@@ -994,7 +994,8 @@ button.cal-cell:disabled{
 
 .edit-art-block > img{
   width:100%;
-  max-height:68vh;
+  max-width:100%;
+  max-height:58vh;
   object-fit:contain;
   display:block;
   border-radius:18px;
@@ -1914,6 +1915,7 @@ button.cal-cell:disabled{
 .detail-viewer-card{
   position:relative;
   width:min(760px, 96vw);
+  max-width:96vw;
   max-height:90vh;
   overflow:auto;
   border-radius:28px;
@@ -1966,7 +1968,8 @@ button.cal-cell:disabled{
 
 .detail-art-block img{
   width:100%;
-  max-height:72vh;
+  max-width:100%;
+  max-height:70vh;
   object-fit:contain;
   display:block;
   border-radius:20px;
@@ -2009,6 +2012,7 @@ button.cal-cell:disabled{
 .detail-actions button{
   flex:1;
 }
+
 /* 我的页：默认头像 */
 .profile-avatar-fallback{
   display:flex !important;
