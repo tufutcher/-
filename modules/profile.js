@@ -870,6 +870,7 @@ function openAdminPurgeUserModal(state){
 export function renderProfile(state, options = {}){
   const targetUserId = options.userId || state.user?.id;
   const readonly = !!options.readonly;
+  const skipBind = !!options.skipBind;
 
   const mine = state.checkins.filter(i => i.user_id === targetUserId);
   const stats = computeStats(mine);
@@ -977,7 +978,9 @@ export function renderProfile(state, options = {}){
 
     renderArchiveCard(tagCount, topTags, visibleMine);
 
-  setTimeout(() => bindProfileEvents(state, mine, { readonly }), 0);
+  if(!skipBind){
+    setTimeout(() => bindProfileEvents(state, mine, { readonly }), 0);
+  }
 
   return html;
 }
@@ -1347,18 +1350,95 @@ export function openReadonlyProfileModal(userId){
 
   document.body.appendChild(modal);
 
-function renderReadonlyContent(){
-  const content = modal.querySelector(".readonly-profile-content");
-  if(!content) return;
+  function renderReadonlyContent(){
+    const content = modal.querySelector(".readonly-profile-content");
+    if(!content) return;
 
-  content.innerHTML = renderProfile(state, {
-    userId,
-    readonly: true
-  });
+    content.innerHTML = renderProfile(state, {
+      userId,
+      readonly: true,
+      skipBind: true
+    });
 
-  setTimeout(() => {
-    bindReadonlyProfileModalEvents();
-  }, 30);
+    bindReadonlyProfileEvents();
+  }
+
+  function bindReadonlyProfileEvents(){
+    const mine = (state.checkins || []).filter(item => item.user_id === userId);
+
+    const dataFilter = modal.querySelector("#profile-data-filter");
+    if(dataFilter){
+      dataFilter.querySelectorAll("span").forEach(btn => {
+        btn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          profileDataMode = btn.dataset.mode || "month";
+          renderReadonlyContent();
+        };
+      });
+    }
+
+    const prevCal = modal.querySelector("#cal-prev");
+    if(prevCal){
+      prevCal.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        profileCalendarDate.setMonth(profileCalendarDate.getMonth() - 1);
+        renderReadonlyContent();
+      };
+    }
+
+    const nextCal = modal.querySelector("#cal-next");
+    if(nextCal){
+      nextCal.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        profileCalendarDate.setMonth(profileCalendarDate.getMonth() + 1);
+        renderReadonlyContent();
+      };
+    }
+
+    modal.querySelectorAll("[data-cal-date]").forEach(btn => {
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        openCalendarDayModal(btn.dataset.calDate, mine, true);
+      };
+    });
+
+    modal.querySelectorAll("[data-checkin-id]").forEach(el => {
+      el.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const item = mine.find(x => x.id === el.dataset.checkinId);
+        if(!item) return;
+
+        openProfileCheckinDetail(item, true);
+      };
+    });
+  }
+
+  modal.onclick = (e) => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  };
+
+  const escClose = (e) => {
+    if(e.key === "Escape"){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
+  };
+
+  document.addEventListener("keydown", escClose);
+
+  renderReadonlyContent();
 }
 
   function bindReadonlyProfileModalEvents(){
