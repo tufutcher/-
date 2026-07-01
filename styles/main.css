@@ -769,10 +769,9 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 /* 作品视图区域 */
 .archive-gallery-section{
   padding-top:16px;
-}
-
 /* 个人页作品画廊：
-   固定高度缩略图墙，图片正方形填满，框内滚动。 */
+   固定高度缩略图墙，图片正方形填满，框内滚动。
+   列数根据容器宽度自动变化；手机最多 6 列。 */
 
 .archive-empty{
   padding:24px 0;
@@ -782,6 +781,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-board{
   display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(88px, 1fr));
   gap:7px;
   height:520px;
   overflow-y:auto;
@@ -801,16 +801,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 .gallery-board-scroll{
   height:560px;
 }
-
-/* 桌面端：最多 10 列 */
-.gallery-size-3{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
-.gallery-size-4{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
-.gallery-size-5{ grid-template-columns:repeat(5, minmax(0, 1fr)); }
-.gallery-size-6{ grid-template-columns:repeat(6, minmax(0, 1fr)); }
-.gallery-size-7{ grid-template-columns:repeat(7, minmax(0, 1fr)); }
-.gallery-size-8{ grid-template-columns:repeat(8, minmax(0, 1fr)); }
-.gallery-size-9{ grid-template-columns:repeat(9, minmax(0, 1fr)); }
-.gallery-size-10{ grid-template-columns:repeat(10, minmax(0, 1fr)); }
 
 .gallery-tile{
   position:relative;
@@ -870,7 +860,25 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   opacity:1;
 }
 
-/* 平板 / 小屏：最多 6 列 */
+/* 中等宽度：自动更多列 */
+@media (max-width:760px){
+  .gallery-board{
+    grid-template-columns:repeat(auto-fill, minmax(72px, 1fr));
+    height:460px;
+    gap:6px;
+    padding:6px;
+  }
+
+  .gallery-board-scroll{
+    height:500px;
+  }
+
+  .gallery-tile{
+    border-radius:9px;
+  }
+}
+
+/* 手机：最多约 6 列 */
 @media (max-width:620px){
   .archive-top{
     flex-direction:column;
@@ -886,6 +894,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .gallery-board{
+    grid-template-columns:repeat(auto-fill, minmax(54px, 1fr));
     height:420px;
     gap:5px;
     padding:6px;
@@ -893,18 +902,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
   .gallery-board-scroll{
     height:460px;
-  }
-
-  .gallery-size-3{ grid-template-columns:repeat(3, minmax(0, 1fr)); }
-  .gallery-size-4{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
-  .gallery-size-5{ grid-template-columns:repeat(5, minmax(0, 1fr)); }
-
-  .gallery-size-6,
-  .gallery-size-7,
-  .gallery-size-8,
-  .gallery-size-9,
-  .gallery-size-10{
-    grid-template-columns:repeat(6, minmax(0, 1fr));
   }
 
   .gallery-tile{
@@ -916,31 +913,12 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 }
 
-/* 更窄手机：最多 5 列 */
-@media (max-width:430px){
-  .gallery-size-5,
-  .gallery-size-6,
-  .gallery-size-7,
-  .gallery-size-8,
-  .gallery-size-9,
-  .gallery-size-10{
-    grid-template-columns:repeat(5, minmax(0, 1fr));
+/* 很窄手机：不要小到看不见 */
+@media (max-width:390px){
+  .gallery-board{
+    grid-template-columns:repeat(auto-fill, minmax(62px, 1fr));
   }
 }
-
-/* 很窄手机：最多 4 列 */
-@media (max-width:360px){
-  .gallery-size-4,
-  .gallery-size-5,
-  .gallery-size-6,
-  .gallery-size-7,
-  .gallery-size-8,
-  .gallery-size-9,
-  .gallery-size-10{
-    grid-template-columns:repeat(4, minmax(0, 1fr));
-  }
-}
-
 /* 手机适配 */
 @media (max-width:620px){
   .archive-top{
@@ -955,40 +933,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   .data-filter span{
     flex:1;
   }
-
-  .gallery-board{
-    height:420px;
-    gap:8px;
-    padding:7px;
-  }
-
-  .gallery-board-scroll{
-    height:460px;
-  }
-
-  .gallery-size-3{
-    grid-template-columns:repeat(3, minmax(0, 1fr));
-  }
-
-  .gallery-size-4,
-  .gallery-size-5,
-  .gallery-size-6,
-  .gallery-size-7,
-  .gallery-size-8,
-  .gallery-size-9,
-  .gallery-size-10{
-    grid-template-columns:repeat(4, minmax(0, 1fr));
-  }
-
-  .gallery-tile{
-    border-radius:10px;
-  }
-
-  .gallery-date{
-    font-size:9px;
-    padding:3px 5px;
-  }
-}/* 月历：点击日期查看当天打卡 */
+}
+  /* 月历：点击日期查看当天打卡 */
 .cal-cell{
   border:none;
   font:inherit;
