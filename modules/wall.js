@@ -56,9 +56,7 @@ export function renderWall(items, profiles = []){
 
   return `
     <section class="wall-hero">
-      <div class="brand-kicker">DRAWING LOG</div>
       <h1>不 画 画 真 的 要 完 了</h1>
-      <p>一款劲爆的创作习惯追踪平台</p>
     </section>
 
     <div class="wall-controls">
