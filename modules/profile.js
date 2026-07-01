@@ -529,7 +529,7 @@ function openAdminCheckinManager(state){
   const old = document.getElementById("admin-checkin-manager");
   if(old) old.remove();
 
-  const checkins = state.checkins || [];
+  let checkins = [...(state.checkins || [])];
   const profiles = state.profiles || [];
 
   let selectedUserId = "all";
@@ -625,12 +625,15 @@ function openAdminCheckinManager(state){
         }
 
         const freshCheckins = await loadCheckins(sb);
-
+        
+        checkins = [...freshCheckins];
+        
         if(window.setState){
           window.setState({ checkins: freshCheckins });
         }
-
-        modal.remove();
+        
+        renderRows();
+        
         window.showToast?.("这次打卡已经删除。", "已删除", "success");
       };
     });
