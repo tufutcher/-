@@ -2153,3 +2153,21 @@ button.cal-cell:disabled{
   font-weight:850;
   visibility:visible !important;
 }
+/* 我的页：简化统计 */
+.profile-simple-stats .stat{
+  padding:14px 10px;
+}
+
+.profile-simple-stats .stat-main{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:-.05em;
+  color:#111;
+}
+
+.profile-simple-stats .stat-title{
+  margin-top:5px;
+  margin-bottom:0;
+  font-size:12px;
+  color:#999;
+}
