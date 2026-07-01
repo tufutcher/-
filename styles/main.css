@@ -2142,3 +2142,14 @@ button.cal-cell:disabled{
 .detail-actions button{
   flex:1;
 }
+/* 我的页：默认头像 */
+.profile-avatar-fallback{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  background:#111 !important;
+  color:#fff;
+  font-size:34px;
+  font-weight:850;
+  visibility:visible !important;
+}
