@@ -847,6 +847,42 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     font-size:11px;
   }
 }
+/* 管理员：清理用户痕迹 */
+.admin-purge-card{
+  width:min(560px, 94vw);
+}
+
+.admin-purge-box{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.admin-purge-box label{
+  font-size:13px;
+  font-weight:800;
+  color:#777;
+}
+
+.admin-purge-box select{
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  border-radius:16px;
+  background:#f7f8f9;
+  font-family:inherit;
+  font-size:14px;
+  outline:none;
+}
+
+.admin-purge-warning{
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(255,69,58,.08);
+  color:#9f1d16;
+  font-size:13px;
+  line-height:1.6;
+}
 
 /* =========================
    个人页：创作档案模块
