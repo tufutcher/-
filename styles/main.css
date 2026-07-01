@@ -820,19 +820,6 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   font-size:0;
 }
 
-.gallery-tile img{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  max-width:none;
-  max-height:none;
-  object-fit:cover;
-  display:block;
-  background:#fafafa;
-  transition:transform .25s ease;
-}
-
 .gallery-date{
   position:absolute;
   left:6px;
