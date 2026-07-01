@@ -613,7 +613,7 @@ export function renderProfile(state, options = {}){
     backBtnHtml +
 
     '<div class="card profile-hero-card ' + (readonly ? 'readonly-profile' : '') + '">' +
-      (currentStreak ? '<div class="streak-corner" data-text="连续' + currentStreak + '天打卡"></div>' : '') +
+      (currentStreak ? '<div class="streak-corner"><span>连续打卡</span><b>' + currentStreak + '天</b></div>' : '') +
       '<div class="profile-hero-left">' +
         '<button id="avatar-trigger" class="avatar-trigger" type="button">' +
           profileAvatarHtml +
