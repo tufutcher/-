@@ -1148,6 +1148,24 @@ function openReadOnlyCheckinDetail(item){
   openProfileCheckinDetail(item, true);
 }
 
+function getAvatarStorageInfoFromUrl(url){
+  if(!url) return null;
+
+  const marker = "/storage/v1/object/public/";
+  const index = url.indexOf(marker);
+
+  if(index === -1) return null;
+
+  const rest = decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
+  const parts = rest.split("/");
+  const bucket = parts.shift();
+  const path = parts.join("/");
+
+  if(!bucket || !path) return null;
+
+  return { bucket, path };
+}
+
 function bindProfileEvents(state, mine, options = {}){
   const readonly = !!options.readonly;
 
@@ -1237,27 +1255,58 @@ function bindProfileEvents(state, mine, options = {}){
       avatarInput.onchange = async (e) => {
         const f = e.target.files[0];
         if(!f) return;
-
+      
         const sb = window.__sb;
+        if(!sb || !state.user){
+          window.showToast?.("登录状态异常，请刷新后重试。", "上传失败", "error");
+          return;
+        }
+      
+        const oldAvatarUrl = state.profile?.avatar_url || "";
+      
         const safeName = f.name.replace(/[^\w.\-]/g, "_");
         const path = "avatars/" + state.user.id + "_" + Date.now() + "_" + safeName;
         const url = await uploadImage(sb, f, path);
-
-        if(url){
-          await sb.from("profiles").update({ avatar_url: url }).eq("id", state.user.id);
-
-          if(state.profile){
-            state.profile.avatar_url = url;
-          }
-
-          const img = document.getElementById("avatar-img");
-          if(img){
-            img.src = url;
-            img.style.background = "transparent";
-          }
-
-          link.classList.remove("show");
+      
+        if(!url){
+          window.showToast?.("头像上传失败，请稍后重试。", "上传失败", "error");
+          return;
         }
+      
+        const { error } = await sb
+          .from("profiles")
+          .update({ avatar_url: url })
+          .eq("id", state.user.id);
+      
+        if(error){
+          window.showToast?.("头像保存失败：" + error.message, "保存失败", "error");
+          return;
+        }
+      
+        const oldAvatar = getAvatarStorageInfoFromUrl(oldAvatarUrl);
+      
+        if(oldAvatar){
+          const { error: removeErr } = await sb.storage
+            .from(oldAvatar.bucket)
+            .remove([oldAvatar.path]);
+      
+          if(removeErr){
+            console.warn("旧头像删除失败：", removeErr);
+          }
+        }
+      
+        if(state.profile){
+          state.profile.avatar_url = url;
+        }
+      
+        const img = document.getElementById("avatar-img");
+        if(img && img.tagName === "IMG"){
+          img.src = url;
+          img.style.background = "transparent";
+        }
+      
+        link.classList.remove("show");
+        window.showToast?.("头像已更新。", "保存成功", "success");
       };
     }
   }
@@ -1271,6 +1320,18 @@ function bindProfileEvents(state, mine, options = {}){
     };
   });
 }
+
+function getAvatarPathFromUrl(url){
+  if(!url) return "";
+
+  const marker = "/storage/v1/object/public/avatars/";
+  const index = url.indexOf(marker);
+
+  if(index === -1) return "";
+
+  return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
+}
+
 export function openReadonlyProfileModal(userId){
   const old = document.getElementById("readonly-profile-modal");
   if(old) old.remove();
