@@ -1440,8 +1440,13 @@ button.cal-cell:disabled{
   margin:0;
 }
 
-/* 单张标签卡底部两个小圆按钮 */
-#checkin-modal .ci-single-actions{
+/* =========================
+   打卡 / 编辑弹窗：单图标签编辑
+========================= */
+
+/* 单图标签编辑底部两个小圆按钮 */
+#checkin-modal .ci-single-actions,
+#edit-modal .ci-single-actions{
   display:flex;
   justify-content:center;
   align-items:center;
@@ -1449,26 +1454,30 @@ button.cal-cell:disabled{
   margin-top:14px;
 }
 
-#checkin-modal .ci-icon-btn{
+#checkin-modal .ci-icon-btn,
+#edit-modal .ci-icon-btn{
   width:38px !important;
   height:38px !important;
   min-width:38px;
+  max-width:38px;
   padding:0 !important;
-  border:none;
-  border-radius:50%;
-  background:#f0f1f2;
-  color:#111;
+  border:none !important;
+  border-radius:50% !important;
+  background:#f0f1f2 !important;
+  color:#111 !important;
   font-size:22px;
   line-height:1;
-  display:flex;
+  display:flex !important;
   align-items:center;
   justify-content:center;
   cursor:pointer;
+  box-shadow:none !important;
 }
 
-#checkin-modal .ci-icon-btn:hover{
-  background:#111;
-  color:#fff;
+#checkin-modal .ci-icon-btn:hover,
+#edit-modal .ci-icon-btn:hover{
+  background:#111 !important;
+  color:#fff !important;
 }
 
 .small-btn{
@@ -1478,42 +1487,9 @@ button.cal-cell:disabled{
   white-space:nowrap;
 }
 
-/* 手机适配 */
-@media (max-width:520px){
-  .ci-thumb-grid{
-    grid-template-columns:repeat(auto-fill,minmax(60px,1fr));
-    gap:8px;
-  }
-
-  .ci-tag-box,
-  .ci-tag-box.single{
-    padding:12px;
-  }
-
-  .ci-tag-row{
-    gap:6px;
-    padding:7px 8px;
-    border-radius:999px;
-  }
-
-  .ci-tag-label{
-    width:42px;
-    flex-basis:42px;
-    font-size:12px;
-  }
-
-  .ci-tag-options{
-    justify-content:flex-start;
-    gap:6px;
-  }
-
-  #checkin-modal .preset-tag{
-    padding:6px 10px;
-    font-size:12px;
-  }
-}
-/* 打卡弹窗内的标签按钮更紧凑 */
-#checkin-modal .preset-tag{
+/* 打卡 / 编辑弹窗内的标签按钮 */
+#checkin-modal .preset-tag,
+#edit-modal .preset-tag{
   padding:6px 12px;
   border-radius:999px;
   font-size:13px;
@@ -1522,7 +1498,8 @@ button.cal-cell:disabled{
   border:1px solid rgba(0,0,0,.12);
 }
 
-#checkin-modal .preset-tag.on{
+#checkin-modal .preset-tag.on,
+#edit-modal .preset-tag.on{
   background:#111;
   color:#fff;
   border-color:#111;
@@ -1563,7 +1540,8 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:8px;
+  text-align:center;
+  gap:10px;
   width:100%;
   min-height:118px;
   margin:12px 0 14px;
@@ -1576,6 +1554,7 @@ button.cal-cell:disabled{
 .ci-upload-empty span{
   width:44px;
   height:44px;
+  margin:0 auto;
   border-radius:50%;
   display:flex;
   align-items:center;
@@ -1587,6 +1566,9 @@ button.cal-cell:disabled{
 }
 
 .ci-upload-empty em{
+  display:block;
+  width:100%;
+  text-align:center;
   font-style:normal;
   font-size:13px;
   color:#999;
@@ -1632,54 +1614,40 @@ button.cal-cell:disabled{
   line-height:1;
 }
 
-#checkin-modal .ci-icon-btn{
-  width:38px !important;
-  height:38px !important;
-  min-width:38px;
-  padding:0 !important;
-  border:none;
-  border-radius:50%;
-  background:#f0f1f2;
-  color:#111;
-  font-size:22px;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
+/* 手机适配 */
+@media (max-width:520px){
+  .ci-thumb-grid{
+    grid-template-columns:repeat(auto-fill,minmax(60px,1fr));
+    gap:8px;
+  }
 
-#checkin-modal .ci-icon-btn:hover{
-  background:#111;
-  color:#fff;
-}
-/* 打卡弹窗：上传加号强制居中 */
-#checkin-modal .ci-upload-empty{
-  position:relative;
-  display:flex;
-  flex-direction:column;
-  align-items:center !important;
-  justify-content:center !important;
-  text-align:center;
-  gap:10px;
-  min-height:118px;
-}
+  .ci-tag-box,
+  .ci-tag-box.single{
+    padding:12px;
+  }
 
-#checkin-modal .ci-upload-empty span{
-  margin:0 auto;
-}
+  .ci-tag-row{
+    gap:6px;
+    padding:7px 8px;
+    border-radius:999px;
+  }
 
-#checkin-modal .ci-upload-empty em{
-  display:block;
-  width:100%;
-  text-align:center;
-}
+  .ci-tag-label{
+    width:42px;
+    flex-basis:42px;
+    font-size:12px;
+  }
 
+  .ci-tag-options{
+    justify-content:flex-start;
+    gap:6px;
+  }
 
-/* 打卡弹窗：缩略图里的继续添加按钮强制居中 */
-
-#checkin-modal .ci-add-thumb span{
-  margin:0 auto;
+  #checkin-modal .preset-tag,
+  #edit-modal .preset-tag{
+    padding:6px 10px;
+    font-size:12px;
+  }
 }
 /* =========================
    按人分组：轻作品集卡片
