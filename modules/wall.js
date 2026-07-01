@@ -11,40 +11,27 @@ function fmtDate(ts){
 }
 
 function cardHtml(item){
-  const tagSet = new Set();
-
-  (item.checkin_images || []).forEach(img => {
-    (img.tags || []).forEach(t => tagSet.add(t));
-  });
-
-  const tags = Array.from(tagSet).slice(0, 4);
-
-  const tagsHtml = tags.length
-    ? `
-      <div class="tags wall-tags">
-        ${tags.map(t => `<span>#${t}</span>`).join("")}
-      </div>
-    `
-    : "";
-
   const imgs = item.checkin_images || [];
   const cover = imgs[0];
   const extra = imgs.length > 1 ? `<div class="extra-count">+${imgs.length - 1}</div>` : "";
 
+  const profile = getProfile(item.user_id, item.username);
+  const avatar = profile?.avatar_url
+    ? `<img src="${profile.avatar_url}">`
+    : `<span>${(item.username || "匿").trim().slice(0, 1) || "匿"}</span>`;
+
   return `
-    <div class="wall-card" data-id="${item.id}">
+    <div class="wall-card gallery-card" data-id="${item.id}">
       <div class="wall-card-img-wrap">
         ${cover ? `<img src="${cover.image_url}">` : ""}
-        ${extra}
-      </div>
 
-      <div class="wall-card-body">
-        <div class="who-row">
-          <b>${item.username || "匿名"}</b>
-          <span class="when">${fmtDate(item.created_at)}</span>
+        <div class="wall-avatar-chip" title="${item.username || "匿名"}">
+          ${avatar}
         </div>
 
-        ${tagsHtml}
+        <div class="wall-date-chip">${fmtDate(item.created_at)}</div>
+
+        ${extra}
       </div>
     </div>
   `;
