@@ -882,7 +882,6 @@ function bindProfileEvents(state, mine, options = {}){
     };
   });
 }
-
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
   if(old) old.remove();
@@ -892,27 +891,30 @@ export function openEditModal(item){
   modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
-  const localImages = imgs.map((img, index) => ({
+
+  let editImages = imgs.map((img, index) => ({
     id: img.id,
     image_url: img.image_url,
     tags: [...(img.tags || [])],
-    originalTags: [...(img.tags || [])],
+    customTags: false,
     index
   }));
 
-  let selectedImageId = localImages[0]?.id || null;
+  let globalTags = editImages[0] ? [...editImages[0].tags] : [];
+  let selectedImageId = null;
+  let noteValue = item.note || "";
 
   function selectedImage(){
-    return localImages.find(img => img.id === selectedImageId) || localImages[0];
+    return editImages.find(img => img.id === selectedImageId);
   }
 
-  function renderTagGroups(activeTags){
+  function renderTagGroups(activeTags, mode){
     return Object.keys(TAG_CATEGORIES).map(cat => {
       const opts = TAG_CATEGORIES[cat].map(tag => {
         const onClass = activeTags.includes(tag) ? " on" : "";
 
         return (
-          '<span class="preset-tag' + onClass + '" data-tag="' + tag + '">' +
+          '<span class="preset-tag' + onClass + '" data-mode="' + mode + '" data-tag="' + tag + '">' +
             tag +
           '</span>'
         );
@@ -928,18 +930,42 @@ export function openEditModal(item){
   }
 
   function renderEditor(){
+    const isSingleMode = !!selectedImageId;
     const selected = selectedImage();
 
-    const thumbsHtml = localImages.map((img, idx) => {
+    const thumbsHtml = editImages.map((img, idx) => {
       const selectedClass = img.id === selectedImageId ? " selected" : "";
+      const customMark = img.customTags ? '<span class="ci-custom-mark">单独</span>' : "";
+      const pointer = img.id === selectedImageId ? '<span class="ci-thumb-pointer"></span>' : "";
 
       return (
         '<button class="ci-thumb edit-thumb' + selectedClass + '" data-img-id="' + img.id + '" type="button">' +
           '<img src="' + img.image_url + '">' +
           '<span class="ci-thumb-num">' + (idx + 1) + '</span>' +
+          customMark +
+          pointer +
         '</button>'
       );
     }).join("");
+
+    const tagPanelHtml = isSingleMode && selected
+      ? (
+        '<div class="ci-tag-box single edit-tag-panel">' +
+          '<div class="ci-section-title">单张标签</div>' +
+          renderTagGroups(selected.tags, "single") +
+          '<div class="ci-single-actions">' +
+            '<button id="edit-back-global" class="ci-icon-btn" type="button" title="返回套用标签">×</button>' +
+            '<button id="edit-reset-tags" class="ci-icon-btn" type="button" title="恢复统一标签">↻</button>' +
+          '</div>' +
+        '</div>'
+      )
+      : (
+        '<div class="ci-tag-box edit-tag-panel">' +
+          '<div class="ci-section-title">套用标签</div>' +
+          '<div class="hint-text ci-tag-hint">选择的标签会套用到所有图片。点击图片可单独修改。</div>' +
+          renderTagGroups(globalTags, "global") +
+        '</div>'
+      );
 
     modal.innerHTML =
       '<div class="detail-viewer-card edit-checkin-card">' +
@@ -957,20 +983,11 @@ export function openEditModal(item){
             thumbsHtml +
           '</div>' +
 
-          (selected ? (
-            '<div class="edit-selected-preview">' +
-              '<img src="' + selected.image_url + '">' +
-            '</div>' +
-
-            '<div class="ci-tag-box single edit-tag-panel">' +
-              '<div class="ci-section-title">单张标签</div>' +
-              renderTagGroups(selected.tags) +
-            '</div>'
-          ) : '') +
+          tagPanelHtml +
 
           '<div class="edit-note-box">' +
             '<label>感想</label>' +
-            '<textarea id="edit-note">' + (item.note || "") + '</textarea>' +
+            '<textarea id="edit-note">' + noteValue + '</textarea>' +
           '</div>' +
 
           '<div class="detail-actions edit-actions">' +
@@ -981,6 +998,13 @@ export function openEditModal(item){
       '</div>';
 
     bindEditorEvents();
+  }
+
+  function saveCurrentNote(){
+    const noteInput = document.getElementById("edit-note");
+    if(noteInput){
+      noteValue = noteInput.value;
+    }
   }
 
   function bindEditorEvents(){
@@ -995,16 +1019,37 @@ export function openEditModal(item){
 
     modal.querySelectorAll(".edit-thumb").forEach(btn => {
       btn.onclick = () => {
+        saveCurrentNote();
         selectedImageId = btn.dataset.imgId;
-        const noteInput = document.getElementById("edit-note");
-        if(noteInput){
-          item.note = noteInput.value;
-        }
         renderEditor();
       };
     });
 
-    modal.querySelectorAll(".edit-tag-panel .preset-tag").forEach(btn => {
+    modal.querySelectorAll('.preset-tag[data-mode="global"]').forEach(btn => {
+      btn.onclick = () => {
+        const tag = btn.dataset.tag;
+
+        if(globalTags.includes(tag)){
+          globalTags = globalTags.filter(x => x !== tag);
+        } else {
+          globalTags.push(tag);
+        }
+
+        editImages = editImages.map(img => {
+          if(img.customTags) return img;
+
+          return {
+            ...img,
+            tags: [...globalTags]
+          };
+        });
+
+        saveCurrentNote();
+        renderEditor();
+      };
+    });
+
+    modal.querySelectorAll('.preset-tag[data-mode="single"]').forEach(btn => {
       btn.onclick = () => {
         const selected = selectedImage();
         if(!selected) return;
@@ -1017,16 +1062,42 @@ export function openEditModal(item){
           selected.tags.push(tag);
         }
 
-        btn.classList.toggle("on");
+        selected.customTags = true;
+
+        saveCurrentNote();
+        renderEditor();
       };
     });
+
+    const backBtn = document.getElementById("edit-back-global");
+    if(backBtn){
+      backBtn.onclick = () => {
+        saveCurrentNote();
+        selectedImageId = null;
+        renderEditor();
+      };
+    }
+
+    const resetBtn = document.getElementById("edit-reset-tags");
+    if(resetBtn){
+      resetBtn.onclick = () => {
+        const selected = selectedImage();
+        if(!selected) return;
+
+        selected.tags = [...globalTags];
+        selected.customTags = false;
+
+        saveCurrentNote();
+        renderEditor();
+      };
+    }
 
     const saveBtn = document.getElementById("edit-save");
     if(saveBtn){
       saveBtn.onclick = async () => {
         const sb = window.__sb;
         const noteInput = document.getElementById("edit-note");
-        const note = noteInput ? noteInput.value.trim() : "";
+        const note = noteInput ? noteInput.value.trim() : noteValue.trim();
 
         if(!sb){
           window.showToast?.("数据库连接失败，请刷新后重试。", "保存失败", "error");
@@ -1038,7 +1109,7 @@ export function openEditModal(item){
 
         await updateCheckinNote(sb, item.id, note);
 
-        for(const img of localImages){
+        for(const img of editImages){
           await updateImageTags(sb, img.id, img.tags);
         }
 
