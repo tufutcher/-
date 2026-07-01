@@ -30,11 +30,8 @@ export function renderWall(items, profiles = []){
   allProfiles = profiles;
 
   return `
-    <section class="wall-hero">
-      <h1>
-        <span>不画画，</span>
-        <span>真的要完了。</span>
-      </h1>
+    <section class="wall-hero wall-logo-hero">
+      <img class="wall-logo" src="./assets/wall-logo.png" alt="不画画真的要完了">
     </section>
 
     <div class="wall-controls">
