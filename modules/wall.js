@@ -266,7 +266,6 @@ function openDetail(item){
       ${isOwner ? `
         <div class="detail-actions">
           <button id="detail-edit">编辑</button>
-          <button id="detail-delete" class="danger">删除</button>
         </div>
       ` : ""}
     </div>
@@ -284,47 +283,6 @@ function openDetail(item){
     document.getElementById("detail-edit").onclick = () => {
       modal.remove();
       openEditModal(item);
-    };
-
-    document.getElementById("detail-delete").onclick = async () => {
-      const ok = await window.showConfirm?.({
-        title: "删除这次打卡？",
-        message: "图片也会一起删除。这个动作不能撤回。",
-        confirmText: "删除",
-        cancelText: "取消",
-        danger: true
-      });
-
-      if(!ok) return;
-
-      const sb = window.__sb;
-      const user = window.__user;
-
-      if(!sb || !user){
-        window.showToast?.("请先登录后再操作。", "还不能操作", "error");
-        return;
-      }
-
-      const btn = document.getElementById("detail-delete");
-      btn.disabled = true;
-      btn.textContent = "删除中...";
-
-      const deleted = await deleteCheckinWithImages(sb, item.id, user.id);
-
-      if(!deleted){
-        btn.disabled = false;
-        btn.textContent = "删除";
-        return;
-      }
-
-      const freshCheckins = await loadCheckins(sb);
-
-      if(window.setState){
-        window.setState({ checkins: freshCheckins });
-      }
-
-      modal.remove();
-      window.showToast?.("这次打卡已经删除。", "已删除", "success");
     };
   }
 }
