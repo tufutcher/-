@@ -531,6 +531,7 @@ export function renderProfile(state, options = {}){
 
   const mine = state.checkins.filter(i => i.user_id === targetUserId);
   const stats = computeStats(mine);
+  const totalDays = new Set(mine.map(item => dateKey(item.created_at))).size;
   const badges = computeBadges(mine);
   const visibleMine = filterProfileItems(mine);
 
@@ -601,10 +602,10 @@ export function renderProfile(state, options = {}){
       '</div>' +
     '</div>' +
 
-    '<div class="stats-row">' +
-      '<div class="stat stat-block"><div class="stat-title">本周打卡</div><div class="stat-main">' + stats.weekDays + '天 | ' + stats.weekImages + '张</div></div>' +
-      '<div class="stat stat-block"><div class="stat-title">本月打卡</div><div class="stat-main">' + stats.monthDays + '天 | ' + stats.monthImages + '张</div></div>' +
-      '<div class="stat stat-block"><div class="stat-title">总计</div><div class="stat-main">连续' + stats.maxStreak + '天 | 共' + stats.totalImages + '张</div></div>' +
+    '<div class="stats-row profile-simple-stats">' +
+      '<div class="stat stat-block"><div class="stat-main">' + stats.weekDays + '天</div><div class="stat-title">本周</div></div>' +
+      '<div class="stat stat-block"><div class="stat-main">' + stats.monthDays + '天</div><div class="stat-title">本月</div></div>' +
+      '<div class="stat stat-block"><div class="stat-main">' + totalDays + '天</div><div class="stat-title">总计</div></div>' +
     '</div>' +
 
     adminPanelHtml +
