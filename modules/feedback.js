@@ -60,7 +60,6 @@ export function showConfettiSuccess(message = "打卡成功！"){
     '<div class="confetti-card">' +
       '<div class="confetti-emoji">🎉</div>' +
       '<div class="confetti-title">' + message + '</div>' +
-      '<div class="confetti-subtitle">今天也留下了一点创作的证据。</div>' +
     '</div>';
 
   document.body.appendChild(modal);
