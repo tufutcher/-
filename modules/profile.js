@@ -919,14 +919,15 @@ function bindProfileEvents(state, mine, options = {}){
     }
   }
 
-document.querySelectorAll("[data-checkin-id]").forEach(el => {
-  el.onclick = () => {
-    const item = mine.find(x => x.id === el.dataset.checkinId);
-    if(!item) return;
-
-    openProfileCheckinDetail(item, readonly);
-  };
-});
+  document.querySelectorAll("[data-checkin-id]").forEach(el => {
+    el.onclick = () => {
+      const item = mine.find(x => x.id === el.dataset.checkinId);
+      if(!item) return;
+  
+      openProfileCheckinDetail(item, readonly);
+    };
+  });
+}
 
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
