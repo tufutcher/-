@@ -528,48 +528,136 @@ function openAdminCheckinManager(state){
   if(old) old.remove();
 
   const checkins = state.checkins || [];
+  const profiles = state.profiles || [];
+
+  let selectedUserId = "all";
 
   const modal = document.createElement("div");
   modal.id = "admin-checkin-manager";
   modal.className = "modal-bg detail-viewer-bg";
 
-  const rowsHtml = checkins.map(item => {
-    const imgs = item.checkin_images || [];
-    const cover = imgs[0];
+  function userNameById(userId){
+    const profile = profiles.find(p => p.id === userId);
+    return profile?.username || "匿名";
+  }
 
-    return `
-      <div class="admin-checkin-row" data-checkin-id="${item.id}">
-        <div class="admin-checkin-cover">
-          ${cover ? `<img src="${cover.image_url}">` : ""}
+  function renderRows(){
+    const filtered = selectedUserId === "all"
+      ? checkins
+      : checkins.filter(item => item.user_id === selectedUserId);
+
+    const rowsHtml = filtered.map(item => {
+      const imgs = item.checkin_images || [];
+      const cover = imgs[0];
+
+      return `
+        <div class="admin-checkin-row compact" data-checkin-id="${item.id}">
+          <div class="admin-checkin-cover">
+            ${cover ? `<img src="${cover.image_url}">` : ""}
+          </div>
+
+          <div class="admin-checkin-info">
+            <div class="admin-checkin-line">
+              <b>${item.username || userNameById(item.user_id)}</b>
+              <span>${fmtDate(item.created_at)}</span>
+              <em>${imgs.length} 张</em>
+            </div>
+          </div>
+
+          <button class="admin-checkin-delete danger" data-checkin-id="${item.id}" type="button">
+            删除
+          </button>
         </div>
+      `;
+    }).join("");
 
-        <div class="admin-checkin-info">
-          <div class="admin-checkin-name">${item.username || "匿名"}</div>
-          <div class="admin-checkin-meta">${fmtDate(item.created_at)} · ${imgs.length} 张作品</div>
-          ${item.note ? `<div class="admin-checkin-note">${item.note}</div>` : ""}
-        </div>
+    const list = modal.querySelector(".admin-checkin-list");
+    const count = modal.querySelector("#admin-checkin-count");
 
-        <button class="admin-checkin-delete danger" data-checkin-id="${item.id}" type="button">
-          删除
-        </button>
-      </div>
-    `;
-  }).join("");
+    if(count){
+      count.textContent = selectedUserId === "all"
+        ? `共 ${checkins.length} 次打卡`
+        : `筛选后 ${filtered.length} 次打卡`;
+    }
+
+    if(list){
+      list.innerHTML = rowsHtml || `<div class="empty">没有符合条件的打卡记录</div>`;
+    }
+
+    bindDeleteEvents();
+  }
+
+  function bindDeleteEvents(){
+    modal.querySelectorAll(".admin-checkin-delete").forEach(btn => {
+      btn.onclick = async (e) => {
+        e.stopPropagation();
+
+        const checkinId = btn.dataset.checkinId;
+        const item = checkins.find(x => x.id === checkinId);
+
+        const ok = await window.showConfirm?.({
+          title: "删除这次打卡？",
+          message: `将删除 ${item?.username || "匿名"} 的这次打卡和所有图片。这个动作不能撤回。`,
+          confirmText: "删除",
+          cancelText: "取消",
+          danger: true
+        });
+
+        if(!ok) return;
+
+        const sb = window.__sb;
+        if(!sb){
+          window.showToast?.("数据库连接失败，请刷新后重试。", "删除失败", "error");
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "删除中...";
+
+        const deleted = await adminDeleteCheckinWithImages(sb, checkinId);
+
+        if(!deleted){
+          btn.disabled = false;
+          btn.textContent = "删除";
+          return;
+        }
+
+        const freshCheckins = await loadCheckins(sb);
+
+        if(window.setState){
+          window.setState({ checkins: freshCheckins });
+        }
+
+        modal.remove();
+        window.showToast?.("这次打卡已经删除。", "已删除", "success");
+      };
+    });
+  }
+
+  const userOptions = [
+    `<option value="all">全部成员</option>`,
+    ...profiles.map(profile => {
+      const count = checkins.filter(item => item.user_id === profile.id).length;
+      return `<option value="${profile.id}">${profile.username || "匿名"}（${count}）</option>`;
+    })
+  ].join("");
 
   modal.innerHTML = `
-    <div class="detail-viewer-card admin-checkin-card">
+    <div class="detail-viewer-card admin-checkin-card compact">
       <button id="admin-checkin-close" class="detail-x" type="button">×</button>
 
-      <div class="detail-viewer-head">
+      <div class="detail-viewer-head admin-manager-head">
         <div>
           <div class="detail-author">批量管理打卡</div>
-          <div class="detail-date">共 ${checkins.length} 次打卡</div>
+          <div class="detail-date" id="admin-checkin-count">共 ${checkins.length} 次打卡</div>
         </div>
+
+        <select id="admin-user-filter" class="admin-user-filter">
+          ${userOptions}
+        </select>
       </div>
 
-      <div class="admin-checkin-list">
-        ${rowsHtml || `<div class="empty">还没有打卡记录</div>`}
-      </div>
+      <div class="admin-checkin-list"></div>
     </div>
   `;
 
@@ -585,50 +673,15 @@ function openAdminCheckinManager(state){
     modal.remove();
   };
 
-  modal.querySelectorAll(".admin-checkin-delete").forEach(btn => {
-    btn.onclick = async (e) => {
-      e.stopPropagation();
-
-      const checkinId = btn.dataset.checkinId;
-      const item = checkins.find(x => x.id === checkinId);
-
-      const ok = await window.showConfirm?.({
-        title: "删除这次打卡？",
-        message: `将删除 ${item?.username || "匿名"} 的这次打卡和所有图片。这个动作不能撤回。`,
-        confirmText: "删除",
-        cancelText: "取消",
-        danger: true
-      });
-
-      if(!ok) return;
-
-      const sb = window.__sb;
-      if(!sb){
-        window.showToast?.("数据库连接失败，请刷新后重试。", "删除失败", "error");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "删除中...";
-
-      const deleted = await adminDeleteCheckinWithImages(sb, checkinId);
-
-      if(!deleted){
-        btn.disabled = false;
-        btn.textContent = "删除";
-        return;
-      }
-
-      const freshCheckins = await loadCheckins(sb);
-
-      if(window.setState){
-        window.setState({ checkins: freshCheckins });
-      }
-
-      modal.remove();
-      window.showToast?.("这次打卡已经删除。", "已删除", "success");
+  const filter = document.getElementById("admin-user-filter");
+  if(filter){
+    filter.onchange = () => {
+      selectedUserId = filter.value;
+      renderRows();
     };
-  });
+  }
+
+  renderRows();
 }
 
 export function renderProfile(state, options = {}){
