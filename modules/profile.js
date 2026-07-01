@@ -1347,17 +1347,19 @@ export function openReadonlyProfileModal(userId){
 
   document.body.appendChild(modal);
 
-  function renderReadonlyContent(){
-    const content = modal.querySelector(".readonly-profile-content");
-    if(!content) return;
+function renderReadonlyContent(){
+  const content = modal.querySelector(".readonly-profile-content");
+  if(!content) return;
 
-    content.innerHTML = renderProfile(state, {
-      userId,
-      readonly: true
-    });
+  content.innerHTML = renderProfile(state, {
+    userId,
+    readonly: true
+  });
 
+  setTimeout(() => {
     bindReadonlyProfileModalEvents();
-  }
+  }, 30);
+}
 
   function bindReadonlyProfileModalEvents(){
     const mine = (state.checkins || []).filter(item => item.user_id === userId);
