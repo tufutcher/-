@@ -5,7 +5,6 @@ import { uploadImage } from "../api/storage.js";
 const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
 let profileDataMode = "month";
-let profileArchiveMode = "gallery";
 
 function fmtDate(ts){
   const d = new Date(ts);
@@ -161,15 +160,6 @@ function getGalleryImages(items){
   );
 }
 
-function renderArchiveModeSwitch(){
-  return `
-    <div class="archive-mode-switch" id="archive-mode-switch">
-      <span data-mode="gallery" class="${profileArchiveMode === "gallery" ? "on" : ""}">画廊</span>
-      <span data-mode="checkin" class="${profileArchiveMode === "checkin" ? "on" : ""}">打卡</span>
-    </div>
-  `;
-}
-
 function renderGalleryView(items){
   const images = getGalleryImages(items);
 
@@ -189,37 +179,8 @@ function renderGalleryView(items){
   );
 }
 
-function renderCheckinArchiveView(items){
-  if(!items.length){
-    return '<div class="empty archive-empty">这个范围内还没有打卡</div>';
-  }
-
-  return (
-    '<div class="archive-checkin-list">' +
-      items.map(item => {
-        const imgs = item.checkin_images || [];
-        const cover = imgs[0];
-
-        return (
-          '<button class="archive-checkin-card" data-checkin-id="' + item.id + '" type="button">' +
-            '<div class="archive-checkin-cover">' +
-              (cover ? '<img src="' + cover.image_url + '">' : '') +
-            '</div>' +
-            '<div class="archive-checkin-meta">' +
-              '<span>' + fmtDate(item.created_at) + '</span>' +
-              '<b>' + imgs.length + ' 张</b>' +
-            '</div>' +
-          '</button>'
-        );
-      }).join("") +
-    '</div>'
-  );
-}
-
 function renderArchiveContent(items){
-  return profileArchiveMode === "gallery"
-    ? renderGalleryView(items)
-    : renderCheckinArchiveView(items);
+  return renderGalleryView(items);
 }
 
 function renderArchiveCard(tagCount, topTags, visibleMine){
@@ -252,7 +213,6 @@ function renderArchiveCard(tagCount, topTags, visibleMine){
       </div>
 
       <div class="archive-section archive-gallery-section">
-        <div class="archive-view-bar">${renderArchiveModeSwitch()}</div>
         ${renderArchiveContent(visibleMine)}
       </div>
     </div>
@@ -839,16 +799,6 @@ function bindProfileEvents(state, mine, options = {}){
     dataFilter.querySelectorAll("span").forEach(btn => {
       btn.onclick = () => {
         profileDataMode = btn.dataset.mode || "month";
-        if(window.setState) window.setState({});
-      };
-    });
-  }
-
-  const archiveModeSwitch = document.getElementById("archive-mode-switch");
-  if(archiveModeSwitch){
-    archiveModeSwitch.querySelectorAll("span").forEach(btn => {
-      btn.onclick = () => {
-        profileArchiveMode = btn.dataset.mode || "gallery";
         if(window.setState) window.setState({});
       };
     });
