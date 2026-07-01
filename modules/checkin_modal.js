@@ -68,7 +68,7 @@ export function openCheckinModal(){
 
   const dateInput = document.getElementById("ci-date");
   if(dateInput){
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localTodayString();
     dateInput.value = today;
     dateInput.max = today;
   }
@@ -121,6 +121,15 @@ function readAsDataUrl(file){
 
     reader.readAsDataURL(file);
   });
+}
+
+function localTodayString(){
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function renderImgList(){
@@ -335,7 +344,14 @@ async function submitCheckin(modal){
   const note = document.getElementById("ci-note").value.trim();
   
   const dateInput = document.getElementById("ci-date");
-  const pickedDate = dateInput?.value || new Date().toISOString().slice(0, 10);
+  const pickedDate = dateInput?.value || localTodayString();
+  const today = localTodayString();
+  
+  if(pickedDate > today){
+    window.showToast?.("不能选择未来日期。", "日期不对", "error");
+    return;
+  }
+  
   const createdAt = pickedDate + "T12:00:00";
   
   const btn = document.getElementById("ci-submit");
