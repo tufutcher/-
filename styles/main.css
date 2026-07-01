@@ -1978,3 +1978,33 @@ button.cal-cell:disabled{
     top:-85px;
   }
 }
+
+/* 打卡弹窗：日期选择 */
+.ci-date-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:8px 0 12px;
+  padding:10px 12px;
+  border-radius:18px;
+  background:#f7f8f9;
+}
+
+.ci-date-row label{
+  margin:0;
+  font-size:13px;
+  font-weight:850;
+  color:#777;
+}
+
+.ci-date-row input{
+  border:none;
+  background:#fff;
+  border-radius:999px;
+  padding:8px 12px;
+  font-family:inherit;
+  font-size:13px;
+  color:#111;
+  outline:none;
+}
