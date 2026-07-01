@@ -990,9 +990,21 @@ function openProfileCheckinDetail(item, readonly = false){
     '</div>';
 
   document.body.appendChild(modal);
+  
+  const escClose = (e) => {
+    if(e.key === "Escape"){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
+  };
+  
+  document.addEventListener("keydown", escClose);
 
   modal.onclick = (e) => {
-    if(e.target === modal) modal.remove();
+    if(e.target === modal){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
   };
 
   const authorCard = modal.querySelector(".detail-author-card");
@@ -1145,7 +1157,6 @@ export function openReadonlyProfileModal(userId){
 
   modal.innerHTML =
     '<div class="detail-viewer-card readonly-profile-card">' +
-      '<button id="readonly-profile-close" class="detail-x" type="button">×</button>' +
       '<div class="readonly-profile-content">' +
         renderProfile(state, {
           userId,
@@ -1160,10 +1171,6 @@ export function openReadonlyProfileModal(userId){
     if(e.target === modal){
       modal.remove();
     }
-  };
-
-  document.getElementById("readonly-profile-close").onclick = () => {
-    modal.remove();
   };
 }
 export function openEditModal(item){
