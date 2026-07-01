@@ -2006,7 +2006,7 @@ button.cal-cell:disabled{
 }
 
 .streak-corner span{
-  left:2px;
+  left:10px;
   top:-110px;
   font-size:11px;
   font-weight:800;
@@ -2035,7 +2035,7 @@ button.cal-cell:disabled{
 
   .streak-corner span{
     left:auto;
-    right:2px;
+    right:10px;
     top:-110px;
   }
 
