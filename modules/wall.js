@@ -270,8 +270,20 @@ function openDetail(item){
 
   document.body.appendChild(modal);
 
+  const escClose = (e) => {
+    if(e.key === "Escape"){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
+  };
+  
+  document.addEventListener("keydown", escClose);
+
   modal.onclick = (e) => {
-    if(e.target === modal) modal.remove();
+    if(e.target === modal){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
   };
 
   const authorCard = modal.querySelector(".detail-author-card");
