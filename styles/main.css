@@ -119,10 +119,9 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .wall-logo{
   display:block;
-  width:auto;
-  max-width:min(360px, 82vw);
+  width:min(620px, 92vw);
   height:auto;
-  max-height:120px;
+  max-height:none;
   object-fit:contain;
 }
 
