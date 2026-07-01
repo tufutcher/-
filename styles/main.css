@@ -859,9 +859,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 .gallery-tile:hover .gallery-date{
-  opacity:1;
+  display:none;
 }
-
 @media (max-width:760px){
   .gallery-board{
     grid-template-columns:repeat(auto-fill, minmax(64px, 1fr));
@@ -869,22 +868,21 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     gap:6px;
     padding:6px;
   }
-
   .gallery-board-scroll{
     height:500px;
   }
-
   .gallery-tile{
     border-radius:9px;
   }
+  .gallery-date{
+    display:none;
+  }
 }
-
 @media (max-width:620px){
   .archive-top{
     flex-direction:column;
     align-items:flex-start;
   }
-
   .data-filter{
     width:100%;
   }
@@ -892,27 +890,22 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   .data-filter span{
     flex:1;
   }
-
   .gallery-board{
     grid-template-columns:repeat(auto-fill, minmax(54px, 1fr));
     height:420px;
     gap:5px;
     padding:6px;
   }
-
   .gallery-board-scroll{
     height:460px;
   }
-
   .gallery-tile{
     border-radius:7px;
   }
-
   .gallery-date{
     display:none;
   }
 }
-
 @media (max-width:390px){
   .gallery-board{
     grid-template-columns:repeat(auto-fill, minmax(62px, 1fr));
