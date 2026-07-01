@@ -782,61 +782,67 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 }
 
 .gallery-board{
-  display:grid;
-  gap:7px;
   height:520px;
   overflow-y:auto;
   overflow-x:hidden;
-  padding:7px;
+  padding:8px;
   border-radius:18px;
   background:#f6f7f8;
-  align-content:start;
+  column-gap:10px;
 }
 
-/* 本周 / 本月：框固定，图片根据数量缩小 */
+/* 本周 / 本月：固定高度框 */
 .gallery-board-fixed{
   height:520px;
 }
 
-/* 总览：同样在框内上下滚动 */
+/* 总览：稍微高一点，也在框内滚动 */
 .gallery-board-scroll{
   height:560px;
 }
 
 /* 图片-列数 */
 .gallery-size-3{
-  grid-template-columns:repeat(3, 1fr);
+  column-count:3;
 }
+
 .gallery-size-4{
-  grid-template-columns:repeat(4, 1fr);
+  column-count:4;
 }
+
 .gallery-size-5{
-  grid-template-columns:repeat(5, 1fr);
+  column-count:5;
 }
+
 .gallery-size-6{
-  grid-template-columns:repeat(6, 1fr);
+  column-count:6;
 }
+
 .gallery-size-7{
-  grid-template-columns:repeat(7, 1fr);
+  column-count:7;
 }
+
 .gallery-size-8{
-  grid-template-columns:repeat(8, 1fr);
+  column-count:8;
 }
+
 .gallery-size-9{
-  grid-template-columns:repeat(9, 1fr);
+  column-count:9;
 }
+
 .gallery-size-10{
-  grid-template-columns:repeat(10, 1fr);
+  column-count:10;
 }
 
 .gallery-tile{
   position:relative;
   display:block;
   width:100%;
-  aspect-ratio:1 / 1;
+  break-inside:avoid;
+  margin:0 0 10px;
   border:none;
   padding:0;
-  border-radius:11px;
+  border-radius:12px;
   overflow:hidden;
   background:#fff;
   cursor:pointer;
@@ -845,8 +851,9 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 .gallery-tile img{
   width:100%;
-  height:100%;
+  height:auto;
   max-width:100%;
+  max-height:260px;
   object-fit:contain;
   display:block;
   background:#fafafa;
@@ -861,6 +868,7 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   border-radius:999px;
   background:rgba(255,255,255,.78);
   backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
   font-size:10px;
   line-height:1;
   color:#666;
@@ -895,11 +903,10 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     flex:1;
   }
 
-@media (max-width:620px){
   .gallery-board{
     height:420px;
-    gap:6px;
-    padding:6px;
+    padding:7px;
+    column-gap:8px;
   }
 
   .gallery-board-scroll{
@@ -907,41 +914,34 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   }
 
   .gallery-size-3{
-    grid-template-columns:repeat(3, 1fr);
+    column-count:3;
   }
 
   .gallery-size-4,
-  .gallery-size-5{
-    grid-template-columns:repeat(4, 1fr);
-  }
-  
+  .gallery-size-5,
   .gallery-size-6,
   .gallery-size-7,
   .gallery-size-8,
   .gallery-size-9,
   .gallery-size-10{
-    grid-template-columns:repeat(5, 1fr);
+    column-count:4;
   }
 
   .gallery-tile{
-    border-radius:9px;
-  }
-
-  .gallery-tile{
-    margin-bottom:6px;
-    border-radius:9px;
+    margin-bottom:8px;
+    border-radius:10px;
   }
 
   .gallery-tile img{
-    max-height:170px;
+    max-height:180px;
   }
-}
-  
+
   .gallery-date{
     font-size:9px;
     padding:3px 5px;
   }
 }
+
 /* 月历：点击日期查看当天打卡 */
 .cal-cell{
   border:none;
