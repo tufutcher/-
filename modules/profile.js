@@ -6,6 +6,7 @@ import {
   updateImageTags,
   deleteCheckinWithImages,
   adminDeleteCheckinWithImages,
+  adminPurgeUserData,
   loadCheckins
 } from "../api/checkin.js";
 import { uploadImage } from "../api/storage.js";
@@ -521,6 +522,7 @@ function renderAdminPanel(state){
         <button id="admin-export-csv">导出 Profile CSV</button>
         <button id="admin-export-json" class="secondary">导出完整 JSON</button>
         <button id="admin-manage-checkins" class="secondary">批量管理打卡</button>
+        <button id="admin-purge-user" class="danger">清理用户痕迹</button>
       </div>
     </div>
   `;
@@ -748,6 +750,121 @@ function openAdminCheckinManager(state){
   }
 
   renderRows();
+}
+
+function openAdminPurgeUserModal(state){
+  const old = document.getElementById("admin-purge-user-modal");
+  if(old) old.remove();
+
+  const profiles = (state.profiles || []).filter(p => p.id !== state.user?.id);
+
+  const modal = document.createElement("div");
+  modal.id = "admin-purge-user-modal";
+  modal.className = "modal-bg detail-viewer-bg";
+
+  const options = profiles.map(profile => {
+    const count = (state.checkins || []).filter(item => item.user_id === profile.id).length;
+    return '<option value="' + profile.id + '">' +
+      (profile.username || "匿名") + '（' + count + ' 次打卡）' +
+    '</option>';
+  }).join("");
+
+  modal.innerHTML =
+    '<div class="detail-viewer-card admin-purge-card">' +
+      '<div class="detail-viewer-head">' +
+        '<div>' +
+          '<div class="detail-author">清理用户痕迹</div>' +
+          '<div class="detail-date">删除作品、头像、打卡记录和个人资料。Auth 用户需要之后去 Supabase 后台删除。</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="admin-purge-box">' +
+        '<label>选择用户</label>' +
+        '<select id="admin-purge-user-select">' +
+          '<option value="">请选择用户</option>' +
+          options +
+        '</select>' +
+
+        '<div class="admin-purge-warning">' +
+          '这个操作会删除该用户在网站里的公开痕迹，但不会删除 Supabase Authentication 里的登录账号。' +
+        '</div>' +
+
+        '<button id="admin-purge-confirm" class="danger" type="button">清理这个用户</button>' +
+        '<button id="admin-purge-cancel" class="secondary" type="button">取消</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(modal);
+
+  modal.onclick = (e) => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  };
+
+  document.getElementById("admin-purge-cancel").onclick = () => {
+    modal.remove();
+  };
+
+  document.getElementById("admin-purge-confirm").onclick = async () => {
+    const select = document.getElementById("admin-purge-user-select");
+    const userId = select?.value;
+
+    if(!userId){
+      window.showToast?.("请先选择一个用户。", "还不能清理", "error");
+      return;
+    }
+
+    const profile = profiles.find(p => p.id === userId);
+    const username = profile?.username || "匿名";
+    const count = (state.checkins || []).filter(item => item.user_id === userId).length;
+
+    const ok = await window.showConfirm?.({
+      title: "清理这个用户？",
+      message: "将删除「" + username + "」的头像、" + count + " 次打卡、所有作品图片和个人资料。这个动作不能撤回。",
+      confirmText: "确认清理",
+      cancelText: "取消",
+      danger: true
+    });
+
+    if(!ok) return;
+
+    const sb = window.__sb;
+
+    if(!sb){
+      window.showToast?.("数据库连接失败，请刷新后重试。", "清理失败", "error");
+      return;
+    }
+
+    const btn = document.getElementById("admin-purge-confirm");
+    btn.disabled = true;
+    btn.textContent = "清理中...";
+
+    const cleaned = await adminPurgeUserData(sb, userId);
+
+    if(!cleaned){
+      btn.disabled = false;
+      btn.textContent = "清理这个用户";
+      return;
+    }
+
+    const freshCheckins = await loadCheckins(sb);
+
+    if(window.setState){
+      window.setState({
+        checkins: freshCheckins,
+        profiles: (state.profiles || []).filter(p => p.id !== userId)
+      });
+    }
+
+    modal.remove();
+
+    window.showToast?.(
+      "网站内数据已清理。现在可以去 Supabase Authentication 删除这个用户账号。",
+      "清理完成",
+      "success"
+    );
+  };
 }
 
 export function renderProfile(state, options = {}){
@@ -1060,6 +1177,13 @@ function bindProfileEvents(state, mine, options = {}){
   if(manageCheckinsBtn){
     manageCheckinsBtn.onclick = () => {
       openAdminCheckinManager(state);
+    };
+  }
+  
+  const purgeUserBtn = document.getElementById("admin-purge-user");
+  if(purgeUserBtn){
+    purgeUserBtn.onclick = () => {
+      openAdminPurgeUserModal(state);
     };
   }
 
