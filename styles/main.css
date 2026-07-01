@@ -461,6 +461,8 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
 
 /* 个人页顶部：左侧头像昵称，右侧月历 */
 .profile-hero-card{
+  position:relative;
+  overflow:hidden;
   display:grid;
   grid-template-columns:minmax(220px, .85fr) minmax(320px, 1.15fr);
   gap:24px;
@@ -587,6 +589,13 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
     grid-template-columns:1fr;
     gap:18px;
     padding:22px;
+  }
+
+    .streak-corner{
+      left:auto;
+      right:0;
+      top:0;
+      transform:translate(52px, -52px) rotate(45deg);
   }
 
   .profile-hero-left{
@@ -1872,34 +1881,26 @@ button.cal-cell:disabled{
   font-size:12px;
   color:#999;
 }
-/* 我的页：月历连续打卡书签 */
-.profile-hero-calendar{
-  position:relative;
-}
 
-.streak-bookmark{
+/* 我的页：连续打卡角标 */
+.streak-corner{
   position:absolute;
-  right:14px;
+  left:0;
   top:0;
-  z-index:2;
-  padding:7px 10px 9px;
-  border-radius:0 0 12px 12px;
-  background:#111;
+  z-index:4;
+  width:150px;
+  height:150px;
+  pointer-events:none;
   color:#fff;
-  font-size:11px;
-  font-weight:800;
-  box-shadow:0 10px 24px rgba(0,0,0,.16);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.04em;
+  transform:translate(-52px, -52px) rotate(-45deg);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding-bottom:18px;
+  background:#111;
+  box-shadow:0 16px 36px rgba(0,0,0,.16);
 }
 
-.streak-bookmark::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-7px;
-  transform:translateX(-50%);
-  width:0;
-  height:0;
-  border-left:7px solid transparent;
-  border-right:7px solid transparent;
-  border-top:7px solid #111;
-}
