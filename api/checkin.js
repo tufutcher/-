@@ -140,3 +140,98 @@ export async function adminDeleteCheckinWithImages(sb, checkinId){
 
   return true;
 }
+export async function adminPurgeUserData(sb, userId){
+  const { data: profile, error: profileErr } = await sb
+    .from("profiles")
+    .select("avatar_url")
+    .eq("id", userId)
+    .single();
+
+  if(profileErr){
+    window.showToast?.("读取用户资料失败：" + profileErr.message, "清理失败", "error");
+    return false;
+  }
+
+  const { data: imgs, error: imgErr } = await sb
+    .from("checkin_images")
+    .select("storage_path")
+    .eq("user_id", userId);
+
+  if(imgErr){
+    window.showToast?.("读取作品图片失败：" + imgErr.message, "清理失败", "error");
+    return false;
+  }
+
+  const artPaths = (imgs || []).map(x => x.storage_path).filter(Boolean);
+
+  if(artPaths.length){
+    const { error: storageErr } = await sb.storage.from("art").remove(artPaths);
+
+    if(storageErr){
+      window.showToast?.(
+        "作品图片删除失败，清理已停止。\n" + storageErr.message,
+        "清理失败",
+        "error"
+      );
+      return false;
+    }
+  }
+
+  const avatarPath = getStoragePathFromPublicUrl(profile?.avatar_url);
+
+  if(avatarPath){
+    const { error: avatarErr } = await sb.storage.from("avatars").remove([avatarPath]);
+
+    if(avatarErr){
+      window.showToast?.(
+        "头像文件删除失败，清理已停止。\n" + avatarErr.message,
+        "清理失败",
+        "error"
+      );
+      return false;
+    }
+  }
+
+  const { error: imageRowsErr } = await sb
+    .from("checkin_images")
+    .delete()
+    .eq("user_id", userId);
+
+  if(imageRowsErr){
+    window.showToast?.("图片记录删除失败：" + imageRowsErr.message, "清理失败", "error");
+    return false;
+  }
+
+  const { error: checkinErr } = await sb
+    .from("checkins")
+    .delete()
+    .eq("user_id", userId);
+
+  if(checkinErr){
+    window.showToast?.("打卡记录删除失败：" + checkinErr.message, "清理失败", "error");
+    return false;
+  }
+
+  const { error: profileDeleteErr } = await sb
+    .from("profiles")
+    .delete()
+    .eq("id", userId);
+
+  if(profileDeleteErr){
+    window.showToast?.("个人资料删除失败：" + profileDeleteErr.message, "清理失败", "error");
+    return false;
+  }
+
+  return true;
+}
+
+function getStoragePathFromPublicUrl(url){
+  if(!url) return "";
+
+  const marker = "/storage/v1/object/public/avatars/";
+  const index = url.indexOf(marker);
+
+  if(index === -1) return "";
+
+  return decodeURIComponent(url.slice(index + marker.length));
+}
