@@ -84,6 +84,20 @@ function computeStats(mine){
     else cur = 1;
     if(cur > maxStreak) maxStreak = cur;
   }
+  function computeCurrentStreak(mine){
+  const days = new Set(mine.map(item => dateKey(item.created_at)));
+
+  let streak = 0;
+  const d = new Date();
+  d.setHours(0,0,0,0);
+
+  while(days.has(dateKey(d))){
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+
+  return streak;
+}
 
   return { weekDays:weekDays.size, weekImages, monthDays:monthDays.size, monthImages, maxStreak, totalImages };
 }
@@ -531,6 +545,7 @@ export function renderProfile(state, options = {}){
 
   const mine = state.checkins.filter(i => i.user_id === targetUserId);
   const stats = computeStats(mine);
+  const currentStreak = computeCurrentStreak(mine);
   const totalDays = new Set(mine.map(item => dateKey(item.created_at))).size;
   const badges = computeBadges(mine);
   const visibleMine = filterProfileItems(mine);
@@ -549,6 +564,7 @@ export function renderProfile(state, options = {}){
 
   const topTags = Object.entries(tagCount).sort((a,b) => b[1] - a[1]).slice(0,6);
   const avatarUrl = profile?.avatar_url;
+  const username = profile?.username || "匿名";
   const avatarLetter = username.trim().slice(0, 1) || "匿";
   
   const profileAvatarHtml = avatarUrl
@@ -598,6 +614,7 @@ export function renderProfile(state, options = {}){
       '</div>' +
 
       '<div class="profile-hero-calendar">' +
+        (currentStreak ? '<div class="streak-bookmark">已连续' + currentStreak + '天打卡</div>' : '') +
         renderMiniCalendar(mine) +
       '</div>' +
     '</div>' +
