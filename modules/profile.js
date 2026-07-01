@@ -1,6 +1,7 @@
 import { TAG_CATEGORIES } from "./checkin_modal.js";
 import {
   updateCheckinNote,
+  updateCheckinDate,
   updateImageTags,
   deleteCheckinWithImages,
   adminDeleteCheckinWithImages,
@@ -1076,6 +1077,7 @@ export function openEditModal(item){
   let globalTags = editImages[0] ? [...editImages[0].tags] : [];
   let selectedImageId = null;
   let noteValue = item.note || "";
+  let dateValue = new Date(item.created_at).toISOString().slice(0, 10);
 
   function selectedImage(){
     return editImages.find(img => img.id === selectedImageId);
@@ -1152,6 +1154,11 @@ export function openEditModal(item){
         '</div>' +
 
         '<div class="edit-checkin-body">' +
+          '<div class="ci-date-row edit-date-row">' +
+            '<label for="edit-date">打卡日期</label>' +
+            '<input type="date" id="edit-date" value="' + dateValue + '">' +
+          '</div>' +
+        
           '<div class="ci-thumb-grid edit-thumb-grid">' +
             thumbsHtml +
           '</div>' +
@@ -1173,10 +1180,15 @@ export function openEditModal(item){
     bindEditorEvents();
   }
 
-  function saveCurrentNote(){
+  function saveCurrentForm(){
     const noteInput = document.getElementById("edit-note");
     if(noteInput){
       noteValue = noteInput.value;
+    }
+  
+    const dateInput = document.getElementById("edit-date");
+    if(dateInput){
+      dateValue = dateInput.value;
     }
   }
 
@@ -1192,7 +1204,7 @@ export function openEditModal(item){
 
     modal.querySelectorAll(".edit-thumb").forEach(btn => {
       btn.onclick = () => {
-        saveCurrentNote();
+        saveCurrentForm();
         selectedImageId = btn.dataset.imgId;
         renderEditor();
       };
@@ -1217,7 +1229,7 @@ export function openEditModal(item){
           };
         });
 
-        saveCurrentNote();
+        saveCurrentForm();
         renderEditor();
       };
     });
@@ -1237,7 +1249,7 @@ export function openEditModal(item){
 
         selected.customTags = true;
 
-        saveCurrentNote();
+        saveCurrentForm();
         renderEditor();
       };
     });
@@ -1245,7 +1257,7 @@ export function openEditModal(item){
     const backBtn = document.getElementById("edit-back-global");
     if(backBtn){
       backBtn.onclick = () => {
-        saveCurrentNote();
+        saveCurrentForm();
         selectedImageId = null;
         renderEditor();
       };
@@ -1260,7 +1272,7 @@ export function openEditModal(item){
         selected.tags = [...globalTags];
         selected.customTags = false;
 
-        saveCurrentNote();
+        saveCurrentForm();
         renderEditor();
       };
     }
@@ -1271,6 +1283,10 @@ export function openEditModal(item){
         const sb = window.__sb;
         const noteInput = document.getElementById("edit-note");
         const note = noteInput ? noteInput.value.trim() : noteValue.trim();
+        
+        const dateInput = document.getElementById("edit-date");
+        const pickedDate = dateInput?.value || dateValue || new Date(item.created_at).toISOString().slice(0, 10);
+        const createdAt = pickedDate + "T12:00:00";
 
         if(!sb){
           window.showToast?.("数据库连接失败，请刷新后重试。", "保存失败", "error");
@@ -1281,6 +1297,7 @@ export function openEditModal(item){
         saveBtn.textContent = "保存中...";
 
         await updateCheckinNote(sb, item.id, note);
+        await updateCheckinDate(sb, item.id, createdAt);
 
         for(const img of editImages){
           await updateImageTags(sb, img.id, img.tags);
