@@ -1,4 +1,4 @@
-import { checkInvite } from "./invite.js";
+import { checkInvite, consumeInvite } from "./invite.js";
 
 // 把任意昵称（含中文）转换成邮箱安全的英文字符串，同一个昵称每次转换结果一致
 export function usernameToEmail(username){
@@ -27,30 +27,63 @@ export async function signIn(sb, username, password){
 }
 
 export async function signUp(sb, username, password, invite){
-  const ok = await checkInvite(sb, invite);
-  if(!ok){
-    return { user: null, error: "邀请码不正确" };
+  const inviteCheck = await checkInvite(sb, invite);
+
+  if(!inviteCheck.ok){
+    return {
+      user: null,
+      error: inviteCheck.error || "邀请码不正确"
+    };
   }
 
   const email = usernameToEmail(username);
-  const result = await sb.auth.signUp({ email: email, password: password });
+
+  const result = await sb.auth.signUp({
+    email: email,
+    password: password
+  });
+
   if(result.error){
-    return { user: null, error: result.error.message };
+    return {
+      user: null,
+      error: result.error.message
+    };
   }
+
   const user = result.data.user;
+
   if(!user){
-    return { user: null, error: "注册失败，请重试" };
+    return {
+      user: null,
+      error: "注册失败，请重试"
+    };
   }
 
   const profileResult = await sb.from("profiles").insert({
     id: user.id,
     username: username
   });
+
   if(profileResult.error){
-    return { user: null, error: "用户名可能已被占用：" + profileResult.error.message };
+    return {
+      user: null,
+      error: "用户名可能已被占用：" + profileResult.error.message
+    };
   }
 
-  return { user: user, error: null };
+  const inviteConsume = await consumeInvite(sb, invite);
+
+  if(!inviteConsume.ok){
+    return {
+      user: null,
+      error: "邀请码使用失败：" + inviteConsume.error
+    };
+  }
+
+  return {
+    user: user,
+    error: null
+  };
 }
 
 export async function getCurrentUser(sb){
