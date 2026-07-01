@@ -688,40 +688,21 @@ function openCalendarDayModal(dayKey, mine, readonly){
     return sum + (item.checkin_images?.length || 0);
   }, 0);
 
-  const bodyHtml = items.map(item => {
+  const galleryHtml = items.map(item => {
     const imgs = item.checkin_images || [];
-    const cover = imgs[0];
 
-    const thumbsHtml = imgs.slice(0, 6).map(img => {
-      return '<img src="' + img.image_url + '">';
+    return imgs.map(img => {
+      return (
+        '<button class="calendar-gallery-tile" data-checkin-id="' + item.id + '" type="button">' +
+          '<img src="' + img.image_url + '">' +
+          (item.note ? '<span class="calendar-gallery-note">' + item.note + '</span>' : '') +
+        '</button>'
+      );
     }).join("");
-
-    const actionText = readonly ? "查看" : "编辑";
-
-    return (
-      '<div class="calendar-modern-item" data-checkin-id="' + item.id + '">' +
-        '<div class="calendar-modern-cover">' +
-          (cover ? '<img src="' + cover.image_url + '">' : '') +
-        '</div>' +
-
-        '<div class="calendar-modern-info">' +
-          '<div class="calendar-modern-title">' + fmtDate(item.created_at) + '</div>' +
-          '<div class="calendar-modern-sub">' + imgs.length + ' 张作品</div>' +
-
-          '<div class="calendar-modern-thumbs">' +
-            thumbsHtml +
-          '</div>' +
-
-          (item.note ? '<div class="calendar-modern-note">' + item.note + '</div>' : '') +
-
-          '<button class="calendar-open-btn" data-checkin-id="' + item.id + '">' + actionText + '</button>' +
-        '</div>' +
-      '</div>'
-    );
   }).join("");
 
   modal.innerHTML =
-    '<div class="detail-viewer-card calendar-modern-card">' +
+    '<div class="detail-viewer-card calendar-gallery-card">' +
       '<button id="calendar-day-close" class="detail-x" type="button">×</button>' +
 
       '<div class="detail-viewer-head">' +
@@ -731,8 +712,8 @@ function openCalendarDayModal(dayKey, mine, readonly){
         '</div>' +
       '</div>' +
 
-      '<div class="calendar-modern-list">' +
-        bodyHtml +
+      '<div class="calendar-gallery-board">' +
+        galleryHtml +
       '</div>' +
     '</div>';
 
@@ -744,45 +725,23 @@ function openCalendarDayModal(dayKey, mine, readonly){
 
   document.getElementById("calendar-day-close").onclick = () => modal.remove();
 
-  modal.querySelectorAll(".calendar-open-btn").forEach(btn => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-
-      const item = items.find(x => x.id === btn.dataset.checkinId);
+  modal.querySelectorAll("[data-checkin-id]").forEach(tile => {
+    tile.onclick = () => {
+      const item = items.find(x => x.id === tile.dataset.checkinId);
       if(!item) return;
 
       modal.remove();
-
-      if(readonly){
-        openReadOnlyCheckinDetail(item);
-      } else {
-        openEditModal(item);
-      }
-    };
-  });
-
-  modal.querySelectorAll(".calendar-modern-item").forEach(card => {
-    card.onclick = () => {
-      const item = items.find(x => x.id === card.dataset.checkinId);
-      if(!item) return;
-
-      modal.remove();
-
-      if(readonly){
-        openReadOnlyCheckinDetail(item);
-      } else {
-        openEditModal(item);
-      }
+      openProfileCheckinDetail(item, readonly);
     };
   });
 }
 
-function openReadOnlyCheckinDetail(item){
-  const old = document.getElementById("readonly-detail-modal");
+function openProfileCheckinDetail(item, readonly = false){
+  const old = document.getElementById("profile-detail-modal");
   if(old) old.remove();
 
   const modal = document.createElement("div");
-  modal.id = "readonly-detail-modal";
+  modal.id = "profile-detail-modal";
   modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
@@ -806,7 +765,7 @@ function openReadOnlyCheckinDetail(item){
 
   modal.innerHTML =
     '<div class="detail-viewer-card">' +
-      '<button id="readonly-detail-close" class="detail-x" type="button">×</button>' +
+      '<button id="profile-detail-close" class="detail-x" type="button">×</button>' +
 
       '<div class="detail-viewer-head">' +
         '<div>' +
@@ -820,6 +779,12 @@ function openReadOnlyCheckinDetail(item){
       '</div>' +
 
       (item.note ? '<div class="note detail-note">' + item.note + '</div>' : '') +
+
+      (!readonly ? (
+        '<div class="detail-actions">' +
+          '<button id="profile-detail-edit">编辑</button>' +
+        '</div>'
+      ) : '') +
     '</div>';
 
   document.body.appendChild(modal);
@@ -828,7 +793,19 @@ function openReadOnlyCheckinDetail(item){
     if(e.target === modal) modal.remove();
   };
 
-  document.getElementById("readonly-detail-close").onclick = () => modal.remove();
+  document.getElementById("profile-detail-close").onclick = () => modal.remove();
+
+  const editBtn = document.getElementById("profile-detail-edit");
+  if(editBtn){
+    editBtn.onclick = () => {
+      modal.remove();
+      openEditModal(item);
+    };
+  }
+}
+
+function openReadOnlyCheckinDetail(item){
+  openProfileCheckinDetail(item, true);
 }
 
 function bindProfileEvents(state, mine, options = {}){
@@ -942,19 +919,14 @@ function bindProfileEvents(state, mine, options = {}){
     }
   }
 
-  document.querySelectorAll("[data-checkin-id]").forEach(el => {
-    el.onclick = () => {
-      const item = mine.find(x => x.id === el.dataset.checkinId);
-      if(!item) return;
+document.querySelectorAll("[data-checkin-id]").forEach(el => {
+  el.onclick = () => {
+    const item = mine.find(x => x.id === el.dataset.checkinId);
+    if(!item) return;
 
-      if(readonly){
-        openReadOnlyCheckinDetail(item);
-      } else {
-        openEditModal(item);
-      }
-    };
-  });
-}
+    openProfileCheckinDetail(item, readonly);
+  };
+});
 
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
