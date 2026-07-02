@@ -5,7 +5,7 @@ const MODE_LABEL = {
   register: "注册"
 };
 
-// 登录 / 注册弹窗
+// 登录 / 注册弹窗 
 export function openAuthModal(sb, onSuccess){
   const old = document.getElementById("auth-modal");
   if(old) old.remove();
