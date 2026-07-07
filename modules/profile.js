@@ -1,12 +1,5 @@
 import { TAG_CATEGORIES } from "./checkin_modal.js";
 import { state } from "../core/state.js";
-import {
-  updateCheckinNote,
-  updateCheckinDate,
-  updateImageTags,
-  deleteCheckinWithImages,
-  loadCheckins
-} from "../api/checkin.js";
 import { uploadImage } from "../api/storage.js";
 import {
   exportAllProfilesCSV,
@@ -15,6 +8,7 @@ import {
   openAdminCheckinManager,
   openAdminPurgeUserModal
 } from "./admin.js";
+import { openEditModal } from "./edit_modal.js";
 
 const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
