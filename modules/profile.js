@@ -15,6 +15,7 @@ const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
 let profileDataMode = "month";
 
+// 日期与统计工具
 function fmtDate(date){
   const d = new Date(date);
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
@@ -110,21 +111,6 @@ function computeStats(mine){
     else cur = 1;
     if(cur > maxStreak) maxStreak = cur;
   }
-  function computeCurrentStreak(mine){
-  const days = new Set(mine.map(item => dateKey(item.created_at)));
-
-  let streak = 0;
-  const d = new Date();
-  d.setHours(0,0,0,0);
-
-  while(days.has(dateKey(d))){
-    streak++;
-    d.setDate(d.getDate() - 1);
-  }
-
-  return streak;
-}
-
   return { weekDays:weekDays.size, weekImages, monthDays:monthDays.size, monthImages, maxStreak, totalImages };
 }
 
@@ -176,6 +162,7 @@ function dataModeTitle(){
   return "全部";
 }
 
+// 个人页作品档案与创作分析
 function getGalleryImages(items){
   return items.flatMap(item =>
     (item.checkin_images || []).map(img => ({
@@ -395,6 +382,7 @@ function pieSvg(tagCount, catName){
   `;
 }
 
+// 管理员数据导出
 function csvCell(value){
   const s = String(value ?? "");
   return `"${s.replaceAll('"', '""')}"`;
@@ -516,6 +504,7 @@ function exportAllProfilesJSON(state){
   );
 }
 
+// 管理员工具
 function renderAdminPanel(state){
   const profiles = state.profiles || [];
   const checkins = state.checkins || [];
@@ -885,6 +874,7 @@ function openAdminPurgeUserModal(state){
   };
 }
 
+// 渲染个人主页。readonly 用于别人主页弹窗，skipBind 用于避免重复绑定全局事件。
 export function renderProfile(state, options = {}){
   const targetUserId = options.userId || state.user?.id;
   const readonly = !!options.readonly;
@@ -1165,10 +1155,6 @@ function openProfileCheckinDetail(item, readonly = false){
   }
 }
 
-function openReadOnlyCheckinDetail(item){
-  openProfileCheckinDetail(item, true);
-}
-
 function getAvatarStorageInfoFromUrl(url){
   if(!url) return null;
 
@@ -1189,15 +1175,6 @@ function getAvatarStorageInfoFromUrl(url){
 
 function bindProfileEvents(state, mine, options = {}){
   const readonly = !!options.readonly;
-
-  const backWallBtn = document.getElementById("back-wall-btn");
-  if(backWallBtn){
-    backWallBtn.onclick = () => {
-      if(window.setState){
-        window.setState({ view: "wall", viewUserId: null });
-      }
-    };
-  }
 
   const exportCsvBtn = document.getElementById("admin-export-csv");
   if(exportCsvBtn){
@@ -1256,8 +1233,8 @@ function bindProfileEvents(state, mine, options = {}){
   document.querySelectorAll("[data-cal-date]").forEach(btn => {
   btn.onclick = () => {
     openCalendarDayModal(btn.dataset.calDate, mine, readonly);
-  };
-});
+    };
+  });
 
   if(!readonly){
     const avatarTrigger = document.getElementById("avatar-trigger");
@@ -1340,17 +1317,6 @@ function bindProfileEvents(state, mine, options = {}){
       openProfileCheckinDetail(item, readonly);
     };
   });
-}
-
-function getAvatarPathFromUrl(url){
-  if(!url) return "";
-
-  const marker = "/storage/v1/object/public/avatars/";
-  const index = url.indexOf(marker);
-
-  if(index === -1) return "";
-
-  return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
 }
 
 export function openReadonlyProfileModal(userId){
@@ -1459,6 +1425,7 @@ export function openReadonlyProfileModal(userId){
   renderReadonlyContent();
 }
 
+// 编辑已有打卡：日期、感想、标签和删除
 export function openEditModal(item){
   const old = document.getElementById("edit-modal");
   if(old) old.remove();
