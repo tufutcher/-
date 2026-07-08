@@ -1,29 +1,44 @@
 import { checkInvite, consumeInvite } from "./invite.js";
 
-// 把任意昵称（含中文）转换成邮箱安全的英文字符串，同一个昵称每次转换结果一致
+// 把任意昵称转换成邮箱安全字符串，同一个昵称结果一致
 export function usernameToEmail(username){
   const raw = btoa(unescape(encodeURIComponent(username)));
   let safe = "";
+
   for(let i = 0; i < raw.length && safe.length < 30; i++){
     const c = raw[i];
     const code = raw.charCodeAt(i);
     const isDigit = code >= 48 && code <= 57;
     const isUpper = code >= 65 && code <= 90;
     const isLower = code >= 97 && code <= 122;
+
     if(isDigit || isUpper || isLower){
       safe += c.toLowerCase();
     }
   }
+
   return safe + "@drawclub.app";
 }
 
 export async function signIn(sb, username, password){
   const email = usernameToEmail(username);
-  const result = await sb.auth.signInWithPassword({ email: email, password: password });
+
+  const result = await sb.auth.signInWithPassword({
+    email,
+    password
+  });
+
   if(result.error){
-    return { user: null, error: result.error.message };
+    return {
+      user: null,
+      error: result.error.message
+    };
   }
-  return { user: result.data.user, error: null };
+
+  return {
+    user: result.data.user,
+    error: null
+  };
 }
 
 export async function signUp(sb, username, password, invite){
@@ -39,8 +54,8 @@ export async function signUp(sb, username, password, invite){
   const email = usernameToEmail(username);
 
   const result = await sb.auth.signUp({
-    email: email,
-    password: password
+    email,
+    password
   });
 
   if(result.error){
@@ -59,9 +74,19 @@ export async function signUp(sb, username, password, invite){
     };
   }
 
+  const member = await findOrCreateMember(sb, username);
+
+  if(!member){
+    return {
+      user: null,
+      error: "成员档案创建失败，请联系管理员"
+    };
+  }
+
   const profileResult = await sb.from("profiles").insert({
     id: user.id,
-    username: username
+    username,
+    member_id: member.id
   });
 
   if(profileResult.error){
@@ -81,7 +106,7 @@ export async function signUp(sb, username, password, invite){
   }
 
   return {
-    user: user,
+    user,
     error: null
   };
 }
@@ -89,4 +114,47 @@ export async function signUp(sb, username, password, invite){
 export async function getCurrentUser(sb){
   const result = await sb.auth.getUser();
   return (result.data && result.data.user) ? result.data.user : null;
+}
+
+function normalizeName(name){
+  return String(name || "")
+    .trim()
+    .replace(/\s+/g, "")
+    .toLowerCase();
+}
+
+async function findOrCreateMember(sb, username){
+  const displayName = username.trim();
+  const normalizedName = normalizeName(displayName);
+
+  const { data: existing, error: findErr } = await sb
+    .from("members")
+    .select("*")
+    .eq("normalized_name", normalizedName)
+    .maybeSingle();
+
+  if(findErr){
+    console.error("find member error:", findErr);
+    return null;
+  }
+
+  if(existing){
+    return existing;
+  }
+
+  const { data: created, error: createErr } = await sb
+    .from("members")
+    .insert({
+      display_name: displayName,
+      normalized_name: normalizedName
+    })
+    .select()
+    .single();
+
+  if(createErr){
+    console.error("create member error:", createErr);
+    return null;
+  }
+
+  return created;
 }
