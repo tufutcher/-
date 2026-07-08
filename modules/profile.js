@@ -13,15 +13,38 @@ import {
   openCalendarDayModal,
   openProfileCheckinDetail
 } from "./detail_modal.js";
+import { loadProfileCheckins } from "../api/checkin.js";
 
 const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
 let profileDataMode = "month";
+let profileCheckinsCache = null;
 
 // 日期与统计工具
 function fmtDate(date){
   const d = new Date(date);
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+async function getProfileCheckins(state){
+  if(!state.profile) return [];
+
+  if(profileCheckinsCache){
+    return profileCheckinsCache;
+  }
+
+  const sb = window.__sb;
+
+  if(!sb){
+    return state.checkins || [];
+  }
+
+  profileCheckinsCache = await loadProfileCheckins(sb, state.profile);
+  return profileCheckinsCache;
+}
+
+export function resetProfileCheckinsCache(){
+  profileCheckinsCache = null;
 }
 
 function dateInputValue(date){
