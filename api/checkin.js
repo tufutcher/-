@@ -215,3 +215,44 @@ function getStoragePathFromPublicUrl(url, bucket){
 
   return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
 }
+
+export async function loadProfileCheckins(sb, profile){
+  if(!profile) return [];
+
+  const userId = profile.id;
+  const memberId = profile.member_id;
+
+  let query = sb
+    .from("checkins")
+    .select(`
+      *,
+      checkin_images(*)
+    `)
+    .order("created_at", { ascending: false });
+
+  if(memberId){
+    query = query.or(`user_id.eq.${userId},member_id.eq.${memberId}`);
+  }else{
+    query = query.eq("user_id", userId);
+  }
+
+  const { data, error } = await query;
+
+  if(error){
+    console.error("load profile checkins error:", error);
+    return [];
+  }
+
+  return dedupeCheckins(data || []);
+}
+
+function dedupeCheckins(items){
+  const map = new Map();
+
+  items.forEach(item => {
+    if(!item?.id) return;
+    map.set(item.id, item);
+  });
+
+  return Array.from(map.values());
+}
