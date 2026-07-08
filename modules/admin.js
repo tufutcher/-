@@ -3,6 +3,7 @@ import {
   adminPurgeUserData,
   loadCheckins
 } from "../api/checkin.js";
+import { openWeeklyReportManager } from "./weekly_report.js";
 
 function csvCell(value){
   const s = String(value ?? "");
@@ -259,6 +260,7 @@ export function renderAdminPanel(state){
         <button id="admin-export-json" class="secondary">导出完整 JSON</button>
         <button id="admin-manage-checkins" class="secondary">批量管理打卡</button>
         <button id="admin-purge-user" class="danger">清理用户痕迹</button>
+        <button id="admin-weekly-report">周报生成器</button>
       </div>
     </div>
   `;
