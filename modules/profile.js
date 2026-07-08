@@ -500,69 +500,6 @@ export function renderProfile(state, options = {}){
   return html;
 }
 
-function openCalendarDayModal(dayKey, mine, readonly){
-  const old = document.getElementById("calendar-day-modal");
-  if(old) old.remove();
-
-  const items = mine.filter(item => dateKey(item.created_at) === dayKey);
-  if(!items.length) return;
-
-  const modal = document.createElement("div");
-  modal.id = "calendar-day-modal";
-  modal.className = "modal-bg detail-viewer-bg";
-
-  const totalImages = items.reduce((sum, item) => {
-    return sum + (item.checkin_images?.length || 0);
-  }, 0);
-
-  const galleryHtml = items.map(item => {
-    const imgs = item.checkin_images || [];
-
-    return imgs.map(img => {
-      return (
-        '<button class="calendar-gallery-tile" data-checkin-id="' + item.id + '" type="button">' +
-          '<img src="' + img.image_url + '">' +
-          (item.note ? '<span class="calendar-gallery-note">' + item.note + '</span>' : '') +
-        '</button>'
-      );
-    }).join("");
-  }).join("");
-
-  modal.innerHTML =
-    '<div class="detail-viewer-card calendar-gallery-card">' +
-      '<button id="calendar-day-close" class="detail-x" type="button">×</button>' +
-
-      '<div class="detail-viewer-head">' +
-        '<div>' +
-          '<div class="detail-author">' + fmtDate(items[0].created_at) + '</div>' +
-          '<div class="detail-date">' + items.length + ' 次打卡 / ' + totalImages + ' 张作品</div>' +
-        '</div>' +
-      '</div>' +
-
-      '<div class="calendar-gallery-board">' +
-        galleryHtml +
-      '</div>' +
-    '</div>';
-
-  document.body.appendChild(modal);
-
-  modal.onclick = (e) => {
-    if(e.target === modal) modal.remove();
-  };
-
-  document.getElementById("calendar-day-close").onclick = () => modal.remove();
-
-  modal.querySelectorAll("[data-checkin-id]").forEach(tile => {
-    tile.onclick = () => {
-      const item = items.find(x => x.id === tile.dataset.checkinId);
-      if(!item) return;
-
-      modal.remove();
-      openProfileCheckinDetail(item, readonly);
-    };
-  });
-}
-
 function openProfileCheckinDetail(item, readonly = false){
   const old = document.getElementById("profile-detail-modal");
   if(old) old.remove();
