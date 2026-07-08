@@ -39,3 +39,54 @@
 - 能力维度（构图 线条 色彩 光影 人体 设计 叙事
 - 作品集（展示自己想展示的）
 - 私密打卡
+
+
+## v0.1.1
+
+这是 v0.1.0 发布后的维护更新，主要整理代码结构、修复日期与弹窗问题，并为后续目标系统、PWA 和 App 化做准备。
+
+### Changed
+
+- 打卡日期逻辑改为本地时间，避免 UTC 导致“今天”偏移。
+- 打卡墙详情、个人页详情、管理员列表中的日期显示增加年份。
+- 他人主页弹窗改为点击外部或按 Esc 关闭，减少界面干扰。
+- 管理员批量管理打卡面板改为删除后不关闭弹窗。
+- 管理员批量管理打卡增加更紧凑的列表展示。
+- 上传新头像后会尝试删除旧头像文件，减少 Storage 残留。
+- 邀请码逻辑调整为支持“一码一人”。
+
+### Fixed
+
+- 修复 `profile.js` 中残留旧函数导致的语法错误。
+- 修复拆分 `openEditModal` 后 `wall.js` 重复 import 导致的报错。
+
+### Refactored
+
+- 重构 `auth_modal.js`，拆分登录 / 注册弹窗创建、模式切换、表单校验与提交逻辑。
+- 重构 `checkin_modal.js`，合并重复的图片添加逻辑，拆分打卡提交流程。
+- 重构 `feedback.js`，统一 Toast、Confirm 和礼花弹窗的基础创建与关闭逻辑。
+- 从 `profile.js` 中拆出管理员工具到 `admin.js`。
+- 从 `profile.js` 中拆出编辑打卡弹窗到 `edit_modal.js`。
+- 从 `profile.js` 中拆出头像上传逻辑到 `avatar.js`。
+- 从 `profile.js` 中拆出作品详情和日历详情弹窗到 `detail_modal.js`。
+- 删除重复的 `computeCurrentStreak`。
+- 删除废弃的 `getAvatarPathFromUrl`。
+- 删除废弃的返回打卡墙按钮逻辑。
+- 删除废弃的只读作品详情兼容函数。
+- 简化关键函数注释，避免注释过度膨胀。
+
+### Internal
+
+- 当前模块结构调整为：
+
+```txt
+modules/
+  admin.js              管理员工具
+  auth_modal.js         登录 / 注册弹窗
+  avatar.js             头像上传
+  checkin_modal.js      发布打卡
+  detail_modal.js       作品详情 / 日历详情
+  edit_modal.js         编辑打卡
+  feedback.js           Toast / Confirm / 礼花反馈
+  profile.js            个人主页主渲染
+  wall.js               打卡墙
