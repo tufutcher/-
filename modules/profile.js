@@ -409,12 +409,32 @@ function pieSvg(tagCount, catName){
 }
 
 // 渲染个人主页。readonly 用于别人主页弹窗，skipBind 用于避免重复绑定全局事件。
+function getProfileItems(state, targetUserId){
+  const all = state.profileCheckins || state.checkins || [];
+  const targetProfile = getProfileByUserId(state, targetUserId);
+  const targetMemberId = targetProfile?.member_id;
+
+  return all.filter(item => {
+    if(item.user_id === targetUserId) return true;
+    if(targetMemberId && item.member_id === targetMemberId) return true;
+    return false;
+  });
+}
+
+function getProfileByUserId(state, userId){
+  if(state.user?.id === userId && state.profile){
+    return state.profile;
+  }
+
+  return (state.profiles || []).find(profile => profile.id === userId);
+}
+
 export function renderProfile(state, options = {}){
   const targetUserId = options.userId || state.user?.id;
   const readonly = !!options.readonly;
   const skipBind = !!options.skipBind;
 
-  const mine = state.checkins.filter(i => i.user_id === targetUserId);
+  const mine = getProfileItems(state, targetUserId);
   const stats = computeStats(mine);
   const currentStreak = computeCurrentStreak(mine);
   const totalDays = new Set(mine.map(item => dateKey(item.created_at))).size;
