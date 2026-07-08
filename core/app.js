@@ -1,7 +1,7 @@
 import { state, setState, subscribe } from "./state.js";
 import { initSupabase } from "../api/supabase.js";
 import { getCurrentUser } from "../api/auth.js";
-import { loadCheckins } from "../api/checkin.js";
+import { loadCheckins, loadProfileCheckins } from "../api/checkin.js";
 import { renderWall, bindWallEvents } from "../modules/wall.js";
 import { renderProfile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
@@ -38,7 +38,7 @@ async function loadProfile(userId){
 async function loadProfiles(){
   const { data, error } = await sb
     .from("profiles")
-    .select("id, username, avatar_url");
+    .select("id, username, avatar_url, member_id");
 
   if(error){
     console.error("loadProfiles error:", error);
@@ -46,6 +46,14 @@ async function loadProfiles(){
   }
 
   return data || [];
+}
+
+async function loadProfileData(profile){
+  if(!profile){
+    return [];
+  }
+
+  return await loadProfileCheckins(sb, profile);
 }
 
 // 渲染函数（唯一入口）
@@ -69,8 +77,15 @@ function render(){
         const profile = await loadProfile(user.id);
         const profiles = await loadProfiles();
 
-        setState({ profile, profiles, view: "me", viewUserId: null });
-      });
+    const profileCheckins = await loadProfileData(profile);
+    
+    setState({
+      profile,
+      profiles,
+      profileCheckins,
+      view: "me",
+      viewUserId: null
+    });
 
     } else {
       app.innerHTML = renderProfile(state, {
@@ -132,7 +147,14 @@ function renderFab(){
   meBtn.classList.toggle("on", state.view === "me");
 
   wallBtn.onclick = () => setState({ view: "wall", viewUserId: null });
-  meBtn.onclick = () => setState({ view: "me", viewUserId: null });
+  meBtn.onclick = async () => {
+    const profileCheckins = await loadProfileData(state.profile);
+    setState({
+      profileCheckins,
+      view: "me",
+      viewUserId: null
+    });
+  };
 
   addBtn.onclick = () => {
     if(state.user){
@@ -145,7 +167,14 @@ function renderFab(){
         const profile = await loadProfile(user.id);
         const profiles = await loadProfiles();
 
-        setState({ profile, profiles });
+        const profileCheckins = await loadProfileData(profile);
+        
+        setState({
+          profile,
+          profiles,
+          profileCheckins
+        });
+        
         openCheckinModal();
       });
     }
@@ -163,6 +192,7 @@ async function start(){
 
   const checkins = await loadCheckins(sb);
   const profiles = await loadProfiles();
+  const profileCheckins = profile ? await loadProfileData(profile) : [];
 
   window.__user = user;
 
@@ -170,7 +200,8 @@ async function start(){
     user,
     profile,
     checkins,
-    profiles
+    profiles,
+    profileCheckins
   });
 }
 
