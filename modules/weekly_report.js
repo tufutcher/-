@@ -5,6 +5,9 @@ import {
   findOrCreateMember
 } from "../api/weekly_report.js";
 import { saveWeeklyReportItems } from "../api/weekly_report.js";
+import {
+  uploadWeeklyCover
+} from "../api/weekly_report.js";
 
 let weeklyReportsCache = [];
 
@@ -68,6 +71,23 @@ function bindWeeklyBaseEvents(modal){
 
   modal.querySelector("#weekly-create").onclick = async () => {
     await handleCreateWeeklyReport();
+  };
+  modal.querySelector("#weekly-save").onclick = async()=>{
+  
+  await saveWeeklyReportItems(
+  window.__sb,
+  report.id,
+  report.weekly_report_items || []
+  );
+  
+  
+  window.showToast?.(
+  "周报数据已保存",
+  "保存成功",
+  "success"
+  );
+  
+  
   };
 }
 
@@ -362,12 +382,11 @@ function renderWeeklyMembers(report){
     );
 
 
-  if(!box)return;
+  if(!box) return;
 
 
   const items =
     report.weekly_report_items || [];
-
 
 
   if(!items.length){
@@ -375,8 +394,7 @@ function renderWeeklyMembers(report){
     box.innerHTML =
     `
     <div class="weekly-empty">
-      还没有成员，
-      点击添加成员。
+      还没有成员
     </div>
     `;
 
@@ -384,50 +402,226 @@ function renderWeeklyMembers(report){
   }
 
 
-
   box.innerHTML =
-  items.map(item=>{
+  items.map((item,index)=>{
 
 
     return `
 
-    <div class="weekly-member-card">
-
-      <h3>
-        ${item.display_name || "匿名"}
-      </h3>
+<div class="weekly-member-card"
+     data-index="${index}">
 
 
-      <div>
-        打卡日期：
-        ${
-          (item.checkin_dates || [])
-          .join(" / ")
-        }
-      </div>
+<h3>
+${item.display_name}
+</h3>
 
 
-      <div>
-        ${
-          item.summary || 
-          "暂无总结"
-        }
-      </div>
+
+<div class="weekly-field">
+
+<label>
+打卡日期
+</label>
 
 
-      <div>
-        ${
-          item.nickname_title ||
-          "暂无称号"
-        }
-      </div>
+<input
+class="weekly-dates"
+data-index="${index}"
+value="${(item.checkin_dates||[]).join(",")}"
+placeholder="例如 7.1,7.3">
+
+</div>
 
 
-    </div>
 
-    `;
+<div class="weekly-field">
 
+<label>
+代表图
+</label>
+
+
+<input
+type="file"
+class="weekly-cover-input"
+data-index="${index}"
+accept="image/*">
+
+
+${
+item.cover_image_url
+?
+`
+<img 
+class="weekly-cover-preview"
+src="${item.cover_image_url}">
+`
+:
+""
+}
+
+
+</div>
+
+
+
+
+<div class="weekly-field">
+
+<label>
+总结
+</label>
+
+
+<textarea
+class="weekly-summary"
+data-index="${index}"
+>${item.summary || ""}</textarea>
+
+
+</div>
+
+
+
+
+<div class="weekly-field">
+
+<label>
+称号
+</label>
+
+
+<input
+class="weekly-title-input"
+data-index="${index}"
+value="${item.nickname_title || ""}"
+placeholder="例如：结构狂魔">
+
+
+</div>
+
+
+</div>
+
+`;
 
   }).join("");
+
+
+
+  bindWeeklyMemberEvents(report);
+
+}
+
+function bindWeeklyMemberEvents(report){
+
+
+document
+.querySelectorAll(".weekly-dates")
+.forEach(input=>{
+
+input.onchange=()=>{
+
+const index =
+Number(input.dataset.index);
+
+
+report.weekly_report_items[index]
+.checkin_dates =
+input.value
+.split(",")
+.map(x=>x.trim())
+.filter(Boolean);
+
+};
+
+});
+
+
+
+document
+.querySelectorAll(".weekly-summary")
+.forEach(input=>{
+
+input.onchange=()=>{
+
+const index =
+Number(input.dataset.index);
+
+
+report.weekly_report_items[index]
+.summary =
+input.value;
+
+};
+
+});
+
+
+
+document
+.querySelectorAll(".weekly-title-input")
+.forEach(input=>{
+
+input.onchange=()=>{
+
+const index =
+Number(input.dataset.index);
+
+
+report.weekly_report_items[index]
+.nickname_title =
+input.value;
+
+};
+
+});
+
+
+
+document
+.querySelectorAll(".weekly-cover-input")
+.forEach(input=>{
+
+
+input.onchange=async()=>{
+
+
+const index =
+Number(input.dataset.index);
+
+
+const file =
+input.files[0];
+
+
+if(!file)return;
+
+
+const url =
+await uploadWeeklyCover(
+window.__sb,
+file
+);
+
+
+
+if(url){
+
+report.weekly_report_items[index]
+.cover_image_url=url;
+
+
+renderWeeklyMembers(report);
+
+}
+
+
+};
+
+
+});
+
 
 }
