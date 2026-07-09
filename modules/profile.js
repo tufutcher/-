@@ -577,6 +577,11 @@ function bindProfileEvents(state, mine, options = {}){
     };
   }
 
+  const weeklyBtn = document.getElementById("admin-weekly-report");
+  if(weeklyBtn){
+    weeklyBtn.onclick = () => openWeeklyReportManager();
+  }
+
   const dataFilter = document.getElementById("profile-data-filter");
   if(dataFilter){
     dataFilter.querySelectorAll("span").forEach(btn => {
