@@ -1,7 +1,8 @@
 import {
   loadWeeklyReports,
   createWeeklyReport,
-  deleteWeeklyReport
+  deleteWeeklyReport,
+  findOrCreateMember
 } from "../api/weekly_report.js";
 import { saveWeeklyReportItems } from "../api/weekly_report.js";
 
@@ -276,6 +277,79 @@ async function openWeeklyEditor(reportId){
 
 
   renderWeeklyMembers(report);
+  const addBtn = modal.querySelector(
+    "#weekly-add-member"
+  );
+  
+  
+  if(addBtn){
+  
+    addBtn.onclick = async()=>{
+  
+      const name = prompt(
+        "请输入成员名字"
+      );
+  
+  
+      if(!name || !name.trim()){
+        return;
+      }
+  
+  
+      const member =
+        await findOrCreateMember(
+          window.__sb,
+          name.trim()
+        );
+  
+  
+      if(!member){
+        window.showToast?.(
+          "成员创建失败",
+          "失败",
+          "error"
+        );
+        return;
+      }
+  
+  
+      const items =
+        report.weekly_report_items || [];
+  
+  
+      items.push({
+  
+        report_id: report.id,
+  
+        member_id: member.id,
+  
+        display_name:
+          member.display_name,
+  
+        checkin_dates: [],
+  
+        cover_image_url:"",
+  
+        summary:"",
+  
+        nickname_title:"",
+  
+        sort_order:
+          items.length
+  
+      });
+  
+  
+      report.weekly_report_items =
+        items;
+  
+  
+      renderWeeklyMembers(report);
+  
+  
+    };
+  
+  }
 
 
 }
