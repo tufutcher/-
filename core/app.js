@@ -86,6 +86,7 @@ function render(){
       view: "me",
       viewUserId: null
     });
+  });
 
     } else {
       app.innerHTML = renderProfile(state, {
