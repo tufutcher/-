@@ -87,15 +87,15 @@ function render(){
       viewUserId: null
     });
   });
-
-} else {
-  app.innerHTML = renderProfile(state, {
-    userId: state.user.id,
-    readonly: false
-  });
       
+  } else {
+    app.innerHTML = renderProfile(state, {
+      userId: state.user.id,
+      readonly: false
+    });
+  }
 }
-
+  
   if(state.view === "user"){
     if(!state.viewUserId){
       setState({ view: "wall" });
