@@ -884,6 +884,142 @@ button.secondary{background:#eee;color:#333;margin-top:8px;}
   line-height:1.6;
 }
 
+/* 管理员：周报生成 */
+.weekly-manager-card{
+  width: min(1180px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  background: #fffaf2;
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.22);
+}
+
+.weekly-manager-head{
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.weekly-manager-head h2{
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.weekly-manager-head p{
+  margin: 0;
+  color: #6f675f;
+}
+
+.weekly-create-box{
+  background: white;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 22px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.weekly-form-grid{
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr .7fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weekly-form-grid label,
+.weekly-full-label{
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #6f675f;
+}
+
+.weekly-form-grid input,
+.weekly-full-label input,
+.weekly-full-label textarea{
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 14px;
+  padding: 11px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+.weekly-full-label{
+  margin-bottom: 12px;
+}
+
+.weekly-full-label textarea{
+  min-height: 86px;
+  resize: vertical;
+}
+
+#weekly-create,
+#weekly-refresh,
+#weekly-close,
+.weekly-row-actions button{
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #111;
+  color: white;
+  cursor: pointer;
+}
+
+#weekly-close,
+#weekly-refresh,
+.weekly-row-actions button{
+  background: rgba(0,0,0,.08);
+  color: #111;
+}
+
+.weekly-list-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.weekly-list-head h3{
+  margin: 0;
+}
+
+.weekly-report-list{
+  display: grid;
+  gap: 10px;
+}
+
+.weekly-report-row{
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  background: white;
+  border-radius: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.weekly-report-row p{
+  margin: 4px 0 0;
+  color: #7a7168;
+  font-size: 13px;
+}
+
+.weekly-row-actions{
+  display: flex;
+  gap: 8px;
+}
+
+.weekly-empty{
+  padding: 24px;
+  text-align: center;
+  color: #84786d;
+  background: white;
+  border-radius: 18px;
+}
+
 /* =========================
    个人页：创作档案模块
    包含：
