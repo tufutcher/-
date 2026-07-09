@@ -14,6 +14,7 @@ import {
   openProfileCheckinDetail
 } from "./detail_modal.js";
 import { loadProfileCheckins } from "../api/checkin.js";
+import { openWeeklyReportManager } from "./weekly_report.js";
 
 const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
