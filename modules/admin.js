@@ -608,15 +608,3 @@ export function openAdminPurgeUserModal(state){
     );
   };
 }
-
-export function bindAdminEvents(state){
-
-  const weeklyBtn = document.getElementById("admin-weekly-report");
-
-  if(weeklyBtn){
-    weeklyBtn.onclick = () => {
-      openWeeklyReportManager();
-    };
-  }
-
-}
