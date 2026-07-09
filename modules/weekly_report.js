@@ -3,6 +3,7 @@ import {
   createWeeklyReport,
   deleteWeeklyReport
 } from "../api/weekly_report.js";
+import { saveWeeklyReportItems } from "../api/weekly_report.js";
 
 let weeklyReportsCache = [];
 
@@ -105,8 +106,8 @@ function bindWeeklyListEvents(){
   document.querySelectorAll("[data-weekly-open]").forEach(btn => {
     btn.onclick = () => {
       const reportId = btn.dataset.weeklyOpen;
-      window.showToast?.("下一步会做周报编辑器。", "还没施工", "info");
-      console.log("open weekly report:", reportId);
+    
+      openWeeklyEditor(reportId);
     };
   });
 
@@ -178,4 +179,181 @@ function escapeHtml(value){
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+async function openWeeklyEditor(reportId){
+
+  const report = weeklyReportsCache.find(
+    x => x.id === reportId
+  );
+
+  if(!report){
+    window.showToast?.(
+      "找不到这份周报。",
+      "打开失败",
+      "error"
+    );
+    return;
+  }
+
+
+  const old = document.getElementById("weekly-editor");
+
+  if(old){
+    old.remove();
+  }
+
+
+  const modal = document.createElement("div");
+
+  modal.id = "weekly-editor";
+  modal.className = "modal-bg detail-viewer-bg";
+
+
+  modal.innerHTML = `
+
+  <div class="weekly-editor-card">
+
+    <div class="weekly-editor-head">
+
+      <div>
+        <h2>${report.title}</h2>
+
+        <p>
+          ${report.start_date}
+          -
+          ${report.end_date}
+        </p>
+      </div>
+
+
+      <button id="weekly-editor-close">
+        关闭
+      </button>
+
+    </div>
+
+
+
+    <div class="weekly-member-list"
+         id="weekly-member-list">
+
+    </div>
+
+
+
+    <button id="weekly-add-member">
+      + 添加成员
+    </button>
+
+
+    <button id="weekly-save">
+      保存周报
+    </button>
+
+
+  </div>
+
+  `;
+
+
+  document.body.appendChild(modal);
+
+
+
+  modal.querySelector(
+    "#weekly-editor-close"
+  ).onclick = () => {
+    modal.remove();
+  };
+
+
+  modal.onclick = e => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  };
+
+
+  renderWeeklyMembers(report);
+
+
+}
+
+function renderWeeklyMembers(report){
+
+  const box =
+    document.getElementById(
+      "weekly-member-list"
+    );
+
+
+  if(!box)return;
+
+
+  const items =
+    report.weekly_report_items || [];
+
+
+
+  if(!items.length){
+
+    box.innerHTML =
+    `
+    <div class="weekly-empty">
+      还没有成员，
+      点击添加成员。
+    </div>
+    `;
+
+    return;
+  }
+
+
+
+  box.innerHTML =
+  items.map(item=>{
+
+
+    return `
+
+    <div class="weekly-member-card">
+
+      <h3>
+        ${item.display_name || "匿名"}
+      </h3>
+
+
+      <div>
+        打卡日期：
+        ${
+          (item.checkin_dates || [])
+          .join(" / ")
+        }
+      </div>
+
+
+      <div>
+        ${
+          item.summary || 
+          "暂无总结"
+        }
+      </div>
+
+
+      <div>
+        ${
+          item.nickname_title ||
+          "暂无称号"
+        }
+      </div>
+
+
+    </div>
+
+    `;
+
+
+  }).join("");
+
 }
