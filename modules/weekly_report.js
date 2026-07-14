@@ -297,6 +297,7 @@ async function openWeeklyEditor(reportId){
 
 
   renderWeeklyMembers(report);
+  bindWeeklyMemberInputs(report);
   const addBtn = modal.querySelector(
     "#weekly-add-member"
   );
@@ -370,6 +371,84 @@ async function openWeeklyEditor(reportId){
     };
   
   }
+
+
+}
+
+function bindWeeklyMemberInputs(report){
+
+  const items =
+    report.weekly_report_items || [];
+
+
+
+  document.querySelectorAll(".weekly-date-input")
+  .forEach(input=>{
+
+
+    input.onchange = ()=>{
+
+      const index =
+        Number(input.dataset.index);
+
+
+      items[index].checkin_dates =
+        input.value
+        .split(",")
+        .map(x=>x.trim())
+        .filter(Boolean);
+
+
+    };
+
+
+  });
+
+
+
+
+
+  document.querySelectorAll(".weekly-summary-input")
+  .forEach(input=>{
+
+
+    input.oninput = ()=>{
+
+      const index =
+        Number(input.dataset.index);
+
+
+      items[index].summary =
+        input.value;
+
+
+    };
+
+
+  });
+
+
+
+
+
+  document.querySelectorAll(".weekly-title-input")
+  .forEach(input=>{
+
+
+    input.oninput = ()=>{
+
+      const index =
+        Number(input.dataset.index);
+
+
+      items[index].nickname_title =
+        input.value;
+
+
+    };
+
+
+  });
 
 
 }
