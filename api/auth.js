@@ -85,13 +85,6 @@ export async function signUp(sb, username, password, invite){
       error: "成员档案创建失败，请联系管理员"
     };
   }
-
-  const member =
-    await findOrCreateMember(
-      sb,
-      username
-    );
-  
   
   const profileResult =
     await sb
@@ -132,47 +125,4 @@ export async function signUp(sb, username, password, invite){
 export async function getCurrentUser(sb){
   const result = await sb.auth.getUser();
   return (result.data && result.data.user) ? result.data.user : null;
-}
-
-function normalizeName(name){
-  return String(name || "")
-    .trim()
-    .replace(/\s+/g, "")
-    .toLowerCase();
-}
-
-async function findOrCreateMember(sb, username){
-  const displayName = username.trim();
-  const normalizedName = normalizeName(displayName);
-
-  const { data: existing, error: findErr } = await sb
-    .from("members")
-    .select("*")
-    .eq("normalized_name", normalizedName)
-    .maybeSingle();
-
-  if(findErr){
-    console.error("find member error:", findErr);
-    return null;
-  }
-
-  if(existing){
-    return existing;
-  }
-
-  const { data: created, error: createErr } = await sb
-    .from("members")
-    .insert({
-      display_name: displayName,
-      normalized_name: normalizedName
-    })
-    .select()
-    .single();
-
-  if(createErr){
-    console.error("create member error:", createErr);
-    return null;
-  }
-
-  return created;
 }
