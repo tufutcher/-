@@ -263,9 +263,17 @@ export function openWeeklyPreview(reportId){
   </div>
 
 
+<div class="weekly-preview-actions">
+
+<button id="weekly-export-image">
+导出图片
+</button>
+
 <button id="weekly-preview-close">
 关闭
 </button>
+
+</div>
 
 
 </div>
@@ -295,6 +303,70 @@ modal.remove();
 
 };
 
+
+}
+
+const exportBtn =
+modal.querySelector("#weekly-export-image");
+
+
+if(exportBtn){
+
+  exportBtn.onclick = async()=>{
+
+
+    const poster =
+      modal.querySelector(".weekly-poster");
+
+
+    if(!poster){
+      return;
+    }
+
+
+    exportBtn.textContent =
+      "生成中...";
+
+
+    const canvas =
+      await html2canvas(
+        poster,
+        {
+          scale:2,
+          backgroundColor:"#ffffff"
+        }
+      );
+
+
+    const link =
+      document.createElement("a");
+
+
+    link.download =
+      "weekly-report.png";
+
+
+    link.href =
+      canvas.toDataURL(
+        "image/png"
+      );
+
+
+    link.click();
+
+
+    exportBtn.textContent =
+      "导出图片";
+
+
+    window.showToast?.(
+      "周报图片已生成。",
+      "完成",
+      "success"
+    );
+
+
+  };
 
 }
 
@@ -550,8 +622,6 @@ async function openWeeklyEditor(reportId){
 
 
   document.body.appendChild(modal);
-
-
 
   modal.querySelector(
     "#weekly-editor-close"
