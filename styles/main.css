@@ -2418,6 +2418,7 @@ button.cal-cell:disabled{
 .person-profile-btn{
   display:none !important;
 }
+
 /* 弹窗统一不显示右上角/顶部关闭 X，点击外层关闭 之后有空再慢慢把 HTML 里的 detail-x 清干净，不然现在逐个搜会比较烦。 */
 .detail-x{
   display:none !important;
@@ -2462,15 +2463,11 @@ font-size:22px;
 
 }
 
-
-
 .weekly-field{
 
 margin-top:18px;
 
 }
-
-
 
 .weekly-field label{
 
@@ -2483,8 +2480,6 @@ color:#666;
 margin-bottom:8px;
 
 }
-
-
 
 .weekly-field input,
 .weekly-field textarea{
@@ -2503,8 +2498,6 @@ font-size:15px;
 
 }
 
-
-
 .weekly-field textarea{
 
 height:100px;
@@ -2512,8 +2505,6 @@ height:100px;
 resize:vertical;
 
 }
-
-
 
 .weekly-cover-area{
 
@@ -2524,8 +2515,6 @@ align-items:center;
 gap:16px;
 
 }
-
-
 
 .weekly-cover-preview{
 
@@ -2538,8 +2527,6 @@ border-radius:16px;
 object-fit:cover;
 
 }
-
-
 
 .weekly-cover-empty{
 
@@ -2561,12 +2548,32 @@ color:#999;
 
 }
 
-
-
 .weekly-upload-cover{
 
 padding:10px 16px;
 
 border-radius:20px;
+
+}
+
+.weekly-editor-card{
+
+width:min(900px,90vw);
+
+height:90vh;
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+.weekly-member-list{
+
+flex:1;
+
+overflow-y:auto;
+
+padding-right:10px;
 
 }
