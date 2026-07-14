@@ -453,6 +453,69 @@ function bindWeeklyMemberInputs(report){
 
 }
 
+document
+.querySelectorAll(".weekly-upload-cover")
+.forEach(btn=>{
+
+  btn.onclick = ()=>{
+
+    const index =
+      Number(btn.dataset.index);
+
+
+    const input =
+      document.createElement("input");
+
+
+    input.type="file";
+    input.accept="image/*";
+
+
+    input.onchange = async(e)=>{
+
+
+      const file=e.target.files[0];
+
+      if(!file)return;
+
+
+      const url =
+        await uploadWeeklyCover(
+          window.__sb,
+          file
+        );
+
+
+      if(!url){
+
+        window.showToast?.(
+          "图片上传失败",
+          "失败",
+          "error"
+        );
+
+        return;
+      }
+
+
+      report.weekly_report_items[index]
+      .cover_image_url=url;
+
+
+      renderWeeklyMembers(report);
+
+      bindWeeklyMemberInputs(report);
+
+
+    };
+
+
+    input.click();
+
+  };
+
+});
+
 function renderWeeklyMembers(report){
 
   const box =
