@@ -112,6 +112,7 @@ async function renderWeeklyReportList(){
         '</div>' +
         '<div class="weekly-row-actions">' +
           '<button data-weekly-open="' + report.id + '" type="button">编辑</button>' +
+          '<button data-weekly-preview="' + report.id + '" type="button">预览</button>'
           '<button data-weekly-delete="' + report.id + '" type="button">删除</button>' +
         '</div>' +
       '</div>'
@@ -121,35 +122,265 @@ async function renderWeeklyReportList(){
   bindWeeklyListEvents();
 }
 
+export function openWeeklyPreview(reportId){
+
+  const report =
+    weeklyReportsCache.find(
+      x=>x.id===reportId
+    );
+
+
+  if(!report){
+
+    window.showToast?.(
+      "找不到周报",
+      "错误",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const old =
+    document.getElementById(
+      "weekly-preview"
+    );
+
+  if(old){
+    old.remove();
+  }
+
+
+  const modal =
+    document.createElement("div");
+
+
+  modal.id="weekly-preview";
+
+  modal.className=
+    "modal-bg detail-viewer-bg";
+
+
+  modal.innerHTML = `
+
+<div class="weekly-poster">
+
+  <div class="weekly-poster-head">
+
+    <h1>
+      ${report.title}
+    </h1>
+
+
+    <p>
+      ${report.start_date}
+      -
+      ${report.end_date}
+    </p>
+
+
+  </div>
+
+
+
+  <div class="weekly-event">
+
+    ${report.event_notes || ""}
+
+  </div>
+
+
+
+  <div class="weekly-member-grid">
+
+  ${
+    (report.weekly_report_items || [])
+    .map(item=>{
+
+
+      return `
+
+<div class="weekly-poster-member">
+
+
+  <div class="weekly-cover">
+
+
+  ${
+    item.cover_image_url
+
+    ?
+
+    `
+    <img src="${item.cover_image_url}">
+    `
+
+    :
+
+    `
+    <div>
+      暂无图片
+    </div>
+    `
+
+  }
+
+
+  </div>
+
+
+
+  <h3>
+    ${item.display_name}
+  </h3>
+
+
+
+  <p>
+    ${item.nickname_title || ""}
+  </p>
+
+
+  <span>
+
+    ${item.summary || ""}
+
+  </span>
+
+
+
+</div>
+
+
+`;
+
+    }).join("")
+
+  }
+
+
+  </div>
+
+
+<button id="weekly-preview-close">
+关闭
+</button>
+
+
+</div>
+
+
+`;
+
+
+
+document.body.appendChild(modal);
+
+
+
+modal
+.querySelector("#weekly-preview-close")
+.onclick=()=>modal.remove();
+
+
+
+modal.onclick=e=>{
+
+if(e.target===modal){
+
+modal.remove();
+
+}
+
+};
+
+
+}
+
 function bindWeeklyListEvents(){
-  document.querySelectorAll("[data-weekly-open]").forEach(btn => {
-    btn.onclick = () => {
-      const reportId = btn.dataset.weeklyOpen;
-    
+  // 编辑周报
+  document
+  .querySelectorAll("[data-weekly-open]")
+  .forEach(btn=>{
+
+    btn.onclick = ()=>{
+
+      const reportId =
+        btn.dataset.weeklyOpen;
+
       openWeeklyEditor(reportId);
+
     };
+
   });
 
-  document.querySelectorAll("[data-weekly-delete]").forEach(btn => {
-    btn.onclick = async () => {
-      const reportId = btn.dataset.weeklyDelete;
+  // 预览周报海报
+  document
+  .querySelectorAll("[data-weekly-preview]")
+  .forEach(btn=>{
 
-      const ok = await window.showConfirm?.({
-        title: "删除周报？",
-        message: "这会删除这期周报和周报卡片。已被用户补全的打卡不会删除。",
-        confirmText: "删除",
-        cancelText: "取消"
-      });
+    btn.onclick = ()=>{
 
-      if(!ok) return;
+      const reportId =
+        btn.dataset.weeklyPreview;
 
-      const success = await deleteWeeklyReport(window.__sb, reportId);
+      openWeeklyPreview(reportId);
+
+    };
+
+  });
+
+  // 删除周报
+  document
+  .querySelectorAll("[data-weekly-delete]")
+  .forEach(btn=>{
+    
+    btn.onclick = async()=>{
+
+      const reportId =
+        btn.dataset.weeklyDelete;
+
+      const ok =
+        await window.showConfirm?.({
+
+          title:"删除周报？",
+
+          message:
+          "这会删除这期周报和周报卡片。已被用户补全的打卡不会删除。",
+
+          confirmText:"删除",
+
+          cancelText:"取消"
+
+        });
+
+      if(!ok){
+        return;
+      }
+
+      const success =
+        await deleteWeeklyReport(
+          window.__sb,
+          reportId
+        );
 
       if(success){
-        window.showToast?.("周报已删除。", "删除成功", "success");
+
+        window.showToast?.(
+          "周报已删除。",
+          "删除成功",
+          "success"
+        );
+        
         await renderWeeklyReportList();
+
       }else{
-        window.showToast?.("周报删除失败。", "删除失败", "error");
+        window.showToast?.(
+          "周报删除失败。",
+          "删除失败",
+          "error"
+        );
       }
     };
   });
