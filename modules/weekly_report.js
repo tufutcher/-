@@ -3,6 +3,8 @@ import {
   createWeeklyReport,
   deleteWeeklyReport,
   findOrCreateMember
+  saveWeeklyReportItems,
+  uploadWeeklyCover
 } from "../api/weekly_report.js";
 import { saveWeeklyReportItems } from "../api/weekly_report.js";
 import {
@@ -72,6 +74,87 @@ function bindWeeklyBaseEvents(modal){
   modal.querySelector("#weekly-create").onclick = async () => {
     await handleCreateWeeklyReport();
   };
+  const saveBtn =
+  modal.querySelector("#weekly-save");
+  
+  
+  if(saveBtn){
+  
+    saveBtn.onclick = async()=>{
+  
+  
+      const reportItems =
+        report.weekly_report_items || [];
+  
+  
+      if(!reportItems.length){
+  
+        window.showToast?.(
+          "请至少添加一个成员。",
+          "无法保存",
+          "error"
+        );
+  
+        return;
+  
+      }
+  
+  
+      saveBtn.disabled = true;
+      saveBtn.textContent="保存中...";
+  
+  
+  
+      const result =
+        await saveWeeklyReportItems(
+          window.__sb,
+          report.id,
+          reportItems
+        );
+  
+  
+  
+      if(result){
+  
+        window.showToast?.(
+          "周报已保存，成员打卡已同步。",
+          "保存成功",
+          "success"
+        );
+  
+  
+        const reports =
+          await loadWeeklyReports(
+            window.__sb
+          );
+  
+  
+        weeklyReportsCache = reports;
+  
+  
+        renderWeeklyReportList();
+  
+  
+      }else{
+  
+  
+        window.showToast?.(
+          "周报保存失败。",
+          "保存失败",
+          "error"
+        );
+  
+  
+      }
+  
+  
+      saveBtn.disabled=false;
+      saveBtn.textContent="保存周报";
+  
+  
+    };
+  
+  }
   modal.querySelector("#weekly-save").onclick = async()=>{
   
   await saveWeeklyReportItems(
