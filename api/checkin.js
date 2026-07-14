@@ -256,3 +256,64 @@ function dedupeCheckins(items){
 
   return Array.from(map.values());
 }
+
+// 用户领取周报代录打卡
+export async function claimProxyCheckin(sb, checkinId, userId){
+
+  const { data: checkin, error: findError } = await sb
+    .from("checkins")
+    .select("*")
+    .eq("id", checkinId)
+    .single();
+
+
+  if(findError || !checkin){
+    console.error("claim proxy checkin find error:", findError);
+    return false;
+  }
+
+
+  // 已经是自己的正式打卡
+  if(checkin.user_id === userId){
+    return true;
+  }
+
+
+  // 只能领取自己的 member 代录
+  const { data: profile, error: profileError } = await sb
+    .from("profiles")
+    .select("member_id")
+    .eq("id", userId)
+    .single();
+
+
+  if(profileError || !profile?.member_id){
+    console.error("no member link");
+    return false;
+  }
+
+
+  if(checkin.member_id !== profile.member_id){
+    console.error("not your proxy checkin");
+    return false;
+  }
+
+
+  const { error } = await sb
+    .from("checkins")
+    .update({
+      user_id: userId,
+      source: "manual",
+      claimed_at: new Date().toISOString()
+    })
+    .eq("id", checkinId);
+
+
+  if(error){
+    console.error("claim proxy checkin error:", error);
+    return false;
+  }
+
+
+  return true;
+}
