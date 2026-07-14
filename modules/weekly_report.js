@@ -55,7 +55,13 @@ export async function openWeeklyReportManager(){
 }
 
 function bindWeeklyBaseEvents(modal){
-  modal.querySelector("#weekly-close").onclick = () => modal.remove();
+
+  const closeBtn = modal.querySelector("#weekly-close");
+
+  if(closeBtn){
+    closeBtn.onclick = () => modal.remove();
+  }
+
 
   modal.onclick = e => {
     if(e.target === modal){
@@ -63,111 +69,24 @@ function bindWeeklyBaseEvents(modal){
     }
   };
 
-  modal.querySelector("#weekly-refresh").onclick = async () => {
-    await renderWeeklyReportList();
-  };
 
-  modal.querySelector("#weekly-create").onclick = async () => {
-    await handleCreateWeeklyReport();
-  };
-  const saveBtn =
-  modal.querySelector("#weekly-save");
-  
-  
-  if(saveBtn){
-  
-    saveBtn.onclick = async()=>{
-  
-  
-      const reportItems =
-        report.weekly_report_items || [];
-  
-  
-      if(!reportItems.length){
-  
-        window.showToast?.(
-          "请至少添加一个成员。",
-          "无法保存",
-          "error"
-        );
-  
-        return;
-  
-      }
-  
-  
-      saveBtn.disabled = true;
-      saveBtn.textContent="保存中...";
-  
-  
-  
-      const result =
-        await saveWeeklyReportItems(
-          window.__sb,
-          report.id,
-          reportItems
-        );
-  
-  
-  
-      if(result){
-  
-        window.showToast?.(
-          "周报已保存，成员打卡已同步。",
-          "保存成功",
-          "success"
-        );
-  
-  
-        const reports =
-          await loadWeeklyReports(
-            window.__sb
-          );
-  
-  
-        weeklyReportsCache = reports;
-  
-  
-        renderWeeklyReportList();
-  
-  
-      }else{
-  
-  
-        window.showToast?.(
-          "周报保存失败。",
-          "保存失败",
-          "error"
-        );
-  
-  
-      }
-  
-  
-      saveBtn.disabled=false;
-      saveBtn.textContent="保存周报";
-  
-  
+  const refreshBtn = modal.querySelector("#weekly-refresh");
+
+  if(refreshBtn){
+    refreshBtn.onclick = async () => {
+      await renderWeeklyReportList();
     };
-  
   }
-  modal.querySelector("#weekly-save").onclick = async()=>{
-  
-  await saveWeeklyReportItems(
-  window.__sb,
-  report.id,
-  report.weekly_report_items || []
-  );
-  
-  
-  window.showToast?.(
-  "周报数据已保存",
-  "保存成功",
-  "success"
-  );
-  
-  
-  };
+
+
+  const createBtn = modal.querySelector("#weekly-create");
+
+  if(createBtn){
+    createBtn.onclick = async () => {
+      await handleCreateWeeklyReport();
+    };
+  }
+
 }
 
 async function renderWeeklyReportList(){
