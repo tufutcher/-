@@ -338,6 +338,7 @@ async function openWeeklyEditor(reportId){
 
   renderWeeklyMembers(report);
   bindWeeklyMemberInputs(report);
+  bindWeeklyEditorEvents(report, modal);
   const addBtn = modal.querySelector(
     "#weekly-add-member"
   );
@@ -500,68 +501,173 @@ function bindWeeklyMemberInputs(report){
 
 }
 
-document
-.querySelectorAll(".weekly-upload-cover")
-.forEach(btn=>{
-
-  btn.onclick = ()=>{
-
-    const index =
-      Number(btn.dataset.index);
+function bindWeeklyEditorEvents(report, modal){
 
 
-    const input =
-      document.createElement("input");
+  // 保存按钮
+
+  const saveBtn =
+    modal.querySelector("#weekly-save");
 
 
-    input.type="file";
-    input.accept="image/*";
+  if(saveBtn){
+
+    saveBtn.onclick = async()=>{
 
 
-    input.onchange = async(e)=>{
+      saveBtn.disabled = true;
+
+      saveBtn.textContent =
+        "保存中...";
 
 
-      const file=e.target.files[0];
-
-      if(!file)return;
-
-
-      const url =
-        await uploadWeeklyCover(
+      const result =
+        await saveWeeklyReportItems(
           window.__sb,
-          file
+          report.id,
+          report.weekly_report_items || []
         );
 
 
-      if(!url){
+      if(result){
 
         window.showToast?.(
-          "图片上传失败",
+          "周报已保存，成员打卡已同步。",
+          "保存成功",
+          "success"
+        );
+
+
+        const reports =
+          await loadWeeklyReports(
+            window.__sb
+          );
+
+
+        weeklyReportsCache = reports;
+
+
+      }else{
+
+        window.showToast?.(
+          "保存失败。",
           "失败",
           "error"
         );
 
-        return;
       }
 
 
-      report.weekly_report_items[index]
-      .cover_image_url=url;
+      saveBtn.disabled=false;
+
+      saveBtn.textContent =
+        "保存周报";
+
+    };
+
+  }
 
 
-      renderWeeklyMembers(report);
 
-      bindWeeklyMemberInputs(report);
 
+  // 上传代表图
+
+  modal
+  .querySelectorAll(".weekly-upload-cover")
+  .forEach(btn=>{
+
+
+    btn.onclick = ()=>{
+
+
+      const index =
+        Number(
+          btn.dataset.index
+        );
+
+
+      const input =
+        document.createElement("input");
+
+
+      input.type="file";
+
+      input.accept="image/*";
+
+
+
+      input.onchange = async(e)=>{
+
+
+        const file =
+          e.target.files[0];
+
+
+        if(!file){
+          return;
+        }
+
+
+        btn.textContent =
+          "上传中...";
+
+
+        const url =
+          await uploadWeeklyCover(
+            window.__sb,
+            file
+          );
+
+
+        if(url){
+
+
+          report
+          .weekly_report_items[index]
+          .cover_image_url = url;
+
+
+
+          renderWeeklyMembers(report);
+
+
+          bindWeeklyEditorEvents(
+            report,
+            modal
+          );
+
+
+          window.showToast?.(
+            "代表图上传成功",
+            "完成",
+            "success"
+          );
+
+
+        }else{
+
+
+          window.showToast?.(
+            "图片上传失败",
+            "失败",
+            "error"
+          );
+
+        }
+
+
+      };
+
+
+      input.click();
 
     };
 
 
-    input.click();
+  });
 
-  };
 
-});
+}
 
 function renderWeeklyMembers(report){
 
