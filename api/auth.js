@@ -1,4 +1,7 @@
 import { checkInvite, consumeInvite } from "./invite.js";
+import {
+  findOrCreateMember
+} from "./weekly_report.js";
 
 // 把任意昵称转换成邮箱安全字符串，同一个昵称结果一致
 export function usernameToEmail(username){
@@ -83,11 +86,26 @@ export async function signUp(sb, username, password, invite){
     };
   }
 
-  const profileResult = await sb.from("profiles").insert({
-    id: user.id,
-    username,
-    member_id: member.id
-  });
+  const member =
+    await findOrCreateMember(
+      sb,
+      username
+    );
+  
+  
+  const profileResult =
+    await sb
+    .from("profiles")
+    .insert({
+  
+      id:user.id,
+  
+      username:username,
+  
+      member_id:
+        member?.id || null
+  
+    });
 
   if(profileResult.error){
     return {
