@@ -2577,3 +2577,47 @@ overflow-y:auto;
 padding-right:10px;
 
 }
+
+.weekly-date-picker{
+
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+
+margin-top:8px;
+
+}
+
+
+.weekly-date-item{
+
+display:flex;
+align-items:center;
+gap:5px;
+
+padding:6px 10px;
+
+border-radius:12px;
+
+background:#f5f5f5;
+
+font-size:13px;
+
+cursor:pointer;
+
+}
+
+
+.weekly-date-item input{
+
+accent-color:#0CC0DF;
+
+}
+
+
+.weekly-date-item:has(input:checked){
+
+background:#0CC0DF;
+color:white;
+
+}
