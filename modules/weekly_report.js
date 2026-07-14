@@ -2,12 +2,8 @@ import {
   loadWeeklyReports,
   createWeeklyReport,
   deleteWeeklyReport,
-  findOrCreateMember
+  findOrCreateMember,
   saveWeeklyReportItems,
-  uploadWeeklyCover
-} from "../api/weekly_report.js";
-import { saveWeeklyReportItems } from "../api/weekly_report.js";
-import {
   uploadWeeklyCover
 } from "../api/weekly_report.js";
 
