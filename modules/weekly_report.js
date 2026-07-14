@@ -377,9 +377,7 @@ async function openWeeklyEditor(reportId){
 function renderWeeklyMembers(report){
 
   const box =
-    document.getElementById(
-      "weekly-member-list"
-    );
+    document.getElementById("weekly-member-list");
 
 
   if(!box) return;
@@ -391,19 +389,20 @@ function renderWeeklyMembers(report){
 
   if(!items.length){
 
-    box.innerHTML =
-    `
-    <div class="weekly-empty">
-      还没有成员
-    </div>
+    box.innerHTML = `
+      <div class="weekly-empty">
+        还没有成员，点击添加成员。
+      </div>
     `;
 
     return;
   }
 
 
-  box.innerHTML =
-  items.map((item,index)=>{
+  box.innerHTML = items.map((item,index)=>{
+
+    const dates =
+      (item.checkin_dates || []).join(",");
 
 
     return `
@@ -412,94 +411,111 @@ function renderWeeklyMembers(report){
      data-index="${index}">
 
 
-<h3>
-${item.display_name}
-</h3>
+  <div class="weekly-member-head">
+
+    <h3>
+      ${item.display_name || "匿名"}
+    </h3>
+
+    <span>
+      周报成员
+    </span>
+
+  </div>
 
 
 
-<div class="weekly-field">
+  <div class="weekly-field">
 
-<label>
-打卡日期
-</label>
+    <label>
+      打卡日期
+    </label>
 
+    <input
+      class="weekly-date-input"
+      data-index="${index}"
+      value="${dates}"
+      placeholder="例如：2026-07-01,2026-07-03">
 
-<input
-class="weekly-dates"
-data-index="${index}"
-value="${(item.checkin_dates||[]).join(",")}"
-placeholder="例如 7.1,7.3">
-
-</div>
-
-
-
-<div class="weekly-field">
-
-<label>
-代表图
-</label>
-
-
-<input
-type="file"
-class="weekly-cover-input"
-data-index="${index}"
-accept="image/*">
-
-
-${
-item.cover_image_url
-?
-`
-<img 
-class="weekly-cover-preview"
-src="${item.cover_image_url}">
-`
-:
-""
-}
-
-
-</div>
+  </div>
 
 
 
+  <div class="weekly-field">
 
-<div class="weekly-field">
+    <label>
+      代表图
+    </label>
 
-<label>
-总结
-</label>
+    <div class="weekly-cover-area">
+
+      ${
+        item.cover_image_url
+        ?
+        `
+        <img
+        class="weekly-cover-preview"
+        src="${item.cover_image_url}">
+        `
+        :
+        `
+        <div class="weekly-cover-empty">
+          暂无图片
+        </div>
+        `
+      }
 
 
-<textarea
-class="weekly-summary"
-data-index="${index}"
->${item.summary || ""}</textarea>
+      <button
+      class="weekly-upload-cover"
+      data-index="${index}"
+      type="button">
+        上传代表图
+      </button>
 
 
-</div>
+    </div>
+
+  </div>
 
 
 
 
-<div class="weekly-field">
+  <div class="weekly-field">
 
-<label>
-称号
-</label>
-
-
-<input
-class="weekly-title-input"
-data-index="${index}"
-value="${item.nickname_title || ""}"
-placeholder="例如：结构狂魔">
+    <label>
+      总结
+    </label>
 
 
-</div>
+    <textarea
+    class="weekly-summary-input"
+    data-index="${index}"
+    placeholder="本周创作总结">${item.summary || ""}</textarea>
+
+
+  </div>
+
+
+
+
+
+  <div class="weekly-field">
+
+    <label>
+      称号
+    </label>
+
+
+    <input
+    class="weekly-title-input"
+    data-index="${index}"
+    value="${item.nickname_title || ""}"
+    placeholder="例如：结构狂魔">
+
+
+  </div>
+
 
 
 </div>
@@ -507,10 +523,6 @@ placeholder="例如：结构狂魔">
 `;
 
   }).join("");
-
-
-
-  bindWeeklyMemberEvents(report);
 
 }
 
