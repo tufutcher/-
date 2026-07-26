@@ -11,7 +11,7 @@ let weeklyReportsCache = [];
 let weeklyPosterColumns = 9;
 let weeklyPosterImageFit = "cover";
 let weeklyPosterImagePosition = "center";
-let weeklyPosterFontScale = 1;
+let weeklyPosterFontScale = 1.4;
 
 export async function openWeeklyReportManager(){
   const old = document.getElementById("weekly-report-manager");
