@@ -7,6 +7,7 @@ import {
   uploadWeeklyCover
 } from "../api/weekly_report.js";
 
+let weeklyReportsCache = [];
 let weeklyPosterColumns = 6;
 let weeklyPosterImageFit = "cover";
 let weeklyPosterImagePosition = "center";
