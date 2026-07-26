@@ -638,28 +638,31 @@ function renderWeeklyPoster(report, modal){
 
   const rows = Math.max(1, Math.ceil(items.length / actualColumns));
 
-  const cardWidth = 150;
-  const cardHeight = 385;
-  const cardGap = 12;
+  const cardWidth = 118;
+  const cardHeight = 330;
+  const cardGap = 10;
 
   const leftWidth = 190;
-  const sideWidth = 30;
-  const paddingX = 58;
+  const sideWidth = 28;
+  const paddingLeft = 42;
+  const paddingRight = 28;
   const mainGap = 18;
 
   const posterWidth =
-    paddingX +
+    paddingLeft +
     leftWidth +
     mainGap +
     actualColumns * cardWidth +
     Math.max(0, actualColumns - 1) * cardGap +
     mainGap +
-    sideWidth;
+    sideWidth +
+    paddingRight;
 
   const posterHeight =
-    74 +
+    44 +
     rows * cardHeight +
-    Math.max(0, rows - 1) * cardGap;
+    Math.max(0, rows - 1) * cardGap +
+    44;
 
   const cardsHtml = items.map(item => {
     const days = item.checkin_dates?.length || 0;
@@ -711,6 +714,7 @@ function renderWeeklyPoster(report, modal){
       '--poster-height:' + posterHeight + 'px;' +
       '--poster-card-width:' + cardWidth + 'px;' +
       '--poster-card-height:' + cardHeight + 'px;' +
+      '--poster-card-gap:' + cardGap + 'px;' +
       '--poster-image-fit:' + weeklyPosterImageFit + ';' +
       '--poster-image-position:' + weeklyPosterImagePosition + ';' +
     '">' +
