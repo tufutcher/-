@@ -2869,3 +2869,82 @@ button.cal-cell:disabled{
   background:#eee;
   color:#333;
 }
+
+.proxy-checkin-tip{
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  margin:0 0 14px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:#fff4d8;
+  color:#b26a00;
+  font-size:13px;
+  font-weight:700;
+}
+
+.proxy-detail-empty{
+  min-height:220px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f7f7f7;
+  border-radius:18px;
+}
+
+.proxy-detail-placeholder{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  color:#777;
+  text-align:center;
+}
+
+.proxy-detail-placeholder strong{
+  color:#333;
+  font-size:18px;
+}
+
+.proxy-detail-placeholder span{
+  font-size:14px;
+}
+
+.calendar-gallery-proxy{
+  background:#f7f7f7;
+}
+
+.calendar-proxy-placeholder{
+  width:100%;
+  height:100%;
+  min-height:160px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#777;
+  padding:16px;
+  box-sizing:border-box;
+}
+
+.calendar-proxy-placeholder strong{
+  color:#333;
+  font-size:18px;
+}
+
+.calendar-proxy-placeholder span{
+  font-size:13px;
+  line-height:1.4;
+}
+
+#profile-detail-claim{
+  border:none;
+  border-radius:999px;
+  padding:12px 22px;
+  background:#0CC0DF;
+  color:white;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
