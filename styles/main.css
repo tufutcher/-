@@ -2624,7 +2624,7 @@ button.cal-cell:disabled{
   top:0;
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  font-size:16px;
+  font-size:14px;
   font-weight:800;
   letter-spacing:2px;
 }
@@ -2636,11 +2636,10 @@ button.cal-cell:disabled{
   display:flex;
   flex-direction:column;
   gap:0;
-  font-size:44px;
+  font-size:40px;
   font-weight:1000;
   line-height:.98;
 }
-
 
 /* 左下事件框 */
 .weekly-poster-event-box{
@@ -2651,9 +2650,10 @@ button.cal-cell:disabled{
   height:320px;
   border:2px dotted rgba(255,255,255,.9);
   border-radius:10px;
-  padding:18px 13px;
+  padding:16px 12px;
   box-sizing:border-box;
-  display:flex;
+  display:grid;
+  grid-template-columns:34px 1fr;
   gap:10px;
 }
 
@@ -2663,17 +2663,28 @@ button.cal-cell:disabled{
   font-size:15px;
   font-weight:900;
   line-height:1.05;
-  opacity:.78;
+  opacity:.8;
+  justify-self:center;
 }
 
 .weekly-poster-event-content{
-  flex:1;
   font-size:11px;
   line-height:1.42;
   font-weight:700;
   overflow:hidden;
+  word-break:break-all;
+  white-space:normal;
 }
 
+.weekly-poster-event-content.is-small{
+  font-size:9.5px;
+  line-height:1.34;
+}
+
+.weekly-poster-event-content.is-tiny{
+  font-size:8.3px;
+  line-height:1.26;
+}
 
 /* 右侧成员区 */
 .weekly-poster-main{
