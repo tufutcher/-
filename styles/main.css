@@ -2578,25 +2578,37 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   gap:14px;
+  overflow:auto;
+}
+
+#weekly-poster-wrap{
+  width:100%;
+  display:flex;
+  justify-content:center;
 }
 
 
-/* 海报画布：参考 Canva 周报图 */
+/* 海报画布 */
 .weekly-poster-canvas{
-  width:1536px;
-  height:864px;
+  width:1280px;
+  height:var(--poster-height, 864px);
   background:var(--weekly-theme,#ff6a16);
   color:white;
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-columns:260px 1fr 44px;
-  gap:22px;
-  padding:48px 34px 40px 48px;
+  grid-template-columns:210px 1fr 34px;
+  gap:18px;
+  padding:38px 26px 34px 38px;
   box-sizing:border-box;
-  transform:scale(.62);
+  transform:scale(.7);
   transform-origin:top center;
-  margin-bottom:-328px;
+  margin-bottom:calc((var(--poster-height, 864px) * -.3));
+}
+
+.weekly-poster-canvas.is-exporting{
+  transform:none;
+  margin-bottom:0;
 }
 
 
@@ -2612,81 +2624,80 @@ button.cal-cell:disabled{
   top:0;
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  font-size:22px;
+  font-size:16px;
   font-weight:800;
   letter-spacing:2px;
 }
 
 .weekly-poster-title-vertical{
   position:absolute;
-  left:42px;
+  left:34px;
   top:0;
   display:flex;
   flex-direction:column;
-  gap:2px;
-  font-size:58px;
+  gap:0;
+  font-size:44px;
   font-weight:1000;
-  line-height:1;
-  letter-spacing:0;
+  line-height:.98;
 }
 
 
 /* 左下事件框 */
 .weekly-poster-event-box{
   position:absolute;
-  left:8px;
+  left:6px;
   bottom:0;
-  width:205px;
-  height:360px;
+  width:172px;
+  height:320px;
   border:2px dotted rgba(255,255,255,.9);
   border-radius:10px;
-  padding:24px 18px;
+  padding:18px 13px;
   box-sizing:border-box;
   display:flex;
-  gap:14px;
+  gap:10px;
 }
 
 .weekly-poster-event-title{
   writing-mode:vertical-rl;
   text-orientation:upright;
-  font-size:20px;
+  font-size:15px;
   font-weight:900;
-  line-height:1.15;
-  opacity:.72;
+  line-height:1.05;
+  opacity:.78;
 }
 
 .weekly-poster-event-content{
   flex:1;
-  font-size:15px;
-  line-height:1.65;
+  font-size:11px;
+  line-height:1.42;
   font-weight:700;
   overflow:hidden;
 }
 
 
-/* 右侧成员卡网格 */
+/* 右侧成员区 */
 .weekly-poster-main{
   min-width:0;
   height:100%;
 }
 
 .weekly-poster-grid{
-  height:100%;
   display:grid;
-  grid-template-columns:repeat(9, 1fr);
-  grid-template-rows:repeat(2, 1fr);
-  gap:14px;
+  grid-template-columns:repeat(var(--poster-cols,6), 1fr);
+  gap:12px;
+  align-content:start;
 }
 
 
 /* 单个成员卡 */
 .weekly-poster-card{
   background:white;
-  color:#f26a18;
+  color:var(--weekly-theme,#ff6a16);
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-rows:1fr 112px 24px;
+  grid-template-rows:260px 108px 22px;
+  min-width:0;
   box-shadow:0 0 0 2px rgba(255,255,255,.7);
 }
 
@@ -2701,8 +2712,8 @@ button.cal-cell:disabled{
   width:100%;
   height:100%;
   object-fit:cover;
+  object-position:center;
   display:block;
-  filter:saturate(.9) contrast(1.02);
 }
 
 .weekly-poster-img-mask{
@@ -2711,8 +2722,8 @@ button.cal-cell:disabled{
   background:linear-gradient(
     to bottom,
     rgba(0,0,0,0) 35%,
-    rgba(0,0,0,.12) 62%,
-    rgba(0,0,0,.78) 100%
+    rgba(0,0,0,.14) 62%,
+    rgba(0,0,0,.8) 100%
   );
 }
 
@@ -2723,7 +2734,7 @@ button.cal-cell:disabled{
   justify-content:center;
   background:#eee;
   color:#999;
-  font-size:18px;
+  font-size:14px;
   font-weight:800;
 }
 
@@ -2733,12 +2744,11 @@ button.cal-cell:disabled{
   position:absolute;
   left:0;
   right:0;
-  top:52%;
-  transform:translateY(-8px);
+  bottom:10px;
   padding:0 8px;
   text-align:center;
   color:white;
-  text-shadow:0 2px 8px rgba(0,0,0,.7);
+  text-shadow:0 2px 8px rgba(0,0,0,.75);
   pointer-events:none;
 }
 
@@ -2747,21 +2757,21 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   gap:0;
-  font-size:14px;
+  font-size:11px;
   font-weight:900;
 }
 
 .weekly-poster-badge-icon{
-  font-size:34px;
+  font-size:25px;
   line-height:1;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));
 }
 
 .weekly-poster-name{
-  font-size:27px;
+  font-size:21px;
   font-weight:1000;
-  line-height:1.05;
-  margin-top:3px;
+  line-height:1;
+  margin-top:2px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -2770,34 +2780,34 @@ button.cal-cell:disabled{
 
 /* 成员总结文字 */
 .weekly-poster-card-text{
-  padding:14px 10px 8px;
+  padding:10px 8px 6px;
   box-sizing:border-box;
   text-align:center;
   overflow:hidden;
 }
 
 .weekly-poster-card-text p{
-  margin:0 0 8px;
-  font-size:13px;
-  line-height:1.32;
+  margin:0 0 6px;
+  font-size:10px;
+  line-height:1.28;
   font-weight:700;
-  height:34px;
+  height:28px;
   overflow:hidden;
 }
 
 .weekly-poster-card-text strong{
   display:block;
-  font-size:13px;
-  line-height:1.2;
+  font-size:10px;
+  line-height:1.1;
   font-weight:800;
-  opacity:.72;
+  opacity:.7;
 }
 
 .weekly-poster-card-text b{
   display:block;
-  margin-top:4px;
-  color:#f26a18;
-  font-size:15px;
+  margin-top:3px;
+  color:var(--weekly-theme,#ff6a16);
+  font-size:12px;
   line-height:1.1;
   font-weight:1000;
   white-space:nowrap;
@@ -2808,13 +2818,12 @@ button.cal-cell:disabled{
 
 /* 底部日期条 */
 .weekly-poster-date-line{
-  height:24px;
+  height:22px;
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  align-items:end;
-  border-top:1px solid rgba(242,106,24,.2);
-  color:#f26a18;
-  font-size:8px;
+  border-top:1px solid rgba(0,0,0,.08);
+  color:var(--weekly-theme,#ff6a16);
+  font-size:7px;
   font-weight:800;
 }
 
@@ -2823,13 +2832,13 @@ button.cal-cell:disabled{
   display:flex;
   align-items:center;
   justify-content:center;
-  border-left:1px solid rgba(242,106,24,.18);
-  opacity:.35;
+  border-left:1px solid rgba(0,0,0,.08);
+  opacity:.32;
 }
 
 .weekly-poster-date-line span.active{
   opacity:1;
-  background:rgba(242,106,24,.08);
+  background:color-mix(in srgb, var(--weekly-theme,#ff6a16) 10%, white);
 }
 
 
@@ -2841,7 +2850,7 @@ button.cal-cell:disabled{
   align-items:center;
   justify-content:flex-end;
   gap:4px;
-  font-size:19px;
+  font-size:16px;
   font-weight:900;
   line-height:1;
 }
@@ -2851,8 +2860,10 @@ button.cal-cell:disabled{
 .weekly-preview-actions{
   display:flex;
   justify-content:center;
+  align-items:center;
   gap:12px;
   margin-top:8px;
+  flex-wrap:wrap;
 }
 
 .weekly-preview-actions button{
@@ -2868,6 +2879,25 @@ button.cal-cell:disabled{
 .weekly-preview-actions button:last-child{
   background:#eee;
   color:#333;
+}
+
+.weekly-column-control{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  background:white;
+  border-radius:999px;
+  font-size:14px;
+  color:#333;
+}
+
+.weekly-column-control select{
+  border:none;
+  background:#f2f2f2;
+  border-radius:999px;
+  padding:6px 10px;
+  outline:none;
 }
 
 .proxy-checkin-tip{
