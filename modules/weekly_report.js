@@ -8,7 +8,7 @@ import {
 } from "../api/weekly_report.js";
 
 let weeklyReportsCache = [];
-let weeklyPosterColumns = 6;
+let weeklyPosterColumns = 9;
 let weeklyPosterImageFit = "cover";
 let weeklyPosterImagePosition = "center";
 let weeklyPosterFontScale = 1;
@@ -495,11 +495,11 @@ export function openWeeklyPreview(reportId){
         '<label class="weekly-column-control">' +
           '<span>每行人数</span>' +
           '<select id="weekly-column-select">' +
-            '<option value="4">4</option>' +
-            '<option value="5">5</option>' +
             '<option value="6">6</option>' +
             '<option value="7">7</option>' +
             '<option value="8">8</option>' +
+            '<option value="9">9</option>' +
+            '<option value="10">10</option>' +
           '</select>' +
         '</label>' +
         
@@ -660,15 +660,15 @@ function renderWeeklyPoster(report, modal){
 
   const rows = Math.max(1, Math.ceil(items.length / actualColumns));
 
-  const cardWidth = 118;
-  const cardHeight = 306;
-  const cardGap = 10;
-
-  const leftWidth = 190;
-  const sideWidth = 28;
+  const cardWidth = 106;
+  const cardHeight = 318;
+  const cardGap = 7;
+  
+  const leftWidth = 205;
+  const sideWidth = 26;
   const paddingLeft = 42;
-  const paddingRight = 28;
-  const mainGap = 18;
+  const paddingRight = 22;
+  const mainGap = 14;
 
   const posterWidth =
     paddingLeft +
@@ -681,10 +681,10 @@ function renderWeeklyPoster(report, modal){
     paddingRight;
 
   const posterHeight =
-    44 +
+    42 +
     rows * cardHeight +
     Math.max(0, rows - 1) * cardGap +
-    44;
+    42;
 
   const cardsHtml = items.map(item => {
     const days = item.checkin_dates?.length || 0;
