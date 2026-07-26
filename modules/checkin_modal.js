@@ -23,10 +23,22 @@ let pendingImages = [];
 let globalTags = [];
 let selectedImageId = null;
 
+let checkinModalOptions = {
+  presetDate: "",
+  onSuccess: null
+};
+
 // 发布打卡弹窗：选图、设日期、打标签、提交记录
-export function openCheckinModal(){
+export function openCheckinModal(options = {}){
   closeExistingModal();
   resetDraft();
+
+  checkinModalOptions = {
+    presetDate: options.presetDate || "",
+    onSuccess: typeof options.onSuccess === "function"
+      ? options.onSuccess
+      : null
+  };
 
   const modal = createCheckinModal();
   document.body.appendChild(modal);
@@ -52,9 +64,21 @@ function createCheckinModal(){
   modal.id = "checkin-modal";
   modal.className = "modal-bg";
 
+  const isProxyFill = !!checkinModalOptions.presetDate;
+
   modal.innerHTML = `
     <div class="modal-card">
-      <h3>本次打卡</h3>
+      <h3>${isProxyFill ? "补录这天打卡" : "本次打卡"}</h3>
+
+      ${
+        isProxyFill
+        ? `
+          <div class="hint-text">
+            这是从周报代录打卡进入的补录。提交后，这一天的周报占位打卡会自动消失。
+          </div>
+        `
+        : ""
+      }
 
       <div class="ci-date-row">
         <label for="ci-date">打卡日期</label>
@@ -94,7 +118,14 @@ function initDateInput(){
   if(!dateInput) return;
 
   const today = localTodayString();
-  dateInput.value = today;
+
+  let pickedDate = checkinModalOptions.presetDate || today;
+
+  if(pickedDate > today){
+    pickedDate = today;
+  }
+
+  dateInput.value = pickedDate;
   dateInput.max = today;
 }
 
@@ -206,7 +237,7 @@ function renderThumbGrid(wrap){
     <div class="ci-thumb-grid">
       ${gridHtml}
 
-      <label class="ci-thumb ci-add-thumb" for="ci-files">
+      <label class="ci-thumb ci-add-thumb" for="ci-files-more">
         <span>＋</span>
         <input type="file" id="ci-files-more" accept="image/*" multiple>
       </label>
@@ -416,6 +447,10 @@ async function submitCheckin(modal){
   window.showConfettiSuccess?.("打卡成功！");
 
   await refreshCheckins(sb);
+
+  if(checkinModalOptions.onSuccess){
+    checkinModalOptions.onSuccess(checkin);
+  }
 }
 
 function canSubmit(sb, user){
