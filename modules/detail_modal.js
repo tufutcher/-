@@ -220,13 +220,7 @@ export function openProfileCheckinDetail(item, readonly = false){
       openCheckinModal({
         presetDate,
         onSuccess: () => {
-          window.showToast?.(
-            "补录成功，这一天的周报占位打卡会自动消失。",
-            "完成",
-            "success"
-          );
-
-          location.reload();
+          // 不强制刷新，避免提交后跳回首页
         }
       });
     };
