@@ -705,8 +705,8 @@ function renderWeeklyPoster(report, modal){
             '<br>' +
             '<span>发</span><span>生</span><span>了</span><span>啥</span>' +
           '</div>' +
-
-          '<div class="weekly-poster-event-content">' +
+        
+          '<div class="weekly-poster-event-content ' + getEventTextClass(report.event_notes) + '">' +
             formatEventText(report.event_notes || "本周还没有填写群事件。") +
           '</div>' +
         '</div>' +
@@ -753,6 +753,20 @@ function getDateRange(start, end){
 function formatShortDate(date){
   const d = new Date(date);
   return (d.getMonth() + 1) + "月" + d.getDate() + "日";
+}
+
+function getEventTextClass(text){
+  const length = String(text || "").length;
+
+  if(length > 120){
+    return "is-tiny";
+  }
+
+  if(length > 70){
+    return "is-small";
+  }
+
+  return "";
 }
 
 function getWeeklyBadge(days){
