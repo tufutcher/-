@@ -2586,23 +2586,22 @@ button.cal-cell:disabled{
   justify-content:center;
 }
 
-
-/* 海报画布：宽度随人数变化 */
+/* 海报画布：参考周报模板 */
 .weekly-poster-canvas{
-  width:var(--poster-width, 900px);
-  height:var(--poster-height, 420px);
+  width:var(--poster-width, 1320px);
+  height:var(--poster-height, 720px);
   background:var(--weekly-theme,#ff6a16);
   color:white;
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-columns:190px 1fr 28px;
-  gap:18px;
-  padding:44px 28px 44px 42px;
+  grid-template-columns:205px 1fr 26px;
+  gap:14px;
+  padding:42px 22px 42px 42px;
   box-sizing:border-box;
   transform:scale(.82);
   transform-origin:top center;
-  margin-bottom:calc((var(--poster-height, 420px) * -.18));
+  margin-bottom:calc((var(--poster-height, 720px) * -.18));
 }
 
 .weekly-poster-canvas.is-exporting{
@@ -2623,44 +2622,44 @@ button.cal-cell:disabled{
   top:0;
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:1px;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:1.5px;
 }
 
 .weekly-poster-title-vertical{
   position:absolute;
-  left:28px;
+  left:32px;
   top:0;
   display:flex;
   flex-direction:column;
   gap:0;
-  font-size:30px;
+  font-size:44px;
   font-weight:1000;
-  line-height:.98;
+  line-height:.94;
 }
 
 
 /* 左下事件框 */
 .weekly-poster-event-box{
   position:absolute;
-  left:4px;
+  left:0;
   bottom:0;
-  width:150px;
-  height:205px;
-  border:2px dotted rgba(255,255,255,.9);
+  width:178px;
+  height:270px;
+  border:2px dotted rgba(255,255,255,.95);
   border-radius:8px;
-  padding:10px 8px;
+  padding:14px 11px;
   box-sizing:border-box;
   display:grid;
-  grid-template-columns:24px 1fr;
-  gap:7px;
+  grid-template-columns:30px 1fr;
+  gap:9px;
 }
 
 .weekly-poster-event-title{
   writing-mode:vertical-rl;
   text-orientation:upright;
-  font-size:9px;
+  font-size:13px;
   font-weight:900;
   line-height:1.05;
   opacity:.82;
@@ -2668,27 +2667,27 @@ button.cal-cell:disabled{
 }
 
 .weekly-poster-event-content{
-  font-size:5.2px;
-  line-height:1.26;
-  font-weight:700;
+  font-size:7px;
+  line-height:1.38;
+  font-weight:800;
   overflow:hidden;
   word-break:break-all;
   white-space:normal;
 }
 
 .weekly-poster-event-content.is-small{
-  font-size:4.8px;
-  line-height:1.2;
+  font-size:6.2px;
+  line-height:1.3;
 }
 
 .weekly-poster-event-content.is-tiny{
-  font-size:4.2px;
-  line-height:1.15;
+  font-size:5.5px;
+  line-height:1.22;
 }
 
 .weekly-poster-event-content.is-micro{
-  font-size:3.8px;
-  line-height:1.1;
+  font-size:4.8px;
+  line-height:1.16;
 }
 
 
@@ -2700,24 +2699,24 @@ button.cal-cell:disabled{
 
 .weekly-poster-grid{
   display:grid;
-  grid-template-columns:repeat(var(--poster-cols,6), var(--poster-card-width,118px));
-  gap:var(--poster-card-gap,10px);
+  grid-template-columns:repeat(var(--poster-cols,9), var(--poster-card-width,106px));
+  gap:var(--poster-card-gap,7px);
   align-content:start;
 }
 
 
-/* 单个成员卡：固定宽高 */
+/* 单个成员卡：窄长密集 */
 .weekly-poster-card{
-  width:var(--poster-card-width,118px);
-  height:var(--poster-card-height,306px);
+  width:var(--poster-card-width,106px);
+  height:var(--poster-card-height,318px);
   background:white;
   color:var(--weekly-theme,#ff6a16);
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-rows:218px 72px 16px;
+  grid-template-rows:220px 82px 16px;
   min-width:0;
-  box-shadow:0 0 0 2px rgba(255,255,255,.7);
+  box-shadow:0 0 0 1.5px rgba(255,255,255,.85);
 }
 
 .weekly-poster-img{
@@ -2740,9 +2739,9 @@ button.cal-cell:disabled{
   inset:0;
   background:linear-gradient(
     to bottom,
-    rgba(0,0,0,0) 38%,
-    rgba(0,0,0,.16) 64%,
-    rgba(0,0,0,.88) 100%
+    rgba(0,0,0,0) 34%,
+    rgba(0,0,0,.14) 60%,
+    rgba(0,0,0,.9) 100%
   );
 }
 
@@ -2758,16 +2757,16 @@ button.cal-cell:disabled{
 }
 
 
-/* 图片上的 badge 和名字 */
+/* 图片底部 badge + 名字 */
 .weekly-poster-card-info{
   position:absolute;
   left:0;
   right:0;
   bottom:0;
-  padding:0 5px 3px;
+  padding:0 4px 1px;
   text-align:center;
   color:white;
-  text-shadow:0 1px 5px rgba(0,0,0,.8);
+  text-shadow:0 1px 5px rgba(0,0,0,.85);
   pointer-events:none;
 }
 
@@ -2776,21 +2775,21 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   gap:0;
-  font-size:calc(5.5px * var(--poster-font-scale,1));
+  font-size:calc(6px * var(--poster-font-scale,1));
   font-weight:900;
-  margin-bottom:1px;
+  margin-bottom:0;
 }
 
 .weekly-poster-badge-icon{
-  font-size:15px;
+  font-size:calc(17px * var(--poster-font-scale,1));
   line-height:.95;
   filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));
 }
 
 .weekly-poster-name{
-  font-size:calc(17px * var(--poster-font-scale,1));
+  font-size:calc(18px * var(--poster-font-scale,1));
   font-weight:1000;
-  line-height:.95;
+  line-height:.9;
   margin-top:0;
   margin-bottom:-2px;
   white-space:nowrap;
@@ -2799,36 +2798,36 @@ button.cal-cell:disabled{
 }
 
 
-/* 成员总结文字 */
+/* 白色文字区 */
 .weekly-poster-card-text{
-  padding:5px 6px 4px;
+  padding:6px 6px 3px;
   box-sizing:border-box;
   text-align:center;
   overflow:hidden;
 }
 
 .weekly-poster-card-text p{
-  margin:0 0 3px;
-  font-size:calc(5px * var(--poster-font-scale,1));
-  line-height:1.22;
-  font-weight:700;
-  height:13px;
+  margin:0 0 5px;
+  font-size:calc(6px * var(--poster-font-scale,1));
+  line-height:1.25;
+  font-weight:800;
+  height:24px;
   overflow:hidden;
 }
 
 .weekly-poster-card-text strong{
   display:block;
-  font-size:calc(4.8px * var(--poster-font-scale,1));
+  font-size:calc(5.8px * var(--poster-font-scale,1));
   line-height:1.05;
   font-weight:800;
-  opacity:.68;
+  opacity:.72;
 }
 
 .weekly-poster-card-text b{
   display:block;
   margin-top:2px;
   color:var(--weekly-theme,#ff6a16);
-  font-size:calc(5.6px * var(--poster-font-scale,1));
+  font-size:calc(7px * var(--poster-font-scale,1));
   line-height:1.05;
   font-weight:1000;
   white-space:nowrap;
@@ -2837,15 +2836,15 @@ button.cal-cell:disabled{
 }
 
 
-/* 底部日期条：小月历 */
+/* 底部日期条 */
 .weekly-poster-date-line{
   display:grid;
   grid-template-columns:repeat(7,1fr);
   height:16px;
   border-top:1px solid rgba(0,0,0,.08);
   color:var(--weekly-theme,#ff6a16);
-  font-size:4.8px;
-  font-weight:800;
+  font-size:5px;
+  font-weight:900;
 }
 
 .weekly-poster-date-line span{
@@ -2860,7 +2859,6 @@ button.cal-cell:disabled{
   opacity:1;
   background:rgba(255,255,255,.78);
 }
-
 
 /* 导出按钮 */
 .weekly-preview-actions{
