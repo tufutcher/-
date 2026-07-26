@@ -481,48 +481,103 @@ export function openWeeklyPreview(reportId){
   modal.id = "weekly-preview";
   modal.className = "modal-bg detail-viewer-bg";
 
-  const itemsHtml = (report.weekly_report_items || []).map(item => {
+  const themeColor = report.theme_color || "#ff6a16";
+  const items = report.weekly_report_items || [];
+
+  const cardsHtml = items.map(item => {
+    const days = item.checkin_dates?.length || 0;
+    const badge = getWeeklyBadge(days);
+    const dates = renderMiniDateLine(report, item);
+
     const imageHtml = item.cover_image_url
-      ? '<img src="' + item.cover_image_url + '">'
-      : '<div>暂无图片</div>';
+      ? '<img src="' + item.cover_image_url + '" crossorigin="anonymous">'
+      : '<div class="weekly-poster-empty-img">暂无图片</div>';
 
     return (
-      '<div class="weekly-poster-member">' +
+      '<div class="weekly-poster-card">' +
 
-        '<div class="weekly-cover">' +
+        '<div class="weekly-poster-img">' +
           imageHtml +
+          '<div class="weekly-poster-img-mask"></div>' +
         '</div>' +
 
-        '<h3>' +
-          escapeHtml(item.display_name || "匿名") +
-        '</h3>' +
+        '<div class="weekly-poster-card-info">' +
 
-        '<p>' +
-          escapeHtml(item.nickname_title || "") +
-        '</p>' +
+          '<div class="weekly-poster-badge">' +
+            '<span class="weekly-poster-badge-icon">' + badge + '</span>' +
+            '<span>打卡' + days + '天</span>' +
+          '</div>' +
 
-        '<span>' +
-          escapeHtml(item.summary || "") +
-        '</span>' +
+          '<div class="weekly-poster-name">' +
+            escapeHtml(item.display_name || "匿名") +
+          '</div>' +
+
+        '</div>' +
+
+        '<div class="weekly-poster-card-text">' +
+          '<p>' + escapeHtml(item.summary || "本周也在努力画画。") + '</p>' +
+          '<strong>获得称号</strong>' +
+          '<b>「' + escapeHtml(item.nickname_title || "继续创作中") + '」</b>' +
+        '</div>' +
+
+        '<div class="weekly-poster-date-line">' +
+          dates +
+        '</div>' +
 
       '</div>'
     );
   }).join("");
 
   modal.innerHTML =
-    '<div class="weekly-poster">' +
+    '<div class="weekly-preview-card">' +
 
-      '<div class="weekly-poster-head">' +
-        '<h1>' + escapeHtml(report.title || "本周创作报告") + '</h1>' +
-        '<p>' + report.start_date + ' - ' + report.end_date + '</p>' +
-      '</div>' +
+      '<div class="weekly-poster-canvas" style="--weekly-theme:' + themeColor + '">' +
 
-      '<div class="weekly-event">' +
-        escapeHtml(report.event_notes || "") +
-      '</div>' +
+        '<div class="weekly-poster-left">' +
 
-      '<div class="weekly-member-grid">' +
-        itemsHtml +
+          '<div class="weekly-poster-date-vertical">' +
+            formatPosterDate(report.start_date, report.end_date) +
+          '</div>' +
+
+          '<div class="weekly-poster-title-vertical">' +
+            '<span>本</span>' +
+            '<span>周</span>' +
+            '<span>创</span>' +
+            '<span>作</span>' +
+            '<span>报</span>' +
+            '<span>告</span>' +
+          '</div>' +
+
+          '<div class="weekly-poster-event-box">' +
+            '<div class="weekly-poster-event-title">' +
+              '<span>这</span><span>周</span><span>群</span><span>里</span>' +
+              '<br>' +
+              '<span>发</span><span>生</span><span>了</span><span>啥</span>' +
+            '</div>' +
+            '<div class="weekly-poster-event-content">' +
+              formatEventText(report.event_notes || "本周还没有填写群事件。") +
+            '</div>' +
+          '</div>' +
+
+        '</div>' +
+
+        '<div class="weekly-poster-main">' +
+          '<div class="weekly-poster-grid">' +
+            cardsHtml +
+          '</div>' +
+        '</div>' +
+
+        '<div class="weekly-poster-side-text">' +
+          '<span>不</span>' +
+          '<span>画</span>' +
+          '<span>画</span>' +
+          '<span>真</span>' +
+          '<span>的</span>' +
+          '<span>要</span>' +
+          '<span>完</span>' +
+          '<span>了</span>' +
+        '</div>' +
+
       '</div>' +
 
       '<div class="weekly-preview-actions">' +
@@ -538,7 +593,7 @@ export function openWeeklyPreview(reportId){
 
   if(exportBtn){
     exportBtn.onclick = async () => {
-      const poster = modal.querySelector(".weekly-poster");
+      const poster = modal.querySelector(".weekly-poster-canvas");
 
       if(!poster){
         return;
@@ -558,7 +613,8 @@ export function openWeeklyPreview(reportId){
 
       const canvas = await html2canvas(poster, {
         scale: 2,
-        backgroundColor: "#ffffff"
+        backgroundColor: themeColor,
+        useCORS: true
       });
 
       const link = document.createElement("a");
@@ -606,6 +662,37 @@ function getDateRange(start, end){
 function formatShortDate(date){
   const d = new Date(date);
   return (d.getMonth() + 1) + "月" + d.getDate() + "日";
+}
+
+function getWeeklyBadge(days){
+  if(days >= 6) return "🔥";
+  if(days >= 4) return "⭐";
+  if(days >= 2) return "🎨";
+  return "★";
+}
+
+function formatPosterDate(start, end){
+  return start.replaceAll("-", ".") + " - " + end.replaceAll("-", ".");
+}
+
+function formatEventText(text){
+  return escapeHtml(text)
+    .replaceAll("\n", "<br>");
+}
+
+function renderMiniDateLine(report, item){
+  const allDates = getDateRange(report.start_date, report.end_date);
+  const checkedDates = item.checkin_dates || [];
+
+  return allDates.map(date => {
+    const active = checkedDates.includes(date);
+
+    return (
+      '<span class="' + (active ? "active" : "") + '">' +
+        new Date(date).getDate() +
+      '</span>'
+    );
+  }).join("");
 }
 
 function escapeHtml(value){
