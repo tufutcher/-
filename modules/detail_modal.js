@@ -1,6 +1,7 @@
 import { state } from "../core/state.js";
 import { openReadonlyProfileModal } from "./profile.js";
 import { openEditModal } from "./edit_modal.js";
+import { claimWeeklyProxyCheckin } from "../api/weekly_report.js";
 
 function fmtDate(date){
   const d = new Date(date);
@@ -10,6 +11,17 @@ function fmtDate(date){
 function dateKey(date){
   const d = new Date(date);
   return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+
+function canClaimProxyCheckin(item){
+  return (
+    state.user &&
+    state.profile &&
+    item.source === "weekly_report" &&
+    !item.user_id &&
+    state.profile.member_id &&
+    item.member_id === state.profile.member_id
+  );
 }
 
 // 月历某一天的作品弹窗
@@ -30,6 +42,19 @@ export function openCalendarDayModal(dayKey, mine, readonly){
 
   const galleryHtml = items.map(item => {
     const imgs = item.checkin_images || [];
+
+    if(!imgs.length){
+      const isProxy = item.source === "weekly_report";
+
+      return (
+        '<button class="calendar-gallery-tile calendar-gallery-proxy" data-checkin-id="' + item.id + '" type="button">' +
+          '<div class="calendar-proxy-placeholder">' +
+            '<strong>' + (isProxy ? "周报代录" : "暂无图片") + '</strong>' +
+            '<span>' + (item.note || item.proxy_note || "点击查看详情") + '</span>' +
+          '</div>' +
+        '</button>'
+      );
+    }
 
     return imgs.map(img => {
       return (
@@ -84,32 +109,50 @@ export function openProfileCheckinDetail(item, readonly = false){
   const username = item.username || profile?.username || "匿名";
   const avatarLetter = username.trim().slice(0, 1) || "匿";
 
+  const isProxy = item.source === "weekly_report";
+  const canClaim = canClaimProxyCheckin(item);
+
   const authorAvatarHtml = avatarUrl
     ? '<img class="detail-avatar" src="' + avatarUrl + '">'
     : '<div class="detail-avatar detail-avatar-fallback">' + avatarLetter + '</div>';
 
-  const imagesHtml = imgs.map(img => {
-    const tagsHtml = img.tags?.length
-      ? (
-        '<div class="tags detail-tags">' +
-          img.tags.map(t => '<span>#' + t + '</span>').join("") +
-        '</div>'
-      )
-      : "";
+  const imagesHtml = imgs.length
+    ? imgs.map(img => {
+        const tagsHtml = img.tags?.length
+          ? (
+            '<div class="tags detail-tags">' +
+              img.tags.map(t => '<span>#' + t + '</span>').join("") +
+            '</div>'
+          )
+          : "";
 
-    return (
-      '<div class="detail-art-block">' +
-        '<img src="' + img.image_url + '">' +
-        tagsHtml +
+        return (
+          '<div class="detail-art-block">' +
+            '<img src="' + img.image_url + '">' +
+            tagsHtml +
+          '</div>'
+        );
+      }).join("")
+    : (
+      '<div class="detail-art-block proxy-detail-empty">' +
+        '<div class="proxy-detail-placeholder">' +
+          '<strong>' + (isProxy ? "这是一条周报代录打卡" : "暂无图片") + '</strong>' +
+          '<span>' + (isProxy ? "可以点击下方按钮补录图片和感想。" : "还没有上传作品。") + '</span>' +
+        '</div>' +
       '</div>'
     );
-  }).join("");
+
+  const noteHtml = item.note || item.proxy_note
+    ? '<div class="note detail-note">' + (item.note || item.proxy_note) + '</div>'
+    : '';
+
+  const actionsHtml = getDetailActionsHtml(item, readonly, canClaim);
 
   modal.innerHTML =
     '<div class="detail-viewer-card">' +
 
       '<div class="detail-viewer-head">' +
-        '<button class="detail-author-card" data-profile-user-id="' + item.user_id + '" type="button">' +
+        '<button class="detail-author-card" data-profile-user-id="' + (item.user_id || "") + '" type="button">' +
           authorAvatarHtml +
           '<div>' +
             '<div class="detail-author">' + username + '</div>' +
@@ -118,17 +161,18 @@ export function openProfileCheckinDetail(item, readonly = false){
         '</button>' +
       '</div>' +
 
+      (isProxy
+        ? '<div class="proxy-checkin-tip">周报代录打卡</div>'
+        : ''
+      ) +
+
       '<div class="detail-art-list">' +
         imagesHtml +
       '</div>' +
 
-      (item.note ? '<div class="note detail-note">' + item.note + '</div>' : '') +
+      noteHtml +
 
-      (!readonly ? (
-        '<div class="detail-actions">' +
-          '<button id="profile-detail-edit">编辑</button>' +
-        '</div>'
-      ) : '') +
+      actionsHtml +
 
     '</div>';
 
@@ -153,6 +197,70 @@ export function openProfileCheckinDetail(item, readonly = false){
       openEditModal(item);
     };
   }
+
+  const claimBtn = document.getElementById("profile-detail-claim");
+  if(claimBtn){
+    claimBtn.onclick = async () => {
+      claimBtn.disabled = true;
+      claimBtn.textContent = "补录中...";
+
+      const success = await claimWeeklyProxyCheckin(
+        window.__sb,
+        item.id,
+        state.user.id
+      );
+
+      if(!success){
+        claimBtn.disabled = false;
+        claimBtn.textContent = "补录这天打卡";
+
+        window.showToast?.(
+          "补录失败，请检查账号名是否和周报成员匹配。",
+          "失败",
+          "error"
+        );
+
+        return;
+      }
+
+      window.showToast?.(
+        "这条打卡已转为你的个人打卡，可以继续编辑补图。",
+        "补录成功",
+        "success"
+      );
+
+      const claimedItem = {
+        ...item,
+        user_id: state.user.id,
+        username: state.profile.username || item.username,
+        source: "manual",
+        claimed_at: new Date().toISOString()
+      };
+
+      modal.remove();
+      openEditModal(claimedItem);
+    };
+  }
+}
+
+function getDetailActionsHtml(item, readonly, canClaim){
+  if(canClaim){
+    return (
+      '<div class="detail-actions">' +
+        '<button id="profile-detail-claim" type="button">补录这天打卡</button>' +
+      '</div>'
+    );
+  }
+
+  if(!readonly && item.user_id === state.user?.id){
+    return (
+      '<div class="detail-actions">' +
+        '<button id="profile-detail-edit" type="button">编辑</button>' +
+      '</div>'
+    );
+  }
+
+  return "";
 }
 
 function bindBaseModalClose(modal){
