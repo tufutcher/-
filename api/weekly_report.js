@@ -148,18 +148,18 @@ export async function uploadWeeklyCover(sb, file){
 }
 
 export async function saveWeeklyReportItems(sb, reportId, items){
-  const oldItems = await loadWeeklyReportItems(sb, reportId);
-
   await deleteProxyCheckinsForReport(sb, reportId);
   await deleteWeeklyReportItems(sb, reportId);
 
   const savedItems = [];
+  let proxyErrorCount = 0;
 
   for(let i = 0; i < items.length; i++){
     const item = items[i];
     const member = await findOrCreateMember(sb, item.display_name);
 
     if(!member){
+      proxyErrorCount++;
       continue;
     }
 
@@ -183,18 +183,26 @@ export async function saveWeeklyReportItems(sb, reportId, items){
 
     if(error){
       console.error("save weekly item error:", error);
+      proxyErrorCount++;
       continue;
     }
 
     savedItems.push(savedItem);
 
-    await createProxyCheckinsForItem(sb, {
+    const proxyResult = await createProxyCheckinsForItem(sb, {
       reportId,
       itemId: savedItem.id,
       memberId: member.id,
+      displayName: member.display_name,
       dates: checkinDates,
       summary: item.summary || ""
     });
+
+    proxyErrorCount += proxyResult.errorCount;
+  }
+
+  if(proxyErrorCount > 0){
+    console.error("weekly proxy checkin failed count:", proxyErrorCount);
   }
 
   return savedItems;
@@ -239,32 +247,52 @@ async function deleteProxyCheckinsForReport(sb, reportId){
 }
 
 async function createProxyCheckinsForItem(sb, options){
+  let successCount = 0;
+  let errorCount = 0;
+
   for(const date of options.dates){
-    const exists = await hasProxyCheckinOnDate(sb, options.memberId, date);
+    const exists = await hasCheckinOnDate(
+      sb,
+      options.memberId,
+      date
+    );
 
     if(exists){
       continue;
     }
 
+    const note =
+      options.summary || "周报代录打卡";
+
     const { error } = await sb
       .from("checkins")
       .insert({
         user_id: null,
+        username: options.displayName,
+        note: note,
         member_id: options.memberId,
         source: "weekly_report",
         weekly_report_id: options.reportId,
         weekly_report_item_id: options.itemId,
-        proxy_note: options.summary || "周报代录打卡",
+        proxy_note: note,
         created_at: date + "T12:00:00"
       });
 
     if(error){
       console.error("create proxy checkin error:", error);
+      errorCount++;
+    }else{
+      successCount++;
     }
   }
+
+  return {
+    successCount,
+    errorCount
+  };
 }
 
-async function hasProxyCheckinOnDate(sb, memberId, date){
+async function hasCheckinOnDate(sb, memberId, date){
   const start = date + "T00:00:00";
   const end = date + "T23:59:59";
 
@@ -277,11 +305,65 @@ async function hasProxyCheckinOnDate(sb, memberId, date){
     .limit(1);
 
   if(error){
-    console.error("check proxy exists error:", error);
+    console.error("check existing checkin error:", error);
     return true;
   }
 
   return (data || []).length > 0;
+}
+
+export async function claimWeeklyProxyCheckin(sb, checkinId, userId){
+  const { data: checkin, error: checkinError } = await sb
+    .from("checkins")
+    .select("*")
+    .eq("id", checkinId)
+    .single();
+
+  if(checkinError || !checkin){
+    console.error("claim proxy checkin find error:", checkinError);
+    return false;
+  }
+
+  if(checkin.source !== "weekly_report"){
+    return false;
+  }
+
+  if(checkin.user_id){
+    return false;
+  }
+
+  const { data: profile, error: profileError } = await sb
+    .from("profiles")
+    .select("member_id, username")
+    .eq("id", userId)
+    .single();
+
+  if(profileError || !profile?.member_id){
+    console.error("claim proxy profile error:", profileError);
+    return false;
+  }
+
+  if(profile.member_id !== checkin.member_id){
+    console.error("this proxy checkin does not belong to this member");
+    return false;
+  }
+
+  const { error } = await sb
+    .from("checkins")
+    .update({
+      user_id: userId,
+      username: profile.username || checkin.username,
+      source: "manual",
+      claimed_at: new Date().toISOString()
+    })
+    .eq("id", checkinId);
+
+  if(error){
+    console.error("claim proxy checkin update error:", error);
+    return false;
+  }
+
+  return true;
 }
 
 function normalizeDates(dates){
