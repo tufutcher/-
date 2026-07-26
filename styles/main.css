@@ -2569,7 +2569,6 @@ button.cal-cell:disabled{
   color:white;
 }
 
-
 /* 预览窗口 */
 .weekly-preview-card{
   max-width:96vw;
@@ -2588,22 +2587,22 @@ button.cal-cell:disabled{
 }
 
 
-/* 海报画布 */
+/* 海报画布：宽度随人数变化 */
 .weekly-poster-canvas{
-  width:1280px;
+  width:var(--poster-width, 1280px);
   height:var(--poster-height, 864px);
   background:var(--weekly-theme,#ff6a16);
   color:white;
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-columns:210px 1fr 34px;
+  grid-template-columns:190px 1fr 30px;
   gap:18px;
-  padding:38px 26px 34px 38px;
+  padding:38px 20px 36px 38px;
   box-sizing:border-box;
-  transform:scale(.7);
+  transform:scale(.72);
   transform-origin:top center;
-  margin-bottom:calc((var(--poster-height, 864px) * -.3));
+  margin-bottom:calc((var(--poster-height, 864px) * -.28));
 }
 
 .weekly-poster-canvas.is-exporting{
@@ -2624,52 +2623,53 @@ button.cal-cell:disabled{
   top:0;
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  font-size:14px;
+  font-size:10px;
   font-weight:800;
-  letter-spacing:2px;
+  letter-spacing:1px;
 }
 
 .weekly-poster-title-vertical{
   position:absolute;
-  left:34px;
+  left:30px;
   top:0;
   display:flex;
   flex-direction:column;
   gap:0;
-  font-size:40px;
+  font-size:28px;
   font-weight:1000;
   line-height:.98;
 }
 
+
 /* 左下事件框 */
 .weekly-poster-event-box{
   position:absolute;
-  left:6px;
+  left:4px;
   bottom:0;
-  width:172px;
-  height:320px;
+  width:152px;
+  height:260px;
   border:2px dotted rgba(255,255,255,.9);
-  border-radius:10px;
-  padding:16px 12px;
+  border-radius:8px;
+  padding:12px 9px;
   box-sizing:border-box;
   display:grid;
-  grid-template-columns:34px 1fr;
-  gap:10px;
+  grid-template-columns:26px 1fr;
+  gap:8px;
 }
 
 .weekly-poster-event-title{
   writing-mode:vertical-rl;
   text-orientation:upright;
-  font-size:15px;
+  font-size:10px;
   font-weight:900;
   line-height:1.05;
-  opacity:.8;
+  opacity:.82;
   justify-self:center;
 }
 
 .weekly-poster-event-content{
-  font-size:11px;
-  line-height:1.42;
+  font-size:6.2px;
+  line-height:1.32;
   font-weight:700;
   overflow:hidden;
   word-break:break-all;
@@ -2677,14 +2677,20 @@ button.cal-cell:disabled{
 }
 
 .weekly-poster-event-content.is-small{
-  font-size:9.5px;
-  line-height:1.34;
+  font-size:5.4px;
+  line-height:1.25;
 }
 
 .weekly-poster-event-content.is-tiny{
-  font-size:8.3px;
-  line-height:1.26;
+  font-size:4.8px;
+  line-height:1.18;
 }
+
+.weekly-poster-event-content.is-micro{
+  font-size:4.2px;
+  line-height:1.12;
+}
+
 
 /* 右侧成员区 */
 .weekly-poster-main{
@@ -2694,20 +2700,22 @@ button.cal-cell:disabled{
 
 .weekly-poster-grid{
   display:grid;
-  grid-template-columns:repeat(var(--poster-cols,6), 1fr);
+  grid-template-columns:repeat(var(--poster-cols,6), var(--poster-card-width,150px));
   gap:12px;
   align-content:start;
 }
 
 
-/* 单个成员卡 */
+/* 单个成员卡：固定宽高 */
 .weekly-poster-card{
+  width:var(--poster-card-width,150px);
+  min-height:var(--poster-card-height,385px);
   background:white;
   color:var(--weekly-theme,#ff6a16);
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-rows:260px 108px 22px;
+  grid-template-rows:245px 92px auto;
   min-width:0;
   box-shadow:0 0 0 2px rgba(255,255,255,.7);
 }
@@ -2733,8 +2741,8 @@ button.cal-cell:disabled{
   background:linear-gradient(
     to bottom,
     rgba(0,0,0,0) 35%,
-    rgba(0,0,0,.14) 62%,
-    rgba(0,0,0,.8) 100%
+    rgba(0,0,0,.12) 62%,
+    rgba(0,0,0,.72) 100%
   );
 }
 
@@ -2745,7 +2753,7 @@ button.cal-cell:disabled{
   justify-content:center;
   background:#eee;
   color:#999;
-  font-size:14px;
+  font-size:8px;
   font-weight:800;
 }
 
@@ -2755,11 +2763,11 @@ button.cal-cell:disabled{
   position:absolute;
   left:0;
   right:0;
-  bottom:10px;
-  padding:0 8px;
+  bottom:8px;
+  padding:0 6px;
   text-align:center;
   color:white;
-  text-shadow:0 2px 8px rgba(0,0,0,.75);
+  text-shadow:0 1px 5px rgba(0,0,0,.75);
   pointer-events:none;
 }
 
@@ -2768,57 +2776,57 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   gap:0;
-  font-size:11px;
+  font-size:5.8px;
   font-weight:900;
 }
 
 .weekly-poster-badge-icon{
-  font-size:25px;
+  font-size:16px;
   line-height:1;
-  filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));
 }
 
 .weekly-poster-name{
-  font-size:21px;
+  font-size:12px;
   font-weight:1000;
   line-height:1;
-  margin-top:2px;
+  margin-top:1px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 
-/* 成员总结文字 */
+/* 成员总结文字：再缩小一倍 */
 .weekly-poster-card-text{
-  padding:10px 8px 6px;
+  padding:7px 6px 5px;
   box-sizing:border-box;
   text-align:center;
   overflow:hidden;
 }
 
 .weekly-poster-card-text p{
-  margin:0 0 6px;
-  font-size:10px;
+  margin:0 0 4px;
+  font-size:5.6px;
   line-height:1.28;
   font-weight:700;
-  height:28px;
+  height:16px;
   overflow:hidden;
 }
 
 .weekly-poster-card-text strong{
   display:block;
-  font-size:10px;
+  font-size:5.4px;
   line-height:1.1;
   font-weight:800;
-  opacity:.7;
+  opacity:.68;
 }
 
 .weekly-poster-card-text b{
   display:block;
-  margin-top:3px;
+  margin-top:2px;
   color:var(--weekly-theme,#ff6a16);
-  font-size:12px;
+  font-size:6.4px;
   line-height:1.1;
   font-weight:1000;
   white-space:nowrap;
@@ -2827,29 +2835,29 @@ button.cal-cell:disabled{
 }
 
 
-/* 底部日期条 */
+/* 底部日期条：像小月历一样可换行 */
 .weekly-poster-date-line{
-  height:22px;
   display:grid;
   grid-template-columns:repeat(7,1fr);
+  grid-auto-rows:14px;
   border-top:1px solid rgba(0,0,0,.08);
   color:var(--weekly-theme,#ff6a16);
-  font-size:7px;
+  font-size:5px;
   font-weight:800;
 }
 
 .weekly-poster-date-line span{
-  height:22px;
   display:flex;
   align-items:center;
   justify-content:center;
   border-left:1px solid rgba(0,0,0,.08);
-  opacity:.32;
+  border-bottom:1px solid rgba(0,0,0,.05);
+  opacity:.28;
 }
 
 .weekly-poster-date-line span.active{
   opacity:1;
-  background:color-mix(in srgb, var(--weekly-theme,#ff6a16) 10%, white);
+  background:rgba(255,255,255,.78);
 }
 
 
@@ -2860,8 +2868,8 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   justify-content:flex-end;
-  gap:4px;
-  font-size:16px;
+  gap:3px;
+  font-size:10px;
   font-weight:900;
   line-height:1;
 }
