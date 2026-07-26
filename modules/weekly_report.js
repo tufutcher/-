@@ -55,13 +55,13 @@ export async function openWeeklyReportManager(){
 }
 
 function bindWeeklyBaseEvents(modal){
-
   const closeBtn = modal.querySelector("#weekly-close");
+  const refreshBtn = modal.querySelector("#weekly-refresh");
+  const createBtn = modal.querySelector("#weekly-create");
 
   if(closeBtn){
     closeBtn.onclick = () => modal.remove();
   }
-
 
   modal.onclick = e => {
     if(e.target === modal){
@@ -69,32 +69,24 @@ function bindWeeklyBaseEvents(modal){
     }
   };
 
-
-  const refreshBtn = modal.querySelector("#weekly-refresh");
-
   if(refreshBtn){
     refreshBtn.onclick = async () => {
       await renderWeeklyReportList();
     };
   }
 
-
-  const createBtn = modal.querySelector("#weekly-create");
-
   if(createBtn){
     createBtn.onclick = async () => {
       await handleCreateWeeklyReport();
     };
   }
-
 }
 
 async function renderWeeklyReportList(){
   const list = document.getElementById("weekly-report-list");
   if(!list) return;
 
-  const sb = window.__sb;
-  weeklyReportsCache = await loadWeeklyReports(sb);
+  weeklyReportsCache = await loadWeeklyReports(window.__sb);
 
   if(!weeklyReportsCache.length){
     list.innerHTML = '<div class="weekly-empty">还没有周报。</div>';
@@ -122,337 +114,39 @@ async function renderWeeklyReportList(){
   bindWeeklyListEvents();
 }
 
-export function openWeeklyPreview(reportId){
-
-  const report =
-    weeklyReportsCache.find(
-      x=>x.id===reportId
-    );
-
-
-  if(!report){
-
-    window.showToast?.(
-      "找不到周报",
-      "错误",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const old =
-    document.getElementById(
-      "weekly-preview"
-    );
-
-  if(old){
-    old.remove();
-  }
-
-
-  const modal =
-    document.createElement("div");
-
-
-  modal.id="weekly-preview";
-
-  modal.className=
-    "modal-bg detail-viewer-bg";
-
-
-  modal.innerHTML = `
-
-<div class="weekly-poster">
-
-  <div class="weekly-poster-head">
-
-    <h1>
-      ${report.title}
-    </h1>
-
-
-    <p>
-      ${report.start_date}
-      -
-      ${report.end_date}
-    </p>
-
-
-  </div>
-
-
-
-  <div class="weekly-event">
-
-    ${report.event_notes || ""}
-
-  </div>
-
-
-
-  <div class="weekly-member-grid">
-
-  ${
-    (report.weekly_report_items || [])
-    .map(item=>{
-
-
-      return `
-
-<div class="weekly-poster-member">
-
-
-  <div class="weekly-cover">
-
-
-  ${
-    item.cover_image_url
-
-    ?
-
-    `
-    <img src="${item.cover_image_url}">
-    `
-
-    :
-
-    `
-    <div>
-      暂无图片
-    </div>
-    `
-
-  }
-
-
-  </div>
-
-
-
-  <h3>
-    ${item.display_name}
-  </h3>
-
-
-
-  <p>
-    ${item.nickname_title || ""}
-  </p>
-
-
-  <span>
-
-    ${item.summary || ""}
-
-  </span>
-
-
-
-</div>
-
-
-`;
-
-    }).join("")
-
-  }
-
-
-  </div>
-
-
-<div class="weekly-preview-actions">
-
-<button id="weekly-export-image">
-导出图片
-</button>
-
-<button id="weekly-preview-close">
-关闭
-</button>
-
-</div>
-
-
-</div>
-
-
-`;
-
-
-
-document.body.appendChild(modal);
-
-
-
-modal
-.querySelector("#weekly-preview-close")
-.onclick=()=>modal.remove();
-
-
-
-modal.onclick=e=>{
-
-if(e.target===modal){
-
-modal.remove();
-
-}
-
-};
-
-
-}
-
-const exportBtn =
-modal.querySelector("#weekly-export-image");
-
-
-if(exportBtn){
-
-  exportBtn.onclick = async()=>{
-
-
-    const poster =
-      modal.querySelector(".weekly-poster");
-
-
-    if(!poster){
-      return;
-    }
-
-
-    exportBtn.textContent =
-      "生成中...";
-
-
-    const canvas =
-      await html2canvas(
-        poster,
-        {
-          scale:2,
-          backgroundColor:"#ffffff"
-        }
-      );
-
-
-    const link =
-      document.createElement("a");
-
-
-    link.download =
-      "weekly-report.png";
-
-
-    link.href =
-      canvas.toDataURL(
-        "image/png"
-      );
-
-
-    link.click();
-
-
-    exportBtn.textContent =
-      "导出图片";
-
-
-    window.showToast?.(
-      "周报图片已生成。",
-      "完成",
-      "success"
-    );
-
-
-  };
-
-}
-
 function bindWeeklyListEvents(){
-  // 编辑周报
-  document
-  .querySelectorAll("[data-weekly-open]")
-  .forEach(btn=>{
-
-    btn.onclick = ()=>{
-
-      const reportId =
-        btn.dataset.weeklyOpen;
-
-      openWeeklyEditor(reportId);
-
+  document.querySelectorAll("[data-weekly-open]").forEach(btn => {
+    btn.onclick = () => {
+      openWeeklyEditor(btn.dataset.weeklyOpen);
     };
-
   });
 
-  // 预览周报海报
-  document
-  .querySelectorAll("[data-weekly-preview]")
-  .forEach(btn=>{
-
-    btn.onclick = ()=>{
-
-      const reportId =
-        btn.dataset.weeklyPreview;
-
-      openWeeklyPreview(reportId);
-
+  document.querySelectorAll("[data-weekly-preview]").forEach(btn => {
+    btn.onclick = () => {
+      openWeeklyPreview(btn.dataset.weeklyPreview);
     };
-
   });
 
-  // 删除周报
-  document
-  .querySelectorAll("[data-weekly-delete]")
-  .forEach(btn=>{
-    
-    btn.onclick = async()=>{
+  document.querySelectorAll("[data-weekly-delete]").forEach(btn => {
+    btn.onclick = async () => {
+      const reportId = btn.dataset.weeklyDelete;
 
-      const reportId =
-        btn.dataset.weeklyDelete;
+      const ok = await window.showConfirm?.({
+        title: "删除周报？",
+        message: "这会删除这期周报和周报卡片。已被用户补全的打卡不会删除。",
+        confirmText: "删除",
+        cancelText: "取消"
+      });
 
-      const ok =
-        await window.showConfirm?.({
+      if(!ok) return;
 
-          title:"删除周报？",
-
-          message:
-          "这会删除这期周报和周报卡片。已被用户补全的打卡不会删除。",
-
-          confirmText:"删除",
-
-          cancelText:"取消"
-
-        });
-
-      if(!ok){
-        return;
-      }
-
-      const success =
-        await deleteWeeklyReport(
-          window.__sb,
-          reportId
-        );
+      const success = await deleteWeeklyReport(window.__sb, reportId);
 
       if(success){
-
-        window.showToast?.(
-          "周报已删除。",
-          "删除成功",
-          "success"
-        );
-        
+        window.showToast?.("周报已删除。", "删除成功", "success");
         await renderWeeklyReportList();
-
       }else{
-        window.showToast?.(
-          "周报删除失败。",
-          "删除失败",
-          "error"
-        );
+        window.showToast?.("周报删除失败。", "删除失败", "error");
       }
     };
   });
@@ -494,46 +188,424 @@ async function handleCreateWeeklyReport(){
   await renderWeeklyReportList();
 }
 
+async function openWeeklyEditor(reportId){
+  const report = weeklyReportsCache.find(x => x.id === reportId);
+
+  if(!report){
+    window.showToast?.("找不到这份周报。", "打开失败", "error");
+    return;
+  }
+
+  const old = document.getElementById("weekly-editor");
+  if(old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "weekly-editor";
+  modal.className = "modal-bg detail-viewer-bg";
+
+  modal.innerHTML =
+    '<div class="weekly-editor-card">' +
+
+      '<div class="weekly-editor-head">' +
+        '<div>' +
+          '<h2>' + escapeHtml(report.title) + '</h2>' +
+          '<p>' + report.start_date + ' - ' + report.end_date + '</p>' +
+        '</div>' +
+        '<button id="weekly-editor-close" type="button">关闭</button>' +
+      '</div>' +
+
+      '<div class="weekly-member-list" id="weekly-member-list"></div>' +
+
+      '<div class="weekly-editor-actions">' +
+        '<button id="weekly-add-member" type="button">+ 添加成员</button>' +
+        '<button id="weekly-save" type="button">保存周报</button>' +
+      '</div>' +
+
+    '</div>';
+
+  document.body.appendChild(modal);
+
+  const closeBtn = modal.querySelector("#weekly-editor-close");
+  if(closeBtn){
+    closeBtn.onclick = () => modal.remove();
+  }
+
+  modal.onclick = e => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  };
+
+  renderWeeklyMembers(report);
+  bindWeeklyEditorEvents(report, modal);
+}
+
+function bindWeeklyEditorEvents(report, modal){
+  const addBtn = modal.querySelector("#weekly-add-member");
+  const saveBtn = modal.querySelector("#weekly-save");
+
+  if(addBtn){
+    addBtn.onclick = async () => {
+      const name = prompt("请输入成员名字");
+
+      if(!name || !name.trim()){
+        return;
+      }
+
+      const member = await findOrCreateMember(window.__sb, name.trim());
+
+      if(!member){
+        window.showToast?.("成员创建失败", "失败", "error");
+        return;
+      }
+
+      const items = report.weekly_report_items || [];
+
+      items.push({
+        report_id: report.id,
+        member_id: member.id,
+        display_name: member.display_name,
+        checkin_dates: [],
+        cover_image_url: "",
+        cover_storage_path: "",
+        summary: "",
+        nickname_title: "",
+        sort_order: items.length
+      });
+
+      report.weekly_report_items = items;
+      renderWeeklyMembers(report);
+      bindWeeklyEditorEvents(report, modal);
+    };
+  }
+
+  if(saveBtn){
+    saveBtn.onclick = async () => {
+      const items = report.weekly_report_items || [];
+
+      if(!items.length){
+        window.showToast?.("请至少添加一个成员。", "无法保存", "error");
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "保存中...";
+
+      const savedItems = await saveWeeklyReportItems(
+        window.__sb,
+        report.id,
+        items
+      );
+
+      if(savedItems){
+        report.weekly_report_items = savedItems;
+
+        window.showToast?.(
+          "周报已保存，成员打卡已同步。",
+          "保存成功",
+          "success"
+        );
+
+        weeklyReportsCache = await loadWeeklyReports(window.__sb);
+        renderWeeklyMembers(report);
+        bindWeeklyEditorEvents(report, modal);
+        await renderWeeklyReportList();
+
+      }else{
+        window.showToast?.("保存失败。", "失败", "error");
+      }
+
+      saveBtn.disabled = false;
+      saveBtn.textContent = "保存周报";
+    };
+  }
+
+  bindWeeklyMemberInputs(report, modal);
+}
+
+function renderWeeklyMembers(report){
+  const box = document.getElementById("weekly-member-list");
+  if(!box) return;
+
+  const items = report.weekly_report_items || [];
+
+  if(!items.length){
+    box.innerHTML =
+      '<div class="weekly-empty">还没有成员，点击添加成员。</div>';
+    return;
+  }
+
+  box.innerHTML = items.map((item, index) => {
+    return (
+      '<div class="weekly-member-card" data-index="' + index + '">' +
+
+        '<div class="weekly-member-head">' +
+          '<h3>' + escapeHtml(item.display_name || "匿名") + '</h3>' +
+          '<span>周报成员</span>' +
+        '</div>' +
+
+        '<div class="weekly-field">' +
+          '<label>打卡日期</label>' +
+          '<div class="weekly-date-picker">' +
+            renderDateChoices(report, item, index) +
+          '</div>' +
+        '</div>' +
+
+        '<div class="weekly-field">' +
+          '<label>代表图</label>' +
+          '<div class="weekly-cover-area">' +
+            renderCover(item) +
+            '<button class="weekly-upload-cover" data-index="' + index + '" type="button">上传代表图</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="weekly-field">' +
+          '<label>总结</label>' +
+          '<textarea class="weekly-summary-input" data-index="' + index + '" placeholder="本周创作总结">' +
+            escapeHtml(item.summary || "") +
+          '</textarea>' +
+        '</div>' +
+
+        '<div class="weekly-field">' +
+          '<label>称号</label>' +
+          '<input class="weekly-title-input" data-index="' + index + '" value="' +
+            escapeHtml(item.nickname_title || "") +
+            '" placeholder="例如：结构狂魔">' +
+        '</div>' +
+
+      '</div>'
+    );
+  }).join("");
+}
+
+function renderDateChoices(report, item, index){
+  return getDateRange(report.start_date, report.end_date).map(date => {
+    const checked = (item.checkin_dates || []).includes(date);
+
+    return (
+      '<label class="weekly-date-item">' +
+        '<input type="checkbox" class="weekly-date-checkbox" data-index="' + index + '" value="' + date + '"' +
+          (checked ? " checked" : "") +
+        '>' +
+        '<span>' + formatShortDate(date) + '</span>' +
+      '</label>'
+    );
+  }).join("");
+}
+
+function renderCover(item){
+  if(item.cover_image_url){
+    return '<img class="weekly-cover-preview" src="' + item.cover_image_url + '">';
+  }
+
+  return '<div class="weekly-cover-empty">暂无图片</div>';
+}
+
+function bindWeeklyMemberInputs(report, modal){
+  modal.querySelectorAll(".weekly-date-checkbox").forEach(input => {
+    input.onchange = () => {
+      const index = Number(input.dataset.index);
+
+      const checkedDates = Array.from(
+        modal.querySelectorAll(
+          '.weekly-date-checkbox[data-index="' + index + '"]:checked'
+        )
+      ).map(x => x.value);
+
+      report.weekly_report_items[index].checkin_dates = checkedDates;
+    };
+  });
+
+  modal.querySelectorAll(".weekly-summary-input").forEach(input => {
+    input.oninput = () => {
+      const index = Number(input.dataset.index);
+      report.weekly_report_items[index].summary = input.value;
+    };
+  });
+
+  modal.querySelectorAll(".weekly-title-input").forEach(input => {
+    input.oninput = () => {
+      const index = Number(input.dataset.index);
+      report.weekly_report_items[index].nickname_title = input.value;
+    };
+  });
+
+  modal.querySelectorAll(".weekly-upload-cover").forEach(btn => {
+    btn.onclick = () => {
+      const index = Number(btn.dataset.index);
+      const input = document.createElement("input");
+
+      input.type = "file";
+      input.accept = "image/*";
+
+      input.onchange = async e => {
+        const file = e.target.files[0];
+        if(!file) return;
+
+        btn.disabled = true;
+        btn.textContent = "上传中...";
+
+        const url = await uploadWeeklyCover(window.__sb, file);
+
+        if(url){
+          report.weekly_report_items[index].cover_image_url = url;
+
+          renderWeeklyMembers(report);
+          bindWeeklyEditorEvents(report, modal);
+
+          window.showToast?.("代表图上传成功", "完成", "success");
+        }else{
+          window.showToast?.("图片上传失败", "失败", "error");
+          btn.disabled = false;
+          btn.textContent = "上传代表图";
+        }
+      };
+
+      input.click();
+    };
+  });
+}
+
+export function openWeeklyPreview(reportId){
+  const report = weeklyReportsCache.find(x => x.id === reportId);
+
+  if(!report){
+    window.showToast?.("找不到周报", "错误", "error");
+    return;
+  }
+
+  const old = document.getElementById("weekly-preview");
+  if(old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "weekly-preview";
+  modal.className = "modal-bg detail-viewer-bg";
+
+  const itemsHtml = (report.weekly_report_items || []).map(item => {
+    const imageHtml = item.cover_image_url
+      ? '<img src="' + item.cover_image_url + '">'
+      : '<div>暂无图片</div>';
+
+    return (
+      '<div class="weekly-poster-member">' +
+
+        '<div class="weekly-cover">' +
+          imageHtml +
+        '</div>' +
+
+        '<h3>' +
+          escapeHtml(item.display_name || "匿名") +
+        '</h3>' +
+
+        '<p>' +
+          escapeHtml(item.nickname_title || "") +
+        '</p>' +
+
+        '<span>' +
+          escapeHtml(item.summary || "") +
+        '</span>' +
+
+      '</div>'
+    );
+  }).join("");
+
+  modal.innerHTML =
+    '<div class="weekly-poster">' +
+
+      '<div class="weekly-poster-head">' +
+        '<h1>' + escapeHtml(report.title || "本周创作报告") + '</h1>' +
+        '<p>' + report.start_date + ' - ' + report.end_date + '</p>' +
+      '</div>' +
+
+      '<div class="weekly-event">' +
+        escapeHtml(report.event_notes || "") +
+      '</div>' +
+
+      '<div class="weekly-member-grid">' +
+        itemsHtml +
+      '</div>' +
+
+      '<div class="weekly-preview-actions">' +
+        '<button id="weekly-export-image" type="button">导出图片</button>' +
+        '<button id="weekly-preview-close" type="button">关闭</button>' +
+      '</div>' +
+
+    '</div>';
+
+  document.body.appendChild(modal);
+
+  const exportBtn = modal.querySelector("#weekly-export-image");
+
+  if(exportBtn){
+    exportBtn.onclick = async () => {
+      const poster = modal.querySelector(".weekly-poster");
+
+      if(!poster){
+        return;
+      }
+
+      if(typeof html2canvas === "undefined"){
+        window.showToast?.(
+          "html2canvas 没有加载，请检查 index.html。",
+          "导出失败",
+          "error"
+        );
+        return;
+      }
+
+      exportBtn.disabled = true;
+      exportBtn.textContent = "生成中...";
+
+      const canvas = await html2canvas(poster, {
+        scale: 2,
+        backgroundColor: "#ffffff"
+      });
+
+      const link = document.createElement("a");
+      link.download = "weekly-report.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      exportBtn.disabled = false;
+      exportBtn.textContent = "导出图片";
+
+      window.showToast?.("周报图片已生成。", "完成", "success");
+    };
+  }
+
+  const closeBtn = modal.querySelector("#weekly-preview-close");
+
+  if(closeBtn){
+    closeBtn.onclick = () => modal.remove();
+  }
+
+  modal.onclick = e => {
+    if(e.target === modal){
+      modal.remove();
+    }
+  };
+}
+
 function getDateRange(start, end){
-
   const dates = [];
-
   let current = new Date(start);
   const last = new Date(end);
 
-
   while(current <= last){
-
     const y = current.getFullYear();
-    const m = String(current.getMonth()+1).padStart(2,"0");
-    const d = String(current.getDate()).padStart(2,"0");
+    const m = String(current.getMonth() + 1).padStart(2, "0");
+    const d = String(current.getDate()).padStart(2, "0");
 
-    dates.push(
-      `${y}-${m}-${d}`
-    );
-
-
-    current.setDate(
-      current.getDate()+1
-    );
+    dates.push(y + "-" + m + "-" + d);
+    current.setDate(current.getDate() + 1);
   }
-
 
   return dates;
 }
 
-
 function formatShortDate(date){
-
   const d = new Date(date);
-
-  return (
-    (d.getMonth()+1)
-    + "月"
-    +
-    d.getDate()
-    + "日"
-  );
+  return (d.getMonth() + 1) + "月" + d.getDate() + "日";
 }
 
 function escapeHtml(value){
@@ -543,727 +615,4 @@ function escapeHtml(value){
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
-}
-
-async function openWeeklyEditor(reportId){
-
-  const report = weeklyReportsCache.find(
-    x => x.id === reportId
-  );
-
-  if(!report){
-    window.showToast?.(
-      "找不到这份周报。",
-      "打开失败",
-      "error"
-    );
-    return;
-  }
-
-
-  const old = document.getElementById("weekly-editor");
-
-  if(old){
-    old.remove();
-  }
-
-
-  const modal = document.createElement("div");
-
-  modal.id = "weekly-editor";
-  modal.className = "modal-bg detail-viewer-bg";
-
-
-  modal.innerHTML = `
-
-  <div class="weekly-editor-card">
-
-    <div class="weekly-editor-head">
-
-      <div>
-        <h2>${report.title}</h2>
-
-        <p>
-          ${report.start_date}
-          -
-          ${report.end_date}
-        </p>
-      </div>
-
-
-      <button id="weekly-editor-close">
-        关闭
-      </button>
-
-    </div>
-
-
-
-    <div class="weekly-member-list"
-         id="weekly-member-list">
-
-    </div>
-
-
-
-    <button id="weekly-add-member">
-      + 添加成员
-    </button>
-
-
-    <button id="weekly-save">
-      保存周报
-    </button>
-
-
-  </div>
-
-  `;
-
-
-  document.body.appendChild(modal);
-
-  modal.querySelector(
-    "#weekly-editor-close"
-  ).onclick = () => {
-    modal.remove();
-  };
-
-
-  modal.onclick = e => {
-    if(e.target === modal){
-      modal.remove();
-    }
-  };
-
-
-  renderWeeklyMembers(report);
-  bindWeeklyMemberInputs(report);
-  bindWeeklyEditorEvents(report, modal);
-  const addBtn = modal.querySelector(
-    "#weekly-add-member"
-  );
-  
-  
-  if(addBtn){
-  
-    addBtn.onclick = async()=>{
-  
-      const name = prompt(
-        "请输入成员名字"
-      );
-  
-  
-      if(!name || !name.trim()){
-        return;
-      }
-  
-  
-      const member =
-        await findOrCreateMember(
-          window.__sb,
-          name.trim()
-        );
-  
-  
-      if(!member){
-        window.showToast?.(
-          "成员创建失败",
-          "失败",
-          "error"
-        );
-        return;
-      }
-  
-  
-      const items =
-        report.weekly_report_items || [];
-  
-  
-      items.push({
-  
-        report_id: report.id,
-  
-        member_id: member.id,
-  
-        display_name:
-          member.display_name,
-  
-        checkin_dates: [],
-  
-        cover_image_url:"",
-  
-        summary:"",
-  
-        nickname_title:"",
-  
-        sort_order:
-          items.length
-  
-      });
-  
-  
-      report.weekly_report_items =
-        items;
-  
-  
-      renderWeeklyMembers(report);
-  
-  
-    };
-  
-  }
-
-
-}
-
-function bindWeeklyMemberInputs(report){
-
-  const items =
-    report.weekly_report_items || [];
-
-
-
-  document.querySelectorAll(".weekly-date-input")
-  .forEach(input=>{
-
-
-    input.onchange = ()=>{
-
-      const index =
-        Number(input.dataset.index);
-
-
-      items[index].checkin_dates =
-        input.value
-        .split(",")
-        .map(x=>x.trim())
-        .filter(Boolean);
-
-
-    };
-
-
-  });
-
-
-
-  document.querySelectorAll(".weekly-title-input")
-  .forEach(input=>{
-
-
-    input.oninput = ()=>{
-
-      const index =
-        Number(input.dataset.index);
-
-
-      items[index].nickname_title =
-        input.value;
-
-
-    };
-
-
-  });
-
-  document
-  .querySelectorAll(".weekly-date-checkbox")
-  .forEach(input=>{
-  
-  
-  input.onchange = ()=>{
-  
-  
-  const index =
-  Number(input.dataset.index);
-  
-  
-  const checkedDates =
-  Array.from(
-  document.querySelectorAll(
-  '.weekly-date-checkbox[data-index="'+index+'"]:checked'
-  )
-  )
-  .map(x=>x.value);
-  
-  
-  
-  report.weekly_report_items[index]
-  .checkin_dates =
-  checkedDates;
-  
-  
-  };
-  
-  
-  });
-
-
-}
-
-function bindWeeklyEditorEvents(report, modal){
-
-
-  // 保存按钮
-
-  const saveBtn =
-    modal.querySelector("#weekly-save");
-
-
-  if(saveBtn){
-
-    saveBtn.onclick = async()=>{
-
-
-      saveBtn.disabled = true;
-
-      saveBtn.textContent =
-        "保存中...";
-
-
-      const result =
-        await saveWeeklyReportItems(
-          window.__sb,
-          report.id,
-          report.weekly_report_items || []
-        );
-
-
-      if(result){
-
-        window.showToast?.(
-          "周报已保存，成员打卡已同步。",
-          "保存成功",
-          "success"
-        );
-
-
-        const reports =
-          await loadWeeklyReports(
-            window.__sb
-          );
-
-
-        weeklyReportsCache = reports;
-
-
-      }else{
-
-        window.showToast?.(
-          "保存失败。",
-          "失败",
-          "error"
-        );
-
-      }
-
-
-      saveBtn.disabled=false;
-
-      saveBtn.textContent =
-        "保存周报";
-
-    };
-
-  }
-
-
-
-
-  // 上传代表图
-
-  modal
-  .querySelectorAll(".weekly-upload-cover")
-  .forEach(btn=>{
-
-
-    btn.onclick = ()=>{
-
-
-      const index =
-        Number(
-          btn.dataset.index
-        );
-
-
-      const input =
-        document.createElement("input");
-
-
-      input.type="file";
-
-      input.accept="image/*";
-
-
-
-      input.onchange = async(e)=>{
-
-
-        const file =
-          e.target.files[0];
-
-
-        if(!file){
-          return;
-        }
-
-
-        btn.textContent =
-          "上传中...";
-
-
-        const url =
-          await uploadWeeklyCover(
-            window.__sb,
-            file
-          );
-
-
-        if(url){
-
-
-          report
-          .weekly_report_items[index]
-          .cover_image_url = url;
-
-
-
-          renderWeeklyMembers(report);
-
-
-          bindWeeklyEditorEvents(
-            report,
-            modal
-          );
-
-
-          window.showToast?.(
-            "代表图上传成功",
-            "完成",
-            "success"
-          );
-
-
-        }else{
-
-
-          window.showToast?.(
-            "图片上传失败",
-            "失败",
-            "error"
-          );
-
-        }
-
-
-      };
-
-
-      input.click();
-
-    };
-
-
-  });
-
-
-}
-
-function renderWeeklyMembers(report){
-
-  const box =
-    document.getElementById("weekly-member-list");
-
-
-  if(!box) return;
-
-
-  const items =
-    report.weekly_report_items || [];
-
-
-  if(!items.length){
-
-    box.innerHTML = `
-      <div class="weekly-empty">
-        还没有成员，点击添加成员。
-      </div>
-    `;
-
-    return;
-  }
-
-
-  box.innerHTML = items.map((item,index)=>{
-
-    const dates =
-      (item.checkin_dates || []).join(",");
-
-
-    return `
-
-<div class="weekly-member-card"
-     data-index="${index}">
-
-
-  <div class="weekly-member-head">
-
-    <h3>
-      ${item.display_name || "匿名"}
-    </h3>
-
-    <span>
-      周报成员
-    </span>
-
-  </div>
-
-
-
-  <div class="weekly-field">
-
-    <label>
-      打卡日期
-    </label>
-
-    <div class="weekly-date-picker">
-    
-    ${
-    getDateRange(
-      report.start_date,
-      report.end_date
-    )
-    .map(date=>{
-    
-    const checked =
-    (item.checkin_dates || [])
-    .includes(date);
-    
-    
-    return `
-    
-    <label class="weekly-date-item">
-    
-    <input
-    type="checkbox"
-    class="weekly-date-checkbox"
-    data-index="${index}"
-    value="${date}"
-    ${checked ? "checked":""}
-    >
-    
-    <span>
-    ${formatShortDate(date)}
-    </span>
-    
-    </label>
-    
-    `;
-    
-    }).join("")
-    
-    }
-    
-    </div>
-
-  </div>
-
-
-
-  <div class="weekly-field">
-
-    <label>
-      代表图
-    </label>
-
-    <div class="weekly-cover-area">
-
-      ${
-        item.cover_image_url
-        ?
-        `
-        <img
-        class="weekly-cover-preview"
-        src="${item.cover_image_url}">
-        `
-        :
-        `
-        <div class="weekly-cover-empty">
-          暂无图片
-        </div>
-        `
-      }
-
-
-      <button
-      class="weekly-upload-cover"
-      data-index="${index}"
-      type="button">
-        上传代表图
-      </button>
-
-
-    </div>
-
-  </div>
-
-
-
-
-  <div class="weekly-field">
-
-    <label>
-      总结
-    </label>
-
-
-    <textarea
-    class="weekly-summary-input"
-    data-index="${index}"
-    placeholder="本周创作总结">${item.summary || ""}</textarea>
-
-
-  </div>
-
-
-
-
-
-  <div class="weekly-field">
-
-    <label>
-      称号
-    </label>
-
-
-    <input
-    class="weekly-title-input"
-    data-index="${index}"
-    value="${item.nickname_title || ""}"
-    placeholder="例如：结构狂魔">
-
-
-  </div>
-
-
-
-</div>
-
-`;
-
-  }).join("");
-
-}
-
-function bindWeeklyMemberEvents(report){
-
-
-document
-.querySelectorAll(".weekly-dates")
-.forEach(input=>{
-
-input.onchange=()=>{
-
-const index =
-Number(input.dataset.index);
-
-
-report.weekly_report_items[index]
-.checkin_dates =
-input.value
-.split(",")
-.map(x=>x.trim())
-.filter(Boolean);
-
-};
-
-});
-
-
-
-document
-.querySelectorAll(".weekly-summary")
-.forEach(input=>{
-
-input.onchange=()=>{
-
-const index =
-Number(input.dataset.index);
-
-
-report.weekly_report_items[index]
-.summary =
-input.value;
-
-};
-
-});
-
-
-
-document
-.querySelectorAll(".weekly-title-input")
-.forEach(input=>{
-
-input.onchange=()=>{
-
-const index =
-Number(input.dataset.index);
-
-
-report.weekly_report_items[index]
-.nickname_title =
-input.value;
-
-};
-
-});
-
-
-
-document
-.querySelectorAll(".weekly-cover-input")
-.forEach(input=>{
-
-
-input.onchange=async()=>{
-
-
-const index =
-Number(input.dataset.index);
-
-
-const file =
-input.files[0];
-
-
-if(!file)return;
-
-
-const url =
-await uploadWeeklyCover(
-window.__sb,
-file
-);
-
-
-
-if(url){
-
-report.weekly_report_items[index]
-.cover_image_url=url;
-
-
-renderWeeklyMembers(report);
-
-}
-
-
-};
-
-
-});
-
-
 }
