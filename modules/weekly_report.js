@@ -8,6 +8,8 @@ import {
 } from "../api/weekly_report.js";
 
 let weeklyPosterColumns = 6;
+let weeklyPosterImageFit = "cover";
+let weeklyPosterImagePosition = "center";
 
 export async function openWeeklyReportManager(){
   const old = document.getElementById("weekly-report-manager");
@@ -498,7 +500,24 @@ export function openWeeklyPreview(reportId){
             '<option value="8">8</option>' +
           '</select>' +
         '</label>' +
-
+        
+        '<label class="weekly-column-control">' +
+          '<span>图片显示</span>' +
+          '<select id="weekly-image-fit-select">' +
+            '<option value="cover">裁切铺满</option>' +
+            '<option value="contain">完整显示</option>' +
+          '</select>' +
+        '</label>' +
+        
+        '<label class="weekly-column-control">' +
+          '<span>图片位置</span>' +
+          '<select id="weekly-image-position-select">' +
+            '<option value="center">居中</option>' +
+            '<option value="top">靠上</option>' +
+            '<option value="bottom">靠下</option>' +
+          '</select>' +
+        '</label>' +
+        
         '<button id="weekly-export-image" type="button">导出图片</button>' +
         '<button id="weekly-preview-close" type="button">关闭</button>' +
 
@@ -520,6 +539,29 @@ export function openWeeklyPreview(reportId){
       renderWeeklyPoster(report, modal);
     };
   }
+
+  const imageFitSelect = modal.querySelector("#weekly-image-fit-select");
+
+if(imageFitSelect){
+  imageFitSelect.value = weeklyPosterImageFit;
+
+  imageFitSelect.onchange = () => {
+    weeklyPosterImageFit = imageFitSelect.value || "cover";
+    renderWeeklyPoster(report, modal);
+  };
+}
+
+
+const imagePositionSelect = modal.querySelector("#weekly-image-position-select");
+
+if(imagePositionSelect){
+  imagePositionSelect.value = weeklyPosterImagePosition;
+
+  imagePositionSelect.onchange = () => {
+    weeklyPosterImagePosition = imagePositionSelect.value || "center";
+    renderWeeklyPoster(report, modal);
+  };
+}
 
   const exportBtn = modal.querySelector("#weekly-export-image");
 
@@ -638,6 +680,8 @@ function renderWeeklyPoster(report, modal){
       '--weekly-theme:' + themeColor + ';' +
       '--poster-cols:' + columns + ';' +
       '--poster-height:' + posterHeight + 'px;' +
+      '--poster-image-fit:' + weeklyPosterImageFit + ';' +
+      '--poster-image-position:' + weeklyPosterImagePosition + ';' +
     '">' +
 
       '<div class="weekly-poster-left">' +
