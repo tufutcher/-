@@ -1,7 +1,7 @@
 import { state } from "../core/state.js";
 import { openReadonlyProfileModal } from "./profile.js";
 import { openEditModal } from "./edit_modal.js";
-import { claimWeeklyProxyCheckin } from "../api/weekly_report.js";
+import { openCheckinModal } from "./checkin_modal.js";
 
 function fmtDate(date){
   const d = new Date(date);
@@ -11,6 +11,15 @@ function fmtDate(date){
 function dateKey(date){
   const d = new Date(date);
   return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+
+function toDateInputValue(date){
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function canClaimProxyCheckin(item){
@@ -204,41 +213,22 @@ export function openProfileCheckinDetail(item, readonly = false){
       claimBtn.disabled = true;
       claimBtn.textContent = "补录中...";
 
-      const success = await claimWeeklyProxyCheckin(
-        window.__sb,
-        item.id,
-        state.user.id
-      );
-
-      if(!success){
-        claimBtn.disabled = false;
-        claimBtn.textContent = "补录这天打卡";
-
-        window.showToast?.(
-          "补录失败，请检查账号名是否和周报成员匹配。",
-          "失败",
-          "error"
-        );
-
-        return;
-      }
-
-      window.showToast?.(
-        "这条打卡已转为你的个人打卡，可以继续编辑补图。",
-        "补录成功",
-        "success"
-      );
-
-      const claimedItem = {
-        ...item,
-        user_id: state.user.id,
-        username: state.profile.username || item.username,
-        source: "manual",
-        claimed_at: new Date().toISOString()
-      };
+      const presetDate = toDateInputValue(item.created_at);
 
       modal.remove();
-      openEditModal(claimedItem);
+
+      openCheckinModal({
+        presetDate,
+        onSuccess: () => {
+          window.showToast?.(
+            "补录成功，这一天的周报占位打卡会自动消失。",
+            "完成",
+            "success"
+          );
+
+          location.reload();
+        }
+      });
     };
   }
 }
