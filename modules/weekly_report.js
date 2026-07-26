@@ -11,6 +11,7 @@ let weeklyReportsCache = [];
 let weeklyPosterColumns = 6;
 let weeklyPosterImageFit = "cover";
 let weeklyPosterImagePosition = "center";
+let weeklyPosterFontScale = 1;
 
 export async function openWeeklyReportManager(){
   const old = document.getElementById("weekly-report-manager");
@@ -519,6 +520,16 @@ export function openWeeklyPreview(reportId){
           '</select>' +
         '</label>' +
         
+        '<label class="weekly-column-control">' +
+          '<span>字体大小</span>' +
+          '<select id="weekly-font-scale-select">' +
+            '<option value="0.8">小</option>' +
+            '<option value="1">正常</option>' +
+            '<option value="1.2">大</option>' +
+            '<option value="1.4">特大</option>' +
+          '</select>' +
+        '</label>' +
+        
         '<button id="weekly-export-image" type="button">导出图片</button>' +
         '<button id="weekly-preview-close" type="button">关闭</button>' +
 
@@ -560,6 +571,17 @@ if(imagePositionSelect){
 
   imagePositionSelect.onchange = () => {
     weeklyPosterImagePosition = imagePositionSelect.value || "center";
+    renderWeeklyPoster(report, modal);
+  };
+}
+
+const fontScaleSelect = modal.querySelector("#weekly-font-scale-select");
+
+if(fontScaleSelect){
+  fontScaleSelect.value = String(weeklyPosterFontScale);
+
+  fontScaleSelect.onchange = () => {
+    weeklyPosterFontScale = Number(fontScaleSelect.value) || 1;
     renderWeeklyPoster(report, modal);
   };
 }
@@ -639,7 +661,7 @@ function renderWeeklyPoster(report, modal){
   const rows = Math.max(1, Math.ceil(items.length / actualColumns));
 
   const cardWidth = 118;
-  const cardHeight = 330;
+  const cardHeight = 306;
   const cardGap = 10;
 
   const leftWidth = 190;
@@ -717,6 +739,7 @@ function renderWeeklyPoster(report, modal){
       '--poster-card-gap:' + cardGap + 'px;' +
       '--poster-image-fit:' + weeklyPosterImageFit + ';' +
       '--poster-image-position:' + weeklyPosterImagePosition + ';' +
+      '--poster-font-scale:' + weeklyPosterFontScale + ';' +
     '">' +
 
       '<div class="weekly-poster-left">' +
