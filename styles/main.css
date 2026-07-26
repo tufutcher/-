@@ -2709,13 +2709,13 @@ button.cal-cell:disabled{
 /* 单个成员卡：固定宽高 */
 .weekly-poster-card{
   width:var(--poster-card-width,118px);
-  height:var(--poster-card-height,330px);
+  height:var(--poster-card-height,306px);
   background:white;
   color:var(--weekly-theme,#ff6a16);
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-rows:218px 74px 38px;
+  grid-template-rows:218px 72px 16px;
   min-width:0;
   box-shadow:0 0 0 2px rgba(255,255,255,.7);
 }
@@ -2740,9 +2740,9 @@ button.cal-cell:disabled{
   inset:0;
   background:linear-gradient(
     to bottom,
-    rgba(0,0,0,0) 36%,
-    rgba(0,0,0,.1) 62%,
-    rgba(0,0,0,.78) 100%
+    rgba(0,0,0,0) 38%,
+    rgba(0,0,0,.16) 64%,
+    rgba(0,0,0,.88) 100%
   );
 }
 
@@ -2763,11 +2763,11 @@ button.cal-cell:disabled{
   position:absolute;
   left:0;
   right:0;
-  bottom:8px;
-  padding:0 6px;
+  bottom:0;
+  padding:0 5px 3px;
   text-align:center;
   color:white;
-  text-shadow:0 1px 5px rgba(0,0,0,.75);
+  text-shadow:0 1px 5px rgba(0,0,0,.8);
   pointer-events:none;
 }
 
@@ -2776,21 +2776,23 @@ button.cal-cell:disabled{
   flex-direction:column;
   align-items:center;
   gap:0;
-  font-size:6px;
+  font-size:calc(5.5px * var(--poster-font-scale,1));
   font-weight:900;
+  margin-bottom:1px;
 }
 
 .weekly-poster-badge-icon{
   font-size:15px;
-  line-height:1;
-  filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));
+  line-height:.95;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.55));
 }
 
 .weekly-poster-name{
-  font-size:13px;
+  font-size:calc(17px * var(--poster-font-scale,1));
   font-weight:1000;
-  line-height:1;
-  margin-top:1px;
+  line-height:.95;
+  margin-top:0;
+  margin-bottom:-2px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -2799,7 +2801,7 @@ button.cal-cell:disabled{
 
 /* 成员总结文字 */
 .weekly-poster-card-text{
-  padding:6px 6px 4px;
+  padding:5px 6px 4px;
   box-sizing:border-box;
   text-align:center;
   overflow:hidden;
@@ -2807,7 +2809,7 @@ button.cal-cell:disabled{
 
 .weekly-poster-card-text p{
   margin:0 0 3px;
-  font-size:5px;
+  font-size:calc(5px * var(--poster-font-scale,1));
   line-height:1.22;
   font-weight:700;
   height:13px;
@@ -2816,7 +2818,7 @@ button.cal-cell:disabled{
 
 .weekly-poster-card-text strong{
   display:block;
-  font-size:4.8px;
+  font-size:calc(4.8px * var(--poster-font-scale,1));
   line-height:1.05;
   font-weight:800;
   opacity:.68;
@@ -2826,7 +2828,7 @@ button.cal-cell:disabled{
   display:block;
   margin-top:2px;
   color:var(--weekly-theme,#ff6a16);
-  font-size:5.6px;
+  font-size:calc(5.6px * var(--poster-font-scale,1));
   line-height:1.05;
   font-weight:1000;
   white-space:nowrap;
@@ -2839,7 +2841,7 @@ button.cal-cell:disabled{
 .weekly-poster-date-line{
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  grid-auto-rows:12px;
+  height:16px;
   border-top:1px solid rgba(0,0,0,.08);
   color:var(--weekly-theme,#ff6a16);
   font-size:4.8px;
@@ -2851,7 +2853,6 @@ button.cal-cell:disabled{
   align-items:center;
   justify-content:center;
   border-left:1px solid rgba(0,0,0,.08);
-  border-bottom:1px solid rgba(0,0,0,.05);
   opacity:.28;
 }
 
