@@ -7,7 +7,7 @@ import {
   uploadWeeklyCover
 } from "../api/weekly_report.js";
 
-let weeklyReportsCache = [];
+let weeklyPosterColumns = 6;
 
 export async function openWeeklyReportManager(){
   const old = document.getElementById("weekly-report-manager");
@@ -481,113 +481,45 @@ export function openWeeklyPreview(reportId){
   modal.id = "weekly-preview";
   modal.className = "modal-bg detail-viewer-bg";
 
-  const themeColor = report.theme_color || "#ff6a16";
-  const items = report.weekly_report_items || [];
-
-  const cardsHtml = items.map(item => {
-    const days = item.checkin_dates?.length || 0;
-    const badge = getWeeklyBadge(days);
-    const dates = renderMiniDateLine(report, item);
-
-    const imageHtml = item.cover_image_url
-      ? '<img src="' + item.cover_image_url + '" crossorigin="anonymous">'
-      : '<div class="weekly-poster-empty-img">暂无图片</div>';
-
-    return (
-      '<div class="weekly-poster-card">' +
-
-        '<div class="weekly-poster-img">' +
-          imageHtml +
-          '<div class="weekly-poster-img-mask"></div>' +
-        '</div>' +
-
-        '<div class="weekly-poster-card-info">' +
-
-          '<div class="weekly-poster-badge">' +
-            '<span class="weekly-poster-badge-icon">' + badge + '</span>' +
-            '<span>打卡' + days + '天</span>' +
-          '</div>' +
-
-          '<div class="weekly-poster-name">' +
-            escapeHtml(item.display_name || "匿名") +
-          '</div>' +
-
-        '</div>' +
-
-        '<div class="weekly-poster-card-text">' +
-          '<p>' + escapeHtml(item.summary || "本周也在努力画画。") + '</p>' +
-          '<strong>获得称号</strong>' +
-          '<b>「' + escapeHtml(item.nickname_title || "继续创作中") + '」</b>' +
-        '</div>' +
-
-        '<div class="weekly-poster-date-line">' +
-          dates +
-        '</div>' +
-
-      '</div>'
-    );
-  }).join("");
-
   modal.innerHTML =
     '<div class="weekly-preview-card">' +
 
-      '<div class="weekly-poster-canvas" style="--weekly-theme:' + themeColor + '">' +
-
-        '<div class="weekly-poster-left">' +
-
-          '<div class="weekly-poster-date-vertical">' +
-            formatPosterDate(report.start_date, report.end_date) +
-          '</div>' +
-
-          '<div class="weekly-poster-title-vertical">' +
-            '<span>本</span>' +
-            '<span>周</span>' +
-            '<span>创</span>' +
-            '<span>作</span>' +
-            '<span>报</span>' +
-            '<span>告</span>' +
-          '</div>' +
-
-          '<div class="weekly-poster-event-box">' +
-            '<div class="weekly-poster-event-title">' +
-              '<span>这</span><span>周</span><span>群</span><span>里</span>' +
-              '<br>' +
-              '<span>发</span><span>生</span><span>了</span><span>啥</span>' +
-            '</div>' +
-            '<div class="weekly-poster-event-content">' +
-              formatEventText(report.event_notes || "本周还没有填写群事件。") +
-            '</div>' +
-          '</div>' +
-
-        '</div>' +
-
-        '<div class="weekly-poster-main">' +
-          '<div class="weekly-poster-grid">' +
-            cardsHtml +
-          '</div>' +
-        '</div>' +
-
-        '<div class="weekly-poster-side-text">' +
-          '<span>不</span>' +
-          '<span>画</span>' +
-          '<span>画</span>' +
-          '<span>真</span>' +
-          '<span>的</span>' +
-          '<span>要</span>' +
-          '<span>完</span>' +
-          '<span>了</span>' +
-        '</div>' +
-
-      '</div>' +
+      '<div id="weekly-poster-wrap"></div>' +
 
       '<div class="weekly-preview-actions">' +
+
+        '<label class="weekly-column-control">' +
+          '<span>每行人数</span>' +
+          '<select id="weekly-column-select">' +
+            '<option value="4">4</option>' +
+            '<option value="5">5</option>' +
+            '<option value="6">6</option>' +
+            '<option value="7">7</option>' +
+            '<option value="8">8</option>' +
+          '</select>' +
+        '</label>' +
+
         '<button id="weekly-export-image" type="button">导出图片</button>' +
         '<button id="weekly-preview-close" type="button">关闭</button>' +
+
       '</div>' +
 
     '</div>';
 
   document.body.appendChild(modal);
+
+  renderWeeklyPoster(report, modal);
+
+  const columnSelect = modal.querySelector("#weekly-column-select");
+
+  if(columnSelect){
+    columnSelect.value = String(weeklyPosterColumns);
+
+    columnSelect.onchange = () => {
+      weeklyPosterColumns = Number(columnSelect.value) || 6;
+      renderWeeklyPoster(report, modal);
+    };
+  }
 
   const exportBtn = modal.querySelector("#weekly-export-image");
 
@@ -611,11 +543,17 @@ export function openWeeklyPreview(reportId){
       exportBtn.disabled = true;
       exportBtn.textContent = "生成中...";
 
+      poster.classList.add("is-exporting");
+
+      const themeColor = report.theme_color || "#ff6a16";
+
       const canvas = await html2canvas(poster, {
         scale: 2,
         backgroundColor: themeColor,
         useCORS: true
       });
+
+      poster.classList.remove("is-exporting");
 
       const link = document.createElement("a");
       link.download = "weekly-report.png";
@@ -640,6 +578,115 @@ export function openWeeklyPreview(reportId){
       modal.remove();
     }
   };
+}
+
+function renderWeeklyPoster(report, modal){
+  const wrap = modal.querySelector("#weekly-poster-wrap");
+  if(!wrap) return;
+
+  const themeColor = report.theme_color || "#ff6a16";
+  const items = report.weekly_report_items || [];
+
+  const columns = weeklyPosterColumns;
+  const rows = Math.max(1, Math.ceil(items.length / columns));
+  const posterHeight = 250 + rows * 410;
+
+  const cardsHtml = items.map(item => {
+    const days = item.checkin_dates?.length || 0;
+    const badge = getWeeklyBadge(days);
+    const dates = renderMiniDateLine(report, item);
+
+    const imageHtml = item.cover_image_url
+      ? '<img src="' + item.cover_image_url + '" crossorigin="anonymous">'
+      : '<div class="weekly-poster-empty-img">暂无图片</div>';
+
+    return (
+      '<div class="weekly-poster-card">' +
+
+        '<div class="weekly-poster-img">' +
+          imageHtml +
+          '<div class="weekly-poster-img-mask"></div>' +
+
+          '<div class="weekly-poster-card-info">' +
+            '<div class="weekly-poster-badge">' +
+              '<span class="weekly-poster-badge-icon">' + badge + '</span>' +
+              '<span>打卡' + days + '天</span>' +
+            '</div>' +
+
+            '<div class="weekly-poster-name">' +
+              escapeHtml(item.display_name || "匿名") +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="weekly-poster-card-text">' +
+          '<p>' + escapeHtml(item.summary || "本周也在努力画画。") + '</p>' +
+          '<strong>获得称号</strong>' +
+          '<b>「' + escapeHtml(item.nickname_title || "继续创作中") + '」</b>' +
+        '</div>' +
+
+        '<div class="weekly-poster-date-line">' +
+          dates +
+        '</div>' +
+
+      '</div>'
+    );
+  }).join("");
+
+  wrap.innerHTML =
+    '<div class="weekly-poster-canvas" style="' +
+      '--weekly-theme:' + themeColor + ';' +
+      '--poster-cols:' + columns + ';' +
+      '--poster-height:' + posterHeight + 'px;' +
+    '">' +
+
+      '<div class="weekly-poster-left">' +
+
+        '<div class="weekly-poster-date-vertical">' +
+          formatPosterDate(report.start_date, report.end_date) +
+        '</div>' +
+
+        '<div class="weekly-poster-title-vertical">' +
+          '<span>本</span>' +
+          '<span>周</span>' +
+          '<span>创</span>' +
+          '<span>作</span>' +
+          '<span>报</span>' +
+          '<span>告</span>' +
+        '</div>' +
+
+        '<div class="weekly-poster-event-box">' +
+          '<div class="weekly-poster-event-title">' +
+            '<span>这</span><span>周</span><span>群</span><span>里</span>' +
+            '<br>' +
+            '<span>发</span><span>生</span><span>了</span><span>啥</span>' +
+          '</div>' +
+
+          '<div class="weekly-poster-event-content">' +
+            formatEventText(report.event_notes || "本周还没有填写群事件。") +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+
+      '<div class="weekly-poster-main">' +
+        '<div class="weekly-poster-grid">' +
+          cardsHtml +
+        '</div>' +
+      '</div>' +
+
+      '<div class="weekly-poster-side-text">' +
+        '<span>不</span>' +
+        '<span>画</span>' +
+        '<span>画</span>' +
+        '<span>真</span>' +
+        '<span>的</span>' +
+        '<span>要</span>' +
+        '<span>完</span>' +
+        '<span>了</span>' +
+      '</div>' +
+
+    '</div>';
 }
 
 function getDateRange(start, end){
