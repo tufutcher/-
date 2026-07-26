@@ -112,7 +112,7 @@ async function renderWeeklyReportList(){
         '</div>' +
         '<div class="weekly-row-actions">' +
           '<button data-weekly-open="' + report.id + '" type="button">编辑</button>' +
-          '<button data-weekly-preview="' + report.id + '" type="button">预览</button>'
+          '<button data-weekly-preview="' + report.id + '" type="button">预览</button>' +
           '<button data-weekly-delete="' + report.id + '" type="button">删除</button>' +
         '</div>' +
       '</div>'
