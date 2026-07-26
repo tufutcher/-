@@ -630,9 +630,36 @@ function renderWeeklyPoster(report, modal){
   const themeColor = report.theme_color || "#ff6a16";
   const items = report.weekly_report_items || [];
 
-  const columns = weeklyPosterColumns;
-  const rows = Math.max(1, Math.ceil(items.length / columns));
-  const posterHeight = 250 + rows * 410;
+  const selectedColumns = weeklyPosterColumns || 6;
+  const actualColumns = Math.max(
+    1,
+    Math.min(selectedColumns, Math.max(items.length, 1))
+  );
+
+  const rows = Math.max(1, Math.ceil(items.length / actualColumns));
+
+  const cardWidth = 150;
+  const cardHeight = 385;
+  const cardGap = 12;
+
+  const leftWidth = 190;
+  const sideWidth = 30;
+  const paddingX = 58;
+  const mainGap = 18;
+
+  const posterWidth =
+    paddingX +
+    leftWidth +
+    mainGap +
+    actualColumns * cardWidth +
+    Math.max(0, actualColumns - 1) * cardGap +
+    mainGap +
+    sideWidth;
+
+  const posterHeight =
+    74 +
+    rows * cardHeight +
+    Math.max(0, rows - 1) * cardGap;
 
   const cardsHtml = items.map(item => {
     const days = item.checkin_dates?.length || 0;
@@ -679,8 +706,11 @@ function renderWeeklyPoster(report, modal){
   wrap.innerHTML =
     '<div class="weekly-poster-canvas" style="' +
       '--weekly-theme:' + themeColor + ';' +
-      '--poster-cols:' + columns + ';' +
+      '--poster-cols:' + actualColumns + ';' +
+      '--poster-width:' + posterWidth + 'px;' +
       '--poster-height:' + posterHeight + 'px;' +
+      '--poster-card-width:' + cardWidth + 'px;' +
+      '--poster-card-height:' + cardHeight + 'px;' +
       '--poster-image-fit:' + weeklyPosterImageFit + ';' +
       '--poster-image-position:' + weeklyPosterImagePosition + ';' +
     '">' +
@@ -706,7 +736,7 @@ function renderWeeklyPoster(report, modal){
             '<br>' +
             '<span>发</span><span>生</span><span>了</span><span>啥</span>' +
           '</div>' +
-        
+
           '<div class="weekly-poster-event-content ' + getEventTextClass(report.event_notes) + '">' +
             formatEventText(report.event_notes || "本周还没有填写群事件。") +
           '</div>' +
@@ -759,11 +789,15 @@ function formatShortDate(date){
 function getEventTextClass(text){
   const length = String(text || "").length;
 
-  if(length > 120){
+  if(length > 160){
+    return "is-micro";
+  }
+
+  if(length > 100){
     return "is-tiny";
   }
 
-  if(length > 70){
+  if(length > 55){
     return "is-small";
   }
 
