@@ -975,8 +975,3 @@ function escapeHtml(value){
 
 }
 
-await renderWeeklyReportList();
-
-
-}
-
