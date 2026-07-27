@@ -573,10 +573,346 @@ return;
 
 
 window.showToast?.(
+
 "周报创建成功",
+
 "完成",
+
 "success"
+
 );
+
+await renderWeeklyReportList();
+
+}
+
+export function openWeeklyPreview(reportId){
+
+  const report =
+    weeklyReportsCache.find(
+      x => x.id === reportId
+    );
+
+
+  if(!report){
+
+    window.showToast?.(
+      "找不到周报",
+      "错误",
+      "error"
+    );
+
+    return;
+  }
+
+
+
+  const old =
+    document.getElementById(
+      "weekly-preview"
+    );
+
+
+  if(old){
+    old.remove();
+  }
+
+
+
+  const modal =
+    document.createElement("div");
+
+
+  modal.id =
+    "weekly-preview";
+
+
+  modal.className =
+    "modal-bg detail-viewer-bg";
+
+
+
+  modal.innerHTML = `
+
+<div class="weekly-preview-card">
+
+
+<div id="weekly-poster-wrap"></div>
+
+
+
+<div class="weekly-preview-actions">
+
+
+<label>
+每行人数
+
+<select id="weekly-column-select">
+
+<option value="6">
+6
+</option>
+
+<option value="7">
+7
+</option>
+
+<option value="8">
+8
+</option>
+
+<option value="9">
+9
+</option>
+
+<option value="10">
+10
+</option>
+
+</select>
+
+</label>
+
+
+
+<label>
+字体
+
+<select id="weekly-font-scale-select">
+
+<option value="1">
+普通
+</option>
+
+
+<option value="1.2">
+大
+</option>
+
+
+<option value="1.4">
+特大
+</option>
+
+</select>
+
+</label>
+
+
+
+<button id="weekly-export-image">
+导出图片
+</button>
+
+
+
+<button id="weekly-preview-close">
+关闭
+</button>
+
+
+</div>
+
+
+</div>
+
+`;
+
+
+
+  document.body.appendChild(modal);
+
+
+
+  renderWeeklyPoster(
+    report,
+    modal
+  );
+
+
+
+  const columnSelect =
+    modal.querySelector(
+      "#weekly-column-select"
+    );
+
+
+  if(columnSelect){
+
+    columnSelect.value =
+      String(
+        weeklyPosterColumns
+      );
+
+
+    columnSelect.onchange = ()=>{
+
+      weeklyPosterColumns =
+        Number(
+          columnSelect.value
+        );
+
+
+      renderWeeklyPoster(
+        report,
+        modal
+      );
+
+    };
+
+  }
+
+
+
+  const fontSelect =
+    modal.querySelector(
+      "#weekly-font-scale-select"
+    );
+
+
+  if(fontSelect){
+
+    fontSelect.value =
+      String(
+        weeklyPosterFontScale
+      );
+
+
+    fontSelect.onchange = ()=>{
+
+      weeklyPosterFontScale =
+        Number(
+          fontSelect.value
+        );
+
+
+      renderWeeklyPoster(
+        report,
+        modal
+      );
+
+    };
+
+  }
+
+
+
+  const exportBtn =
+    modal.querySelector(
+      "#weekly-export-image"
+    );
+
+
+  if(exportBtn){
+
+    exportBtn.onclick =
+    async()=>{
+
+
+      const poster =
+        modal.querySelector(
+          ".weekly-poster-canvas"
+        );
+
+
+      if(!poster){
+        return;
+      }
+
+
+
+      if(
+        typeof html2canvas === "undefined"
+      ){
+
+        window.showToast?.(
+          "缺少图片导出组件。",
+          "失败",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+
+      exportBtn.disabled=true;
+
+      exportBtn.textContent=
+        "生成中...";
+
+
+
+      const canvas =
+        await html2canvas(
+          poster,
+          {
+            scale:2,
+            backgroundColor:
+              report.theme_color || "#ff6a16",
+            useCORS:true
+          }
+        );
+
+
+
+      const link =
+        document.createElement("a");
+
+
+      link.download =
+        "weekly-report.png";
+
+
+      link.href =
+        canvas.toDataURL(
+          "image/png"
+        );
+
+
+      link.click();
+
+
+
+      exportBtn.disabled=false;
+
+      exportBtn.textContent=
+        "导出图片";
+
+    };
+
+  }
+
+
+
+  const closeBtn =
+    modal.querySelector(
+      "#weekly-preview-close"
+    );
+
+
+  if(closeBtn){
+
+    closeBtn.onclick =
+      ()=>modal.remove();
+
+  }
+
+
+
+  modal.onclick=e=>{
+
+    if(e.target===modal){
+
+      modal.remove();
+
+    }
+
+  };
+
+
+}
 
 function renderWeeklyPoster(report, modal){
 
