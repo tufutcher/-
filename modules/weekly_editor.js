@@ -176,3 +176,62 @@ bindEditorEvents(report,modal);
 
 
 }
+
+function bindEditorEvents(report, modal){
+
+  const color =
+    modal.querySelector("#editor-color");
+
+  if(color){
+
+    color.onchange = ()=>{
+
+      report.theme_color =
+        color.value;
+
+      renderEditorPoster(report);
+
+    };
+
+  }
+
+
+
+  const columns =
+    modal.querySelector("#editor-columns");
+
+
+  if(columns){
+
+    columns.onchange = ()=>{
+
+      weeklyPosterColumns =
+        Number(columns.value);
+
+      renderEditorPoster(report);
+
+    };
+
+  }
+
+
+
+  const font =
+    modal.querySelector("#editor-font");
+
+
+  if(font){
+
+    font.onchange = ()=>{
+
+      weeklyPosterFontScale =
+        Number(font.value);
+
+      renderEditorPoster(report);
+
+    };
+
+  }
+
+
+}
