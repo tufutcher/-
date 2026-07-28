@@ -2424,122 +2424,225 @@ button.cal-cell:disabled{
   display:none !important;
 }
 
+/* =====================================================
+   Weekly Report System
+   Poster + Preview
+===================================================== */
+
+
 /* =========================
-   周报海报预览修复
+   周报预览窗口
 ========================= */
 
 
 .weekly-preview-card{
-    max-width:95vw;
-    max-height:95vh;
+
+    max-width:96vw;
+
+    max-height:96vh;
 
     overflow:auto;
 
+    background:white;
+
+    border-radius:28px;
+
+    padding:24px;
+
     display:flex;
+
     flex-direction:column;
 
     align-items:center;
 
-    background:white;
+    gap:20px;
 
-    padding:20px;
-
-    border-radius:24px;
 }
 
 
 
-/* 海报主体 */
+
+
+.weekly-preview-actions{
+
+    display:flex;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+}
+
+
+.weekly-preview-actions button,
+.weekly-preview-actions select{
+
+    border:none;
+
+    border-radius:999px;
+
+    padding:10px 18px;
+
+    background:#111;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+
+
+/* =========================
+   海报主体
+========================= */
+
 
 .weekly-poster-canvas{
 
     position:relative;
 
     width:var(--poster-width);
+
     height:var(--poster-height);
 
     background:var(--weekly-theme);
 
-    display:flex;
-
-    gap:20px;
-
-    padding:30px;
+    padding:40px;
 
     box-sizing:border-box;
 
-    flex-shrink:0;
+
+    display:flex;
+
+    gap:30px;
+
+    overflow:hidden;
+
+
+    font-family:
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
 
 }
 
 
 
-/* 左侧 */
+/* =========================
+   左侧区域
+========================= */
+
 
 .poster-left{
 
     width:220px;
 
-    flex-shrink:0;
+    flex:none;
+
+
+    height:100%;
+
 
     display:flex;
 
     flex-direction:column;
 
-    justify-content:flex-start;
-
 }
 
 
 
-/* 标题 */
-
-.poster-title{
-
-    font-size:64px;
-
-    line-height:1.05;
-
-    font-weight:900;
+.poster-date{
 
     color:white;
 
+    font-size:18px;
+
+    line-height:1.5;
+
+    margin-bottom:20px;
+
 }
 
 
 
-/* 事件 */
+.poster-title{
+
+    color:white;
+
+    font-size:72px;
+
+    font-weight:900;
+
+    line-height:1;
+
+    letter-spacing:5px;
+
+}
+
+
 
 .poster-event{
 
     margin-top:auto;
 
-    color:white;
 
     border:2px dotted white;
 
-    padding:18px;
-
     border-radius:18px;
 
-    font-size:18px;
+    padding:20px;
 
-    line-height:1.7;
+
+    color:white;
+
+}
+
+
+.poster-event h3{
+
+    font-size:22px;
+
+    margin:0 0 16px;
+
+}
+
+
+.poster-event p{
+
+    font-size:16px;
+
+    line-height:1.8;
+
+    margin:0;
 
 }
 
 
 
-/* 卡片区域 */
+/* =========================
+   成员区域
+========================= */
+
 
 .poster-members{
+
+    flex:1;
+
 
     display:grid;
 
     grid-template-columns:
-    repeat(var(--poster-columns),var(--poster-card-width));
+    repeat(
+        var(--poster-columns),
+        var(--poster-card-width)
+    );
+
 
     gap:var(--poster-gap);
+
 
     align-content:start;
 
@@ -2547,7 +2650,10 @@ button.cal-cell:disabled{
 
 
 
-/* 单人卡 */
+/* =========================
+   单人卡片
+========================= */
+
 
 .poster-member-card{
 
@@ -2555,19 +2661,22 @@ button.cal-cell:disabled{
 
     height:var(--poster-card-height);
 
+
     background:white;
+
+    overflow:hidden;
+
 
     display:flex;
 
     flex-direction:column;
 
-    overflow:hidden;
 
 }
 
 
 
-/* 图片 */
+/* 图片区域 */
 
 .poster-image{
 
@@ -2575,9 +2684,12 @@ button.cal-cell:disabled{
 
     height:190px;
 
-    flex-shrink:0;
+    flex:none;
+
 
     background:#eee;
+
+    overflow:hidden;
 
 }
 
@@ -2589,6 +2701,7 @@ button.cal-cell:disabled{
 
     height:100%;
 
+
     object-fit:var(--poster-fit);
 
     object-position:var(--poster-position);
@@ -2597,75 +2710,12 @@ button.cal-cell:disabled{
 
 
 
-/* 人名区域 */
+.empty-img{
 
-.poster-member-card h3{
+    width:100%;
 
-    margin:0;
+    height:100%;
 
-    padding:10px 6px 4px;
-
-    text-align:center;
-
-    font-size:18px;
-
-    color:#111;
-
-}
-
-
-
-/* 总结 */
-
-.poster-summary{
-
-    flex:1;
-
-    padding:6px;
-
-    text-align:center;
-
-    font-size:12px;
-
-    line-height:1.5;
-
-}
-
-
-
-/* 日期必须贴底 */
-
-.poster-days{
-
-    min-height:36px;
-
-    margin-top:auto;
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    justify-content:center;
-
-    align-content:center;
-
-    gap:2px;
-
-    padding:4px;
-
-}
-
-
-
-.poster-days span{
-
-    width:18px;
-
-    height:18px;
-
-    border-radius:50%;
-
-    font-size:10px;
 
     display:flex;
 
@@ -2673,35 +2723,222 @@ button.cal-cell:disabled{
 
     justify-content:center;
 
+
+    color:#999;
+
     background:#eee;
+
+    font-size:14px;
 
 }
 
 
+
+/* =========================
+   名字
+   贴合白色区域
+========================= */
+
+
+.poster-member-card h3{
+
+
+    margin:-10px 0 0;
+
+
+    padding:12px 4px 4px;
+
+
+    position:relative;
+
+    z-index:2;
+
+
+    background:white;
+
+
+    text-align:center;
+
+
+    font-size:20px;
+
+    font-weight:900;
+
+
+    color:#111;
+
+}
+
+
+
+/* =========================
+   总结文字
+========================= */
+
+
+.poster-summary{
+
+
+    height:80px;
+
+
+    padding:8px;
+
+
+    box-sizing:border-box;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    text-align:center;
+
+
+    overflow:hidden;
+
+
+    font-size:13px;
+
+    line-height:1.5;
+
+    color:#333;
+
+}
+
+
+
+/* =========================
+   日期标签
+   类似月历
+========================= */
+
+
+.poster-days{
+
+
+    margin-top:auto;
+
+
+    min-height:38px;
+
+
+    padding:6px;
+
+
+    box-sizing:border-box;
+
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+
+    justify-content:center;
+
+    align-content:center;
+
+
+    gap:3px;
+
+
+}
+
+
+
+.poster-days span{
+
+
+    width:18px;
+
+    height:18px;
+
+
+    border-radius:50%;
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    background:#eee;
+
+
+    font-size:10px;
+
+    color:#666;
+
+
+}
+
+
+
 .poster-days span.active{
+
 
     background:var(--weekly-theme);
 
     color:white;
 
+
 }
 
 
 
-/* 右侧标语 */
+/* =========================
+   右侧标语
+========================= */
+
 
 .poster-right{
 
-    width:30px;
+
+    width:36px;
+
+    flex:none;
+
 
     color:white;
 
+
     font-size:22px;
 
-    font-weight:bold;
+    font-weight:900;
+
 
     line-height:1.5;
 
+
     writing-mode:vertical-rl;
+
+
+}
+
+
+
+/* =========================
+   手机适配
+========================= */
+
+
+@media(max-width:1000px){
+
+
+    .weekly-poster-canvas{
+
+        transform-origin:center top;
+
+        transform:scale(.8);
+
+        margin-bottom:-150px;
+
+    }
+
 
 }
