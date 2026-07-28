@@ -2424,93 +2424,332 @@ button.cal-cell:disabled{
   display:none !important;
 }
 
-/* 周报生成 */
+/* =========================
+   Weekly Editor New
+========================= */
 
-/* 编辑器：成员卡片 */
-.weekly-member-card{
-  background:white;
-  border-radius:24px;
-  padding:24px;
-  margin-bottom:20px;
-  box-shadow:0 10px 30px rgba(0,0,0,.06);
+
+.weekly-editor-layout{
+
+width:96vw;
+height:92vh;
+
+display:flex;
+
+background:#f5f5f5;
+
+border-radius:28px;
+
+overflow:hidden;
+
 }
 
-.weekly-member-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
+
+
+.weekly-editor-sidebar{
+
+width:360px;
+
+background:white;
+
+padding:26px;
+
+overflow-y:auto;
+
+box-sizing:border-box;
+
 }
 
-.weekly-member-head h3{
-  margin:0;
-  font-size:22px;
+
+
+.weekly-editor-sidebar h2{
+
+font-size:24px;
+
+margin:0 0 24px;
+
 }
 
-.weekly-field{
-  margin-top:18px;
+
+
+.weekly-editor-sidebar section{
+
+margin-bottom:28px;
+
 }
 
-.weekly-field label{
-  display:block;
-  font-size:14px;
-  color:#666;
-  margin-bottom:8px;
+
+
+.weekly-editor-sidebar label{
+
+display:flex;
+
+flex-direction:column;
+
+gap:8px;
+
+font-size:14px;
+
+color:#666;
+
+margin-bottom:14px;
+
 }
 
-.weekly-field input,
-.weekly-field textarea{
-  width:100%;
-  box-sizing:border-box;
-  border:1px solid #ddd;
-  border-radius:12px;
-  padding:12px;
-  font-size:15px;
+
+
+.weekly-editor-sidebar input,
+.weekly-editor-sidebar select{
+
+border:1px solid #ddd;
+
+border-radius:12px;
+
+padding:10px;
+
+font-size:14px;
+
 }
 
-.weekly-field textarea{
-  height:100px;
-  resize:vertical;
+
+
+
+#editor-member-list{
+
+display:flex;
+
+flex-direction:column;
+
+gap:14px;
+
 }
 
-.weekly-cover-area{
-  display:flex;
-  align-items:center;
-  gap:16px;
+
+
+
+.editor-member-card{
+
+background:#fafafa;
+
+border-radius:18px;
+
+padding:16px;
+
 }
 
-.weekly-cover-preview{
-  width:120px;
-  height:120px;
-  border-radius:16px;
-  object-fit:cover;
+
+
+.editor-member-title{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:12px;
+
 }
 
-.weekly-cover-empty{
-  width:120px;
-  height:120px;
-  border-radius:16px;
-  background:#f5f5f5;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#999;
+
+
+.editor-member-title strong{
+
+font-size:18px;
+
 }
 
-.weekly-upload-cover{
-  padding:10px 16px;
-  border-radius:20px;
+
+
+
+.editor-remove-member{
+
+border:none;
+
+background:#eee;
+
+border-radius:999px;
+
+padding:5px 12px;
+
+cursor:pointer;
+
 }
 
-.weekly-editor-card{
-  width:min(900px,90vw);
-  height:90vh;
-  display:flex;
-  flex-direction:column;
-  background:white;
-  border-radius:28px;
-  padding:30px;
-  box-sizing:border-box;
+
+
+
+.editor-date-list{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:6px;
+
+}
+
+
+
+.editor-date-item{
+
+background:white;
+
+border-radius:10px;
+
+padding:6px 10px;
+
+font-size:12px;
+
+border:1px solid #eee;
+
+cursor:pointer;
+
+}
+
+
+
+.editor-date-item input{
+
+accent-color:#0CC0DF;
+
+}
+
+
+
+.editor-cover-box{
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+}
+
+
+
+.editor-cover-box img{
+
+width:80px;
+
+height:80px;
+
+object-fit:cover;
+
+border-radius:14px;
+
+}
+
+
+
+.editor-cover-box div{
+
+width:80px;
+
+height:80px;
+
+background:#eee;
+
+border-radius:14px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:12px;
+
+color:#999;
+
+}
+
+
+
+.editor-cover-box button{
+
+border:none;
+
+background:#111;
+
+color:white;
+
+padding:8px 14px;
+
+border-radius:999px;
+
+}
+
+
+
+.editor-member-card textarea,
+.editor-member-card input{
+
+width:100%;
+
+box-sizing:border-box;
+
+border:1px solid #ddd;
+
+border-radius:12px;
+
+padding:10px;
+
+}
+
+
+
+
+#editor-save{
+
+width:100%;
+
+margin-top:20px;
+
+border:none;
+
+background:#111;
+
+color:white;
+
+padding:14px;
+
+border-radius:999px;
+
+font-size:15px;
+
+cursor:pointer;
+
+}
+
+
+
+/* 右侧预览 */
+
+
+.weekly-editor-preview{
+
+flex:1;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+background:#eee;
+
+overflow:auto;
+
+}
+
+
+
+#editor-poster{
+
+padding:40px;
+
 }
 
 .weekly-member-list{
