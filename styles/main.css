@@ -2424,425 +2424,51 @@ button.cal-cell:disabled{
   display:none !important;
 }
 
-/* =================================================
-   周报编辑器
-================================================= */
+/* =========================
+   周报海报预览修复
+========================= */
 
 
-/* 编辑器整体 */
-
-.weekly-editor-layout{
-
-    width:96vw;
-    height:92vh;
-
-    display:flex;
-
-    gap:24px;
-
-    padding:24px;
-
-    box-sizing:border-box;
-
-}
-
-
-/* 左侧控制区 */
-
-.weekly-editor-sidebar{
-
-    width:320px;
-
-    flex-shrink:0;
-
-    background:white;
-
-    border-radius:28px;
-
-    padding:24px;
-
-    overflow-y:auto;
-
-    box-shadow:
-    0 12px 40px rgba(0,0,0,.08);
-
-}
-
-
-
-.weekly-editor-sidebar h2{
-
-    margin:0 0 24px;
-
-    font-size:28px;
-
-}
-
-
-
-.editor-section{
-
-    margin-bottom:26px;
-
-}
-
-
-
-.editor-section h3{
-
-    font-size:16px;
-
-    margin-bottom:14px;
-
-    color:#555;
-
-}
-
-
-
-.editor-section label{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:14px;
-
-    font-size:14px;
-
-}
-
-
-
-.editor-section input,
-.editor-section select{
-
-    border:1px solid #ddd;
-
-    border-radius:12px;
-
-    padding:8px 12px;
-
-    background:white;
-
-}
-
-
-
-
-
-/* 成员编辑卡 */
-
-.editor-member-card{
-
-    background:#f7f7f7;
-
-    border-radius:18px;
-
-    padding:16px;
-
-    margin-bottom:14px;
-
-}
-
-
-
-.editor-member-card strong{
-
-    font-size:17px;
-
-}
-
-
-
-.editor-field{
-
-    margin-top:14px;
-
-}
-
-
-
-.editor-field label{
-
-    display:block;
-
-    margin-bottom:8px;
-
-    font-size:13px;
-
-    color:#666;
-
-}
-
-
-
-.editor-field textarea,
-.editor-field input{
-
-    width:100%;
-
-    box-sizing:border-box;
-
-    border:
-
-    1px solid #ddd;
-
-    border-radius:12px;
-
-    padding:10px;
-
-    font-size:14px;
-
-}
-
-
-
-
-
-/* 日期选择 */
-
-.editor-date-grid{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    gap:6px;
-
-}
-
-
-
-.editor-date{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:5px;
-
-    background:#eee;
-
-    padding:6px 9px;
-
-    border-radius:10px;
-
-    font-size:12px;
-
-    cursor:pointer;
-
-}
-
-
-
-.editor-date:has(input:checked){
-
-    background:#0CC0DF;
-
-    color:white;
-
-}
-
-
-
-.editor-date input{
-
-    accent-color:#0CC0DF;
-
-}
-
-
-
-
-
-/* 上传图片 */
-
-.editor-cover{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-}
-
-
-
-.editor-cover img{
-
-    width:90px;
-
-    height:90px;
-
-    object-fit:cover;
-
-    border-radius:14px;
-
-}
-
-
-
-.editor-cover-empty{
-
-    width:90px;
-
-    height:90px;
-
-    border-radius:14px;
-
-    background:#eee;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    color:#999;
-
-    font-size:12px;
-
-}
-
-
-
-.editor-upload{
-
-    border:none;
-
-    border-radius:999px;
-
-    padding:8px 14px;
-
-    background:#111;
-
-    color:white;
-
-    cursor:pointer;
-
-}
-
-
-
-
-
-/* 左侧按钮 */
-
-.editor-actions{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:10px;
-
-}
-
-
-
-.editor-actions button{
-
-    border:none;
-
-    border-radius:999px;
-
-    padding:12px;
-
-    cursor:pointer;
-
-    font-size:15px;
-
-}
-
-
-
-#editor-save{
-
-    background:#111;
-
-    color:white;
-
-}
-
-
-
-#editor-export{
-
-    background:#0CC0DF;
-
-    color:white;
-
-}
-
-
-
-#editor-close{
-
-    background:#eee;
-
-}
-
-
-
-
-
-/* =================================================
-   右侧预览区域
-================================================= */
-
-
-.weekly-editor-preview{
-
-    flex:1;
+.weekly-preview-card{
+    max-width:95vw;
+    max-height:95vh;
 
     overflow:auto;
 
-    background:#f2f2f2;
-
-    border-radius:28px;
-
-    padding:30px;
-
-}
-
-
-
-#editor-poster{
-
     display:flex;
+    flex-direction:column;
 
-    justify-content:center;
+    align-items:center;
 
+    background:white;
+
+    padding:20px;
+
+    border-radius:24px;
 }
 
 
 
-
-
-/* =================================================
-   海报主体
-================================================= */
-
+/* 海报主体 */
 
 .weekly-poster-canvas{
 
+    position:relative;
+
+    width:var(--poster-width);
+    height:var(--poster-height);
+
+    background:var(--weekly-theme);
+
     display:flex;
 
-    gap:18px;
+    gap:20px;
 
-    padding:40px;
+    padding:30px;
 
     box-sizing:border-box;
 
-    background:var(--poster-theme);
-
-    border-radius:24px;
-
-    font-size:calc(16px * var(--poster-font));
+    flex-shrink:0;
 
 }
 
@@ -2852,63 +2478,51 @@ button.cal-cell:disabled{
 
 .poster-left{
 
-    width:210px;
+    width:220px;
 
-    color:white;
+    flex-shrink:0;
 
     display:flex;
 
     flex-direction:column;
 
-    justify-content:space-between;
+    justify-content:flex-start;
 
 }
 
 
+
+/* 标题 */
 
 .poster-title{
 
-    font-size:60px;
+    font-size:64px;
 
-    line-height:1;
+    line-height:1.05;
 
     font-weight:900;
 
-    letter-spacing:10px;
+    color:white;
 
 }
 
 
+
+/* 事件 */
 
 .poster-event{
 
-    background:white;
+    margin-top:auto;
 
-    color:#222;
+    color:white;
 
-    border-radius:20px;
+    border:2px dotted white;
 
     padding:18px;
 
-}
+    border-radius:18px;
 
-
-
-.poster-event h3{
-
-    margin:0 0 12px;
-
-    font-size:20px;
-
-}
-
-
-
-.poster-event p{
-
-    margin:0;
-
-    font-size:16px;
+    font-size:18px;
 
     line-height:1.7;
 
@@ -2916,30 +2530,24 @@ button.cal-cell:disabled{
 
 
 
-
-
-/* 中间成员 */
+/* 卡片区域 */
 
 .poster-members{
 
     display:grid;
 
     grid-template-columns:
+    repeat(var(--poster-columns),var(--poster-card-width));
 
-    repeat(
-        var(--poster-columns),
-        var(--poster-card-width)
-    );
-
-    gap:
-
-    var(--poster-gap);
+    gap:var(--poster-gap);
 
     align-content:start;
 
 }
 
 
+
+/* 单人卡 */
 
 .poster-member-card{
 
@@ -2949,33 +2557,25 @@ button.cal-cell:disabled{
 
     background:white;
 
-    border-radius:18px;
-
-    overflow:hidden;
-
-    padding:10px;
-
-    box-sizing:border-box;
-
     display:flex;
 
     flex-direction:column;
 
-    align-items:center;
+    overflow:hidden;
 
 }
 
 
 
+/* 图片 */
+
 .poster-image{
 
     width:100%;
 
-    height:120px;
+    height:190px;
 
-    border-radius:12px;
-
-    overflow:hidden;
+    flex-shrink:0;
 
     background:#eee;
 
@@ -2997,41 +2597,31 @@ button.cal-cell:disabled{
 
 
 
-.empty-img{
-
-    width:100%;
-
-    height:100%;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    color:#999;
-
-    font-size:12px;
-
-}
-
-
+/* 人名区域 */
 
 .poster-member-card h3{
 
-    margin:8px 0 4px;
+    margin:0;
 
-    font-size:16px;
+    padding:10px 6px 4px;
+
+    text-align:center;
+
+    font-size:18px;
+
+    color:#111;
 
 }
 
 
 
+/* 总结 */
+
 .poster-summary{
 
-    height:50px;
+    flex:1;
 
-    overflow:hidden;
+    padding:6px;
 
     text-align:center;
 
@@ -3043,17 +2633,25 @@ button.cal-cell:disabled{
 
 
 
+/* 日期必须贴底 */
+
 .poster-days{
+
+    min-height:36px;
 
     margin-top:auto;
 
-    width:100%;
+    display:flex;
 
-    display:grid;
+    flex-wrap:wrap;
 
-    grid-template-columns:repeat(7,1fr);
+    justify-content:center;
 
-    gap:3px;
+    align-content:center;
+
+    gap:2px;
+
+    padding:4px;
 
 }
 
@@ -3061,23 +2659,28 @@ button.cal-cell:disabled{
 
 .poster-days span{
 
-    background:#eee;
+    width:18px;
 
-    border-radius:5px;
+    height:18px;
 
-    text-align:center;
+    border-radius:50%;
 
     font-size:10px;
 
-    padding:3px 0;
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#eee;
 
 }
 
 
-
 .poster-days span.active{
 
-    background:var(--poster-theme);
+    background:var(--weekly-theme);
 
     color:white;
 
@@ -3085,27 +2688,11 @@ button.cal-cell:disabled{
 
 
 
-.poster-title-tag{
-
-    margin-top:6px;
-
-    color:var(--poster-theme);
-
-    font-size:12px;
-
-    font-weight:bold;
-
-}
-
-
-
-
-
-/* 右侧竖排 */
+/* 右侧标语 */
 
 .poster-right{
 
-    writing-mode:vertical-rl;
+    width:30px;
 
     color:white;
 
@@ -3113,37 +2700,8 @@ button.cal-cell:disabled{
 
     font-weight:bold;
 
-    letter-spacing:8px;
+    line-height:1.5;
 
-}
-
-
-
-
-
-
-/* 导出按钮区域 */
-
-.weekly-preview-actions{
-
-    display:flex;
-
-    gap:12px;
-
-    margin-top:20px;
-
-}
-
-
-
-.weekly-preview-actions button{
-
-    border:none;
-
-    border-radius:999px;
-
-    padding:12px 22px;
-
-    cursor:pointer;
+    writing-mode:vertical-rl;
 
 }
