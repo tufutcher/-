@@ -5,16 +5,15 @@ import {
 } from "../api/weekly_report.js";
 
 import { openWeeklyEditor } from "./weekly_editor.js";
+import {
+  renderWeeklyPoster,
+  setPosterFontScale
+} from "./weekly_poster.js";
 
 
 let weeklyReportsCache = [];
 
-
-// 海报配置
 let weeklyPosterColumns = 9;
-let weeklyPosterImageFit = "cover";
-let weeklyPosterImagePosition = "center";
-let weeklyPosterFontScale = 1.4;
 
 
 
@@ -56,9 +55,11 @@ export async function openWeeklyReportManager(){
 周报生成器
 </h2>
 
+
 <p>
 创建周报、录入成员打卡日期，并生成周报海报。
 </p>
+
 
 </div>
 
@@ -72,13 +73,15 @@ export async function openWeeklyReportManager(){
 
 
 
+
 <div class="weekly-create-box">
 
 
 <label>
 标题
 
-<input id="weekly-title"
+<input
+id="weekly-title"
 value="本周创作报告">
 
 </label>
@@ -88,7 +91,8 @@ value="本周创作报告">
 <label>
 开始日期
 
-<input id="weekly-start"
+<input
+id="weekly-start"
 type="date">
 
 </label>
@@ -98,7 +102,8 @@ type="date">
 <label>
 结束日期
 
-<input id="weekly-end"
+<input
+id="weekly-end"
 type="date">
 
 </label>
@@ -108,7 +113,8 @@ type="date">
 <label>
 主题色
 
-<input id="weekly-color"
+<input
+id="weekly-color"
 type="color"
 value="#ff6a16">
 
@@ -119,7 +125,11 @@ value="#ff6a16">
 <label>
 本周事件
 
-<textarea id="weekly-events"></textarea>
+<textarea
+id="weekly-events"
+placeholder="写这周群里发生了什么。">
+
+</textarea>
 
 </label>
 
@@ -128,7 +138,9 @@ value="#ff6a16">
 <label>
 贡献者
 
-<input id="weekly-contributors">
+<input
+id="weekly-contributors"
+placeholder="例如：安夏、古鸟">
 
 </label>
 
@@ -140,6 +152,7 @@ value="#ff6a16">
 
 
 </div>
+
 
 
 
@@ -160,16 +173,14 @@ value="#ff6a16">
 
 
 
-<div id="weekly-report-list">
 
-</div>
+<div id="weekly-report-list"></div>
 
 
 
 </div>
 
 `;
-
 
 
 document.body.appendChild(modal);
@@ -181,6 +192,8 @@ bindWeeklyBaseEvents(modal);
 await renderWeeklyReportList();
 
 }
+
+
 
 
 
@@ -215,11 +228,11 @@ modal.remove();
 
 
 
+
 const refresh =
 modal.querySelector(
 "#weekly-refresh"
 );
-
 
 
 if(refresh){
@@ -235,11 +248,11 @@ await renderWeeklyReportList();
 
 
 
+
 const create =
 modal.querySelector(
 "#weekly-create"
 );
-
 
 
 if(create){
@@ -254,7 +267,10 @@ await handleCreateWeeklyReport();
 }
 
 
+
 }
+
+
 
 
 
@@ -272,6 +288,7 @@ if(!list)return;
 
 
 
+
 weeklyReportsCache =
 await loadWeeklyReports(
 window.__sb
@@ -279,13 +296,18 @@ window.__sb
 
 
 
+
+
 if(!weeklyReportsCache.length){
 
-list.innerHTML =
-`
+list.innerHTML = `
+
 <div class="weekly-empty">
+
 还没有周报。
+
 </div>
+
 `;
 
 return;
@@ -294,7 +316,10 @@ return;
 
 
 
+
+
 list.innerHTML =
+
 weeklyReportsCache.map(report=>{
 
 
@@ -310,24 +335,35 @@ return `
 
 <div>
 
+
 <strong>
+
 ${escapeHtml(report.title)}
+
 </strong>
 
 
+
 <p>
+
 ${report.start_date}
+
 -
+
 ${report.end_date}
 
 ·
 
-${count} 人
+${count}
+
+人
 
 </p>
 
 
 </div>
+
+
 
 
 
@@ -354,7 +390,9 @@ data-weekly-delete="${report.id}">
 </button>
 
 
+
 </div>
+
 
 
 </div>
@@ -374,6 +412,10 @@ bindWeeklyListEvents();
 
 
 
+
+
+
+
 function bindWeeklyListEvents(){
 
 
@@ -382,12 +424,15 @@ document
 .forEach(btn=>{
 
 
-btn.onclick=()=>{
+btn.onclick = ()=>{
 
 
 const report =
+
 weeklyReportsCache.find(
+
 x=>x.id===btn.dataset.weeklyOpen
+
 );
 
 
@@ -406,16 +451,22 @@ openWeeklyEditor(report);
 
 
 
+
+
+
+
 document
 .querySelectorAll("[data-weekly-preview]")
 .forEach(btn=>{
 
 
-btn.onclick=()=>{
+btn.onclick = ()=>{
+
 
 openWeeklyPreview(
 btn.dataset.weeklyPreview
 );
+
 
 };
 
@@ -424,15 +475,19 @@ btn.dataset.weeklyPreview
 
 
 
+
+
+
+
 document
 .querySelectorAll("[data-weekly-delete]")
 .forEach(btn=>{
 
 
-btn.onclick=async()=>{
+btn.onclick = async()=>{
 
 
-const id =
+const reportId =
 btn.dataset.weeklyDelete;
 
 
@@ -457,11 +512,14 @@ if(!ok)return;
 
 
 
+
 const success =
+
 await deleteWeeklyReport(
 window.__sb,
-id
+reportId
 );
+
 
 
 
@@ -476,7 +534,6 @@ window.showToast?.(
 
 await renderWeeklyReportList();
 
-
 }
 
 
@@ -486,7 +543,9 @@ await renderWeeklyReportList();
 });
 
 
+
 }
+
 
 
 
@@ -504,21 +563,21 @@ document
 
 
 
-const start =
+const startDate =
 document
 .getElementById("weekly-start")
 .value;
 
 
 
-const end =
+const endDate =
 document
 .getElementById("weekly-end")
 .value;
 
 
 
-if(!start || !end){
+if(!startDate || !endDate){
 
 window.showToast?.(
 "请选择日期",
@@ -533,15 +592,16 @@ return;
 
 
 const result =
+
 await createWeeklyReport(
 window.__sb,
 {
 
 title,
 
-start_date:start,
+start_date:startDate,
 
-end_date:end,
+end_date:endDate,
 
 theme_color:
 document.getElementById("weekly-color").value,
@@ -573,66 +633,69 @@ return;
 
 
 window.showToast?.(
-
 "周报创建成功",
-
 "完成",
-
 "success"
-
 );
 
+
+
 await renderWeeklyReportList();
+
 
 }
 
 export function openWeeklyPreview(reportId){
 
-  const report =
-    weeklyReportsCache.find(
-      x => x.id === reportId
-    );
+
+const report =
+weeklyReportsCache.find(
+x=>x.id===reportId
+);
 
 
-  if(!report){
+if(!report){
 
-    window.showToast?.(
-      "找不到周报",
-      "错误",
-      "error"
-    );
+window.showToast?.(
+"找不到周报",
+"错误",
+"error"
+);
 
-    return;
-  }
+return;
 
-
-
-  const old =
-    document.getElementById(
-      "weekly-preview"
-    );
-
-
-  if(old){
-    old.remove();
-  }
+}
 
 
 
-  const modal =
-    document.createElement("div");
+const old =
+document.getElementById(
+"weekly-preview"
+);
 
 
-  modal.id =
-    "weekly-preview";
+if(old){
+
+old.remove();
+
+}
 
 
-  modal.className =
-    "modal-bg detail-viewer-bg";
+
+const modal =
+document.createElement("div");
+
+
+modal.id =
+"weekly-preview";
+
+
+modal.className =
+"modal-bg detail-viewer-bg";
 
 
 
-  modal.innerHTML = `
+modal.innerHTML = `
 
 <div class="weekly-preview-card">
 
@@ -644,39 +707,34 @@ export function openWeeklyPreview(reportId){
 <div class="weekly-preview-actions">
 
 
-<label>
+<label class="weekly-column-control">
+
 每行人数
+
 
 <select id="weekly-column-select">
 
-<option value="6">
-6
-</option>
+<option value="6">6</option>
 
-<option value="7">
-7
-</option>
+<option value="7">7</option>
 
-<option value="8">
-8
-</option>
+<option value="8">8</option>
 
-<option value="9">
-9
-</option>
+<option value="9" selected>9</option>
 
-<option value="10">
-10
-</option>
+<option value="10">10</option>
 
 </select>
+
 
 </label>
 
 
 
-<label>
-字体
+<label class="weekly-column-control">
+
+字体大小
+
 
 <select id="weekly-font-scale-select">
 
@@ -690,28 +748,36 @@ export function openWeeklyPreview(reportId){
 </option>
 
 
-<option value="1.4">
+<option value="1.4" selected>
 特大
 </option>
 
+
 </select>
+
 
 </label>
 
 
 
 <button id="weekly-export-image">
+
 导出图片
+
 </button>
 
 
 
 <button id="weekly-preview-close">
+
 关闭
+
 </button>
 
 
+
 </div>
+
 
 
 </div>
@@ -720,593 +786,338 @@ export function openWeeklyPreview(reportId){
 
 
 
-  document.body.appendChild(modal);
+document.body.appendChild(modal);
 
 
 
-  renderWeeklyPoster(
-    report,
-    modal
-  );
 
+renderPoster(modal,report);
 
 
-  const columnSelect =
-    modal.querySelector(
-      "#weekly-column-select"
-    );
 
 
-  if(columnSelect){
 
-    columnSelect.value =
-      String(
-        weeklyPosterColumns
-      );
+const columnSelect =
+modal.querySelector(
+"#weekly-column-select"
+);
 
 
-    columnSelect.onchange = ()=>{
 
-      weeklyPosterColumns =
-        Number(
-          columnSelect.value
-        );
+if(columnSelect){
 
 
-      renderWeeklyPoster(
-        report,
-        modal
-      );
+columnSelect.onchange = ()=>{
 
-    };
 
-  }
+weeklyPosterColumns =
+Number(columnSelect.value);
 
 
+renderPoster(
+modal,
+report
+);
 
-  const fontSelect =
-    modal.querySelector(
-      "#weekly-font-scale-select"
-    );
 
-
-  if(fontSelect){
-
-    fontSelect.value =
-      String(
-        weeklyPosterFontScale
-      );
-
-
-    fontSelect.onchange = ()=>{
-
-      weeklyPosterFontScale =
-        Number(
-          fontSelect.value
-        );
-
-
-      renderWeeklyPoster(
-        report,
-        modal
-      );
-
-    };
-
-  }
-
-
-
-  const exportBtn =
-    modal.querySelector(
-      "#weekly-export-image"
-    );
-
-
-  if(exportBtn){
-
-    exportBtn.onclick =
-    async()=>{
-
-
-      const poster =
-        modal.querySelector(
-          ".weekly-poster-canvas"
-        );
-
-
-      if(!poster){
-        return;
-      }
-
-
-
-      if(
-        typeof html2canvas === "undefined"
-      ){
-
-        window.showToast?.(
-          "缺少图片导出组件。",
-          "失败",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-
-      exportBtn.disabled=true;
-
-      exportBtn.textContent=
-        "生成中...";
-
-
-
-      const canvas =
-        await html2canvas(
-          poster,
-          {
-            scale:2,
-            backgroundColor:
-              report.theme_color || "#ff6a16",
-            useCORS:true
-          }
-        );
-
-
-
-      const link =
-        document.createElement("a");
-
-
-      link.download =
-        "weekly-report.png";
-
-
-      link.href =
-        canvas.toDataURL(
-          "image/png"
-        );
-
-
-      link.click();
-
-
-
-      exportBtn.disabled=false;
-
-      exportBtn.textContent=
-        "导出图片";
-
-    };
-
-  }
-
-
-
-  const closeBtn =
-    modal.querySelector(
-      "#weekly-preview-close"
-    );
-
-
-  if(closeBtn){
-
-    closeBtn.onclick =
-      ()=>modal.remove();
-
-  }
-
-
-
-  modal.onclick=e=>{
-
-    if(e.target===modal){
-
-      modal.remove();
-
-    }
-
-  };
+};
 
 
 }
 
-function renderWeeklyPoster(report, modal){
-
-  const wrap =
-    modal.querySelector(
-      "#weekly-poster-wrap"
-    );
-
-
-  if(!wrap)return;
 
 
 
-  const items =
-    report.weekly_report_items || [];
+
+const fontSelect =
+modal.querySelector(
+"#weekly-font-scale-select"
+);
 
 
 
-  const columns =
-    Math.max(
-      1,
-      Math.min(
-        weeklyPosterColumns,
-        items.length || 1
-      )
-    );
+if(fontSelect){
 
 
-
-  const rows =
-    Math.ceil(
-      items.length / columns
-    );
+fontSelect.onchange = ()=>{
 
 
-
-  const cardWidth = 110;
-  const cardHeight = 360;
-  const gap = 8;
-
+setPosterFontScale(
+Number(fontSelect.value)
+);
 
 
-  const posterWidth =
-    260 +
-    columns *
-    cardWidth +
-    (columns - 1) *
-    gap +
-    80;
+renderPoster(
+modal,
+report
+);
 
 
+};
 
-  const posterHeight =
-    Math.max(
-      900,
-      rows *
-      cardHeight +
-      80
-    );
-
-
-
-  const cards =
-    items.map(item=>{
-
-
-      const days =
-        item.checkin_dates?.length || 0;
-
-
-      return `
-
-<div class="poster-member-card">
-
-
-<div class="poster-image">
-
-${
-item.cover_image_url
-
-?
-
-`
-<img 
-src="${item.cover_image_url}"
-crossorigin="anonymous">
-`
-
-:
-
-`
-<div class="empty-img">
-暂无图片
-</div>
-`
 
 }
 
 
-</div>
 
 
 
-<h3>
-${escapeHtml(item.display_name || "匿名")}
-</h3>
+
+
+const exportBtn =
+modal.querySelector(
+"#weekly-export-image"
+);
 
 
 
-<div class="poster-summary">
-
-${escapeHtml(
-item.summary ||
-"本周继续创作"
-)}
-
-</div>
+if(exportBtn){
 
 
+exportBtn.onclick =
+async()=>{
 
-<div class="poster-days">
 
-${
-renderMiniDateLine(
+const poster =
+modal.querySelector(
+".weekly-poster-canvas"
+);
+
+
+
+if(!poster){
+
+return;
+
+}
+
+
+
+
+if(
+typeof html2canvas === "undefined"
+){
+
+
+window.showToast?.(
+"缺少图片导出组件",
+"失败",
+"error"
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+exportBtn.disabled=true;
+
+exportBtn.textContent=
+"生成中...";
+
+
+
+
+
+try{
+
+
+const canvas =
+await html2canvas(
+poster,
+{
+
+scale:2,
+
+backgroundColor:
+report.theme_color || "#ff6a16",
+
+useCORS:true
+
+}
+
+);
+
+
+
+
+const link =
+document.createElement("a");
+
+
+
+link.download =
+"weekly-report.png";
+
+
+
+link.href =
+canvas.toDataURL(
+"image/png"
+);
+
+
+
+link.click();
+
+
+
+window.showToast?.(
+"周报图片已生成",
+"完成",
+"success"
+);
+
+
+
+}
+
+catch(err){
+
+
+console.error(
+"export weekly poster error:",
+err
+);
+
+
+
+window.showToast?.(
+"图片生成失败",
+"错误",
+"error"
+);
+
+
+
+}
+
+finally{
+
+
+exportBtn.disabled=false;
+
+exportBtn.textContent=
+"导出图片";
+
+
+}
+
+
+};
+
+
+}
+
+
+
+
+
+
+const close =
+modal.querySelector(
+"#weekly-preview-close"
+);
+
+
+
+if(close){
+
+close.onclick =
+()=>modal.remove();
+
+}
+
+
+
+
+
+modal.onclick =
+e=>{
+
+if(e.target===modal){
+
+modal.remove();
+
+}
+
+};
+
+
+}
+
+
+
+
+
+function renderPoster(modal,report){
+
+
+const wrap =
+modal.querySelector(
+"#weekly-poster-wrap"
+);
+
+
+
+if(!wrap)return;
+
+
+
+renderWeeklyPoster(
 report,
-item
-)
+wrap,
+{
+
+columns:
+weeklyPosterColumns
+
 }
 
-</div>
+);
 
-
-
-<div class="poster-title-tag">
-
-「
-${escapeHtml(
-item.nickname_title ||
-"继续创作中"
-)}
-」
-
-</div>
-
-
-</div>
-
-`;
-
-
-
-}).join("");
-
-
-
-
-
-wrap.innerHTML = `
-
-
-<div 
-class="weekly-poster-canvas"
-
-style="
---poster-columns:${columns};
---poster-card-width:${cardWidth}px;
---poster-card-height:${cardHeight}px;
---poster-gap:${gap}px;
---poster-fit:${weeklyPosterImageFit};
---poster-position:${weeklyPosterImagePosition};
---poster-font:${weeklyPosterFontScale};
-width:${posterWidth}px;
-height:${posterHeight}px;
-">
-
-
-<div class="poster-left">
-
-
-<div class="poster-date">
-
-${formatPosterDate(
-report.start_date,
-report.end_date
-)}
-
-</div>
-
-
-
-<div class="poster-title">
-
-本<br>
-周<br>
-创<br>
-作<br>
-报<br>
-告
-
-</div>
-
-
-
-<div class="poster-event">
-
-
-<h3>
-这周群里发生了啥
-</h3>
-
-
-<p>
-${formatEventText(
-report.event_notes ||
-"暂无事件记录"
-)}
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-<div class="poster-members">
-
-${cards}
-
-</div>
-
-
-
-
-<div class="poster-right">
-
-不<br>
-画<br>
-画<br>
-真<br>
-的<br>
-要<br>
-完<br>
-了
-
-
-</div>
-
-
-
-</div>
-
-
-`;
 
 }
 
 
-
-
-
-function renderMiniDateLine(report,item){
-
-  const dates =
-    getDateRange(
-      report.start_date,
-      report.end_date
-    );
-
-
-  const checked =
-    item.checkin_dates || [];
-
-
-
-  return dates.map(date=>{
-
-
-    const active =
-      checked.includes(date);
-
-
-
-    return `
-
-<span class="${active ? "active" : ""}">
-${new Date(date).getDate()}
-</span>
-
-`;
-
-
-
-  }).join("");
-
-}
-
-
-
-
-function getDateRange(start,end){
-
-  const result=[];
-
-
-  let current =
-    new Date(start);
-
-
-  const last =
-    new Date(end);
-
-
-
-  while(current<=last){
-
-
-    result.push(
-      current.getFullYear()
-      +
-      "-"
-      +
-      String(
-        current.getMonth()+1
-      ).padStart(2,"0")
-      +
-      "-"
-      +
-      String(
-        current.getDate()
-      ).padStart(2,"0")
-    );
-
-
-
-    current.setDate(
-      current.getDate()+1
-    );
-
-
-  }
-
-
-  return result;
-
-}
-
-
-
-
-
-function formatPosterDate(start,end){
-
-  return (
-    start.replaceAll("-",".")
-    +
-    " - "
-    +
-    end.replaceAll("-",".")
-  );
-
-}
-
-
-
-function formatEventText(text){
-
-  return escapeHtml(text)
-  .replaceAll(
-    "\n",
-    "<br>"
-  );
-
-}
 
 
 
 
 function escapeHtml(value){
 
-  return String(value || "")
 
-  .replaceAll("&","&amp;")
+return String(value || "")
 
-  .replaceAll("<","&lt;")
+.replaceAll(
+"&",
+"&amp;"
+)
 
-  .replaceAll(">","&gt;")
+.replaceAll(
+"<",
+"&lt;"
+)
 
-  .replaceAll('"',"&quot;")
+.replaceAll(
+">",
+"&gt;"
+)
 
-  .replaceAll("'","&#039;");
+.replaceAll(
+'"',
+"&quot;"
+)
+
+.replaceAll(
+"'",
+"&#039;"
+);
+
 
 }
