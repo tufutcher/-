@@ -974,8 +974,3 @@ function escapeHtml(value){
   .replaceAll("'","&#039;");
 
 }
-
-await renderWeeklyReportList();
-
-
-}
