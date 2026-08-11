@@ -8,15 +8,16 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   if(!wrap) return;
 
   const items = report.weekly_report_items || [];
-  const columns = Math.max(1, Math.min(options.columns || 9, items.length || 1));
+  const columns = Math.max(1, Math.min(Number(options.columns) || 9, items.length || 1));
+  const rows = Math.max(1, Math.ceil(items.length / columns));
 
+  // 固定卡片尺寸，不随人数拉伸
   const cardWidth = 118;
   const cardHeight = 340;
   const gap = 10;
-  const rows = Math.max(1, Math.ceil(items.length / columns));
 
-  const posterWidth = 280 + columns * cardWidth + (columns - 1) * gap + 70;
-  const posterHeight = 80 + rows * cardHeight + (rows - 1) * gap + 80;
+  const posterWidth = 300 + columns * cardWidth + (columns - 1) * gap;
+  const posterHeight = 100 + rows * cardHeight + (rows - 1) * gap;
 
   const cards = items.map(item => {
     const days = item.checkin_dates?.length || 0;
