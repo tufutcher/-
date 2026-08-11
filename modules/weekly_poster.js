@@ -28,7 +28,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
           : `<div class="weekly-poster-empty-img">暂无图片</div>`}
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
-          <div class="weekly-poster-badge">
+          <div class="weekly-poster-badge ${days===7?'palette':days>=5?'fire':days>=3?'star':'none'}">
             <span class="weekly-poster-badge-icon">${getWeeklyBadge(days)}</span>
           </div>
           <div class="weekly-poster-name">${escapeHtml(item.display_name || '匿名')}</div>
@@ -51,16 +51,14 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     <div class="weekly-poster-left">
       <div class="weekly-poster-date-vertical">${formatPosterDate(report.start_date,report.end_date)}</div>
       <div class="weekly-poster-title-vertical">本<br>周<br>创<br>作<br>报<br>告</div>
-      <div class="weekly-poster-event-box">
+      <div class="weekly-poster-event-box adaptive">
         <div class="weekly-poster-event-title">这周群里发生了啥</div>
         <div class="weekly-poster-event-content">${formatEventText(report.event_notes || '暂无事件记录')}</div>
       </div>
     </div>
 
     <div class="weekly-poster-main">
-      <div class="weekly-poster-grid">
-        ${cards}
-      </div>
+      <div class="weekly-poster-grid">${cards}</div>
     </div>
 
     <div class="poster-right">不<br>画<br>画<br>真<br>的<br>要<br>完<br>了</div>
@@ -86,10 +84,10 @@ function getDateRange(start,end){
 }
 
 function getWeeklyBadge(days){
-  if(days>=6)return '🔥';
-  if(days>=4)return '⭐';
-  if(days>=2)return '🎨';
-  return '★';
+  if(days===7)return '🎨';
+  if(days>=5)return '🔥';
+  if(days>=3)return '⭐';
+  return '';
 }
 
 function formatPosterDate(start,end){
