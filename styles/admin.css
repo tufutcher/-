@@ -1,0 +1,379 @@
+/* 管理员通道 */
+.admin-card{
+  border:1px solid rgba(12,192,223,.18);
+  background:linear-gradient(180deg, rgba(12,192,223,.08), rgba(255,255,255,.96));
+}
+
+.admin-title{
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-.03em;
+  color:#111;
+}
+
+.admin-subtitle{
+  margin-top:6px;
+  color:#777;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.admin-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.admin-actions button{
+  flex:1;
+}
+
+@media (max-width:520px){
+  .admin-actions{
+    flex-direction:column;
+  }
+}
+/* 管理员：批量管理打卡 */
+.admin-checkin-card{
+  width:min(860px, 96vw);
+}
+
+.admin-manager-head{
+  gap:14px;
+}
+
+.admin-user-filter{
+  width:180px;
+  max-width:42vw;
+  padding:9px 12px;
+  border:none;
+  border-radius:999px;
+  background:#f7f8f9;
+  color:#111;
+  font-family:inherit;
+  font-size:13px;
+  outline:none;
+}
+
+.admin-checkin-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:68vh;
+  overflow:auto;
+  padding-right:2px;
+}
+
+.admin-checkin-row.compact{
+  display:grid;
+  grid-template-columns:46px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:7px;
+  border-radius:14px;
+  background:#f7f8f9;
+}
+
+.admin-checkin-cover{
+  width:46px;
+  height:46px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#eee;
+}
+
+.admin-checkin-cover img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.admin-checkin-info{
+  min-width:0;
+}
+
+.admin-checkin-line{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+}
+
+.admin-checkin-line b{
+  max-width:140px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#111;
+  font-size:13px;
+}
+
+.admin-checkin-line span{
+  color:#999;
+}
+
+.admin-checkin-line em{
+  font-style:normal;
+  color:#087c91;
+  background:rgba(12,192,223,.1);
+  padding:3px 6px;
+  border-radius:999px;
+}
+
+.admin-checkin-delete{
+  width:auto !important;
+  min-width:54px;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+@media (max-width:620px){
+  .admin-manager-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+.admin-filter-bar{
+  display:grid;
+  grid-template-columns:180px 150px 1fr auto;
+  gap:8px;
+  margin:8px 0 12px;
+}
+
+.admin-user-filter,
+.admin-date-filter,
+.admin-search-filter{
+  width:100%;
+  min-width:0;
+  padding:9px 12px;
+  border:none;
+  border-radius:999px;
+  background:#f7f8f9;
+  color:#111;
+  font-family:inherit;
+  font-size:13px;
+  outline:none;
+}
+
+#admin-clear-filter{
+  width:auto !important;
+  min-width:64px;
+  padding:9px 14px;
+  border-radius:999px;
+  font-size:13px;
+}
+
+@media (max-width:620px){
+  .admin-filter-bar{
+    grid-template-columns:1fr;
+  }
+}
+
+  .admin-checkin-list{
+    max-height:64vh;
+  }
+
+  .admin-checkin-row.compact{
+    grid-template-columns:42px 1fr auto;
+    gap:8px;
+    padding:6px;
+  }
+
+  .admin-checkin-cover{
+    width:42px;
+    height:42px;
+    border-radius:9px;
+  }
+
+  .admin-checkin-line{
+    gap:5px;
+    font-size:11px;
+  }
+
+  .admin-checkin-line b{
+    max-width:90px;
+    font-size:12px;
+  }
+
+  .admin-checkin-delete{
+    min-width:48px;
+    padding:6px 9px;
+    font-size:11px;
+  }
+}
+/* 管理员：清理用户痕迹 */
+.admin-purge-card{
+  width:min(560px, 94vw);
+}
+
+.admin-purge-box{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.admin-purge-box label{
+  font-size:13px;
+  font-weight:800;
+  color:#777;
+}
+
+.admin-purge-box select{
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  border-radius:16px;
+  background:#f7f8f9;
+  font-family:inherit;
+  font-size:14px;
+  outline:none;
+}
+
+.admin-purge-warning{
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(255,69,58,.08);
+  color:#9f1d16;
+  font-size:13px;
+  line-height:1.6;
+}
+
+/* 管理员：周报生成 */
+.weekly-manager-card{
+  width: min(1180px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  background: #fffaf2;
+  border-radius: 28px;
+  padding: 24px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.22);
+}
+
+.weekly-manager-head{
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.weekly-manager-head h2{
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.weekly-manager-head p{
+  margin: 0;
+  color: #6f675f;
+}
+
+.weekly-create-box{
+  background: white;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 22px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.weekly-form-grid{
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr .7fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.weekly-form-grid label,
+.weekly-full-label{
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #6f675f;
+}
+
+.weekly-form-grid input,
+.weekly-full-label input,
+.weekly-full-label textarea{
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 14px;
+  padding: 11px 12px;
+  font: inherit;
+  background: #fff;
+}
+
+.weekly-full-label{
+  margin-bottom: 12px;
+}
+
+.weekly-full-label textarea{
+  min-height: 86px;
+  resize: vertical;
+}
+
+#weekly-create,
+#weekly-refresh,
+#weekly-close,
+.weekly-row-actions button{
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: #111;
+  color: white;
+  cursor: pointer;
+}
+
+#weekly-close,
+#weekly-refresh,
+.weekly-row-actions button{
+  background: rgba(0,0,0,.08);
+  color: #111;
+}
+
+.weekly-list-head{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.weekly-list-head h3{
+  margin: 0;
+}
+
+.weekly-report-list{
+  display: grid;
+  gap: 10px;
+}
+
+.weekly-report-row{
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  background: white;
+  border-radius: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.weekly-report-row p{
+  margin: 4px 0 0;
+  color: #7a7168;
+  font-size: 13px;
+}
+
+.weekly-row-actions{
+  display: flex;
+  gap: 8px;
+}
+
+.weekly-empty{
+  padding: 24px;
+  text-align: center;
+  color: #84786d;
+  background: white;
+  border-radius: 18px;
+}
