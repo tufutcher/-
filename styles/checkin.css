@@ -1,0 +1,584 @@
+/* =========================
+   打卡详情：作品查看器
+========================= */
+
+.detail-viewer-bg{
+  align-items:center;
+  padding:18px;
+}
+
+.detail-viewer-card{
+  position:relative;
+  width:min(760px, 96vw);
+  max-width:96vw;
+  max-height:90vh;
+  overflow:auto;
+  border-radius:28px;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 28px 80px rgba(0,0,0,.22);
+  padding:18px;
+}
+
+.detail-x{
+  position:absolute;
+  left:50%;
+  top:14px;
+  transform:translateX(-50%);
+  z-index:20;
+
+  width:48px !important;
+  height:48px !important;
+  min-width:48px;
+  padding:0 !important;
+
+  border:none !important;
+  border-radius:50%;
+  background:rgba(245,245,245,.92);
+  color:#111;
+
+  font-size:30px;
+  line-height:1;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.detail-viewer-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+  padding-right:42px;
+}
+
+.detail-author{
+  font-size:18px;
+  font-weight:850;
+  color:#111;
+}
+
+.detail-date{
+  margin-top:3px;
+  font-size:12px;
+  color:#999;
+}
+
+.detail-art-list{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.detail-art-block img{
+  width:100%;
+  max-width:100%;
+  max-height:70vh;
+  object-fit:contain;
+  display:block;
+  border-radius:20px;
+  background:#f6f7f8;
+}
+
+.detail-tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+
+.detail-tags span{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 8px;
+  border-radius:999px;
+  background:rgba(12,192,223,.12);
+  color:#087c91;
+  font-size:12px;
+  line-height:1;
+}
+
+.detail-note{
+  margin-top:16px;
+  padding:14px;
+  border-radius:18px;
+  background:#f7f8f9;
+  color:#555;
+  line-height:1.7;
+}
+
+.detail-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.detail-actions button{
+  flex:1;
+}
+
+
+
+/* 打卡弹窗：日期选择 */
+.ci-date-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:8px 0 12px;
+  padding:10px 12px;
+  border-radius:18px;
+  background:#f7f8f9;
+}
+
+.ci-date-row label{
+  margin:0;
+  font-size:13px;
+  font-weight:850;
+  color:#777;
+}
+
+.ci-date-row input{
+  border:none;
+  background:#fff;
+  border-radius:999px;
+  padding:8px 12px;
+  font-family:inherit;
+  font-size:13px;
+  color:#111;
+  outline:none;
+}
+
+/* 修复详情弹窗感想过长时不换行、撑出屏幕的问题 */
+.note{
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:anywhere;
+  line-height:1.6;
+  max-width:100%;
+}
+
+.modal-card .note{
+  display:block;
+  width:100%;
+}
+
+/* =========================
+   编辑打卡：发布页同款编辑器
+========================= */
+
+.edit-checkin-card{
+  width:min(720px, 96vw);
+}
+
+.edit-checkin-body{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.edit-thumb-grid{
+  margin:4px 0 2px;
+}
+
+.edit-thumb{
+  overflow:visible;
+}
+
+.edit-tag-panel{
+  margin:0;
+}
+
+/* 感想输入框 */
+.edit-note-box{
+  margin-top:0;
+}
+
+.edit-note-box label{
+  display:block;
+  margin-bottom:8px;
+  font-size:13px;
+  font-weight:800;
+  color:#777;
+}
+
+.edit-note-box textarea{
+  width:100%;
+  min-height:96px;
+  padding:14px;
+  border:none;
+  border-radius:18px;
+  background:#f7f8f9;
+  font-family:inherit;
+  font-size:14px;
+  line-height:1.7;
+  resize:vertical;
+  outline:none;
+}
+
+.edit-actions{
+  margin-top:0;
+}
+
+/* =========================
+   打卡弹窗：小图网格 + 标签面板
+========================= */
+
+#checkin-modal [hidden]{
+  display:none !important;
+}
+
+.ci-thumb-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(68px,1fr));
+  gap:10px;
+  margin:18px 0 14px;
+}
+
+.ci-thumb{
+  position:relative;
+  aspect-ratio:1 / 1;
+  padding:0;
+  border:none;
+  border-radius:16px;
+  overflow:hidden;
+  background:#f2f3f4;
+  cursor:pointer;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
+}
+
+.ci-thumb.selected{
+  box-shadow:0 0 0 4px rgba(12,192,223,.28), inset 0 0 0 1px rgba(12,192,223,.7);
+}
+
+.ci-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  background:#fafafa;
+}
+
+.ci-thumb-num{
+  position:absolute;
+  left:5px;
+  top:5px;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  border-radius:999px;
+  background:rgba(0,0,0,.65);
+  color:#fff;
+  font-size:11px;
+  line-height:20px;
+}
+
+.ci-custom-mark{
+  position:absolute;
+  left:50%;
+  bottom:5px;
+  transform:translateX(-50%);
+  padding:4px 7px;
+  border-radius:999px;
+  background:rgba(12,192,223,.95);
+  color:#fff;
+  font-size:11px;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.ci-thumb-remove{
+  position:absolute;
+  right:5px;
+  top:5px;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:rgba(255,255,255,.92);
+  color:#111;
+  font-size:18px;
+  line-height:21px;
+  text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+
+/* 标签面板 */
+.ci-tag-box{
+  margin:10px 0 18px;
+  padding:14px;
+  border-radius:20px;
+  background:#f7f8f9;
+}
+
+.ci-tag-box.single{
+  position:relative;
+  margin-top:18px;
+  background:#fff;
+  border:1px solid rgba(12,192,223,.28);
+  box-shadow:0 10px 28px rgba(12,192,223,.08);
+}
+
+.ci-section-title{
+  font-size:14px;
+  font-weight:850;
+  color:#111;
+  margin-bottom:8px;
+  text-align:left;
+}
+
+.ci-tag-hint{
+  margin-bottom:10px;
+}
+
+/* 每个分类一行：内容 / 类型 / 完成度 永远和标签同一行 */
+.ci-tag-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  margin-top:8px;
+  border-radius:999px;
+  background:#eceef0;
+  overflow:hidden;
+}
+
+.ci-tag-label{
+  width:48px;
+  flex:0 0 48px;
+  font-size:13px;
+  font-weight:850;
+  color:#777;
+  text-align:center;
+  white-space:nowrap;
+}
+
+.ci-tag-options{
+  flex:1;
+  display:flex;
+  flex-wrap:nowrap;
+  justify-content:center;
+  gap:7px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.ci-tag-options::-webkit-scrollbar{
+  display:none;
+}
+
+.ci-tag-options .preset-tag{
+  margin:0;
+}
+
+/* =========================
+   打卡 / 编辑弹窗：单图标签编辑
+========================= */
+
+/* 单图标签编辑底部两个小圆按钮 */
+#checkin-modal .ci-single-actions,
+#edit-modal .ci-single-actions{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  margin-top:14px;
+}
+
+#checkin-modal .ci-icon-btn,
+#edit-modal .ci-icon-btn{
+  width:38px !important;
+  height:38px !important;
+  min-width:38px;
+  max-width:38px;
+  padding:0 !important;
+  border:none !important;
+  border-radius:50% !important;
+  background:#f0f1f2 !important;
+  color:#111 !important;
+  font-size:22px;
+  line-height:1;
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:none !important;
+}
+
+#checkin-modal .ci-icon-btn:hover,
+#edit-modal .ci-icon-btn:hover{
+  background:#111 !important;
+  color:#fff !important;
+}
+
+.small-btn{
+  width:auto;
+  padding:7px 10px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+/* 打卡 / 编辑弹窗内的标签按钮 */
+#checkin-modal .preset-tag,
+#edit-modal .preset-tag{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:13px;
+  line-height:1;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.12);
+}
+
+#checkin-modal .preset-tag.on,
+#edit-modal .preset-tag.on{
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+
+/* 选中的缩略图用小箭头连接到下面的单张标签卡 */
+.ci-thumb{
+  overflow:visible;
+}
+
+.ci-thumb img{
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.ci-thumb-pointer{
+  position:absolute;
+  left:50%;
+  bottom:-15px;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:9px solid transparent;
+  border-right:9px solid transparent;
+  border-bottom:10px solid rgba(12,192,223,.28);
+  z-index:2;
+}
+
+.ci-tag-box.single{
+  position:relative;
+  margin-top:18px;
+}
+
+/* 打卡弹窗：未选图时的上传入口 */
+#checkin-modal .ci-upload-empty{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:10px;
+  width:100%;
+  min-height:118px;
+  margin:12px 0 14px;
+  border-radius:24px;
+  background:#f7f8f9;
+  border:1px dashed rgba(0,0,0,.18);
+  cursor:pointer;
+}
+
+#checkin-modal .ci-upload-empty > span{
+  width:44px;
+  height:44px;
+  margin:0 auto;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  color:#fff;
+  font-size:34px;
+  line-height:1;
+  font-weight:400;
+}
+.ci-upload-empty em{
+  display:block;
+  width:100%;
+  text-align:center;
+  font-style:normal;
+  font-size:13px;
+  color:#999;
+}
+
+.ci-upload-empty input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+
+/* 选图后：缩略图里的加号 */
+#checkin-modal .ci-add-thumb{
+  position:relative;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center;
+  background:#f7f8f9;
+  border:1px dashed rgba(0,0,0,.2);
+  color:#111;
+}
+
+#checkin-modal .ci-add-thumb input{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+
+#checkin-modal .ci-add-thumb span{
+  width:34px;
+  height:34px;
+  margin:0 auto;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#111;
+  color:#fff;
+  font-size:28px;
+  line-height:1;
+}
+
+/* 手机适配 */
+@media (max-width:520px){
+  .ci-thumb-grid{
+    grid-template-columns:repeat(auto-fill,minmax(60px,1fr));
+    gap:8px;
+  }
+
+  .ci-tag-box,
+  .ci-tag-box.single{
+    padding:12px;
+  }
+
+  .ci-tag-row{
+    gap:6px;
+    padding:7px 8px;
+    border-radius:999px;
+  }
+
+  .ci-tag-label{
+    width:42px;
+    flex-basis:42px;
+    font-size:12px;
+  }
+
+  .ci-tag-options{
+    justify-content:flex-start;
+    gap:6px;
+  }
+
+  #checkin-modal .preset-tag,
+  #edit-modal .preset-tag{
+    padding:6px 10px;
+    font-size:12px;
+  }
+}
+
