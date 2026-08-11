@@ -6,7 +6,8 @@ import {
 
 import {
   renderWeeklyPoster,
-  setPosterFontScale
+  setPosterCardFontSize,
+  setPosterEventFontSize
 } from "./weekly_poster.js";
 
 
@@ -38,7 +39,29 @@ export function openWeeklyEditor(report){
 
   modal.className =
     "modal-bg";
-
+  
+  modal.onclick = (e)=>{
+  
+  if(e.target === modal){
+  
+  modal.remove();
+  
+  }
+  
+  };
+  
+  
+  document.addEventListener(
+  "keydown",
+  (e)=>{
+  
+  if(e.key==="Escape"){
+  
+  modal.remove();
+  
+  }
+  
+  });
 
 
   modal.innerHTML = `
@@ -75,6 +98,14 @@ export function openWeeklyEditor(report){
 <option>8</option>
 <option selected>9</option>
 <option>10</option>
+<option>11</option>
+<option>12</option>
+<option>13</option>
+<option>14</option>
+<option>15</option>
+<option>16</option>
+<option>17</option>
+<option>18</option>
 
 </select>
 
@@ -83,24 +114,37 @@ export function openWeeklyEditor(report){
 
 
 <label>
+卡片字体
 
-字体大小
+<input
+type="range"
+id="editor-card-font"
+min="10"
+max="20"
+value="16"
+/>
 
-<select id="editor-font">
+<span id="editor-card-font-value">
+16
+</span>
 
-<option value="1">
-普通
-</option>
+</label>
 
-<option value="1.2">
-大
-</option>
 
-<option value="1.4" selected>
-特大
-</option>
+<label>
+事件字体
 
-</select>
+<input
+type="range"
+id="editor-event-font"
+min="10"
+max="20"
+value="10"
+/>
+
+<span id="editor-event-font-value">
+10
+</span>
 
 </label>
 
@@ -226,42 +270,62 @@ renderEditorPoster(report);
 
 }
 
-
-
-
-
-
-const font =
+const cardFont =
 modal.querySelector(
-"#editor-font"
+"#editor-card-font"
 );
 
 
+if(cardFont){
 
-if(font){
+cardFont.oninput = ()=>{
 
-font.onchange = ()=>{
-
-
-setPosterFontScale(
-Number(font.value)
+setPosterCardFontSize(
+Number(cardFont.value)
 );
+
+
+document.getElementById(
+"editor-card-font-value"
+).textContent =
+cardFont.value;
 
 
 renderEditorPoster(report);
 
-
 };
-
 
 }
 
 
 
+const eventFont =
+modal.querySelector(
+"#editor-event-font"
+);
 
 
+if(eventFont){
+
+eventFont.oninput = ()=>{
+
+setPosterEventFontSize(
+Number(eventFont.value)
+);
 
 
+document.getElementById(
+"editor-event-font-value"
+).textContent =
+eventFont.value;
+
+
+renderEditorPoster(report);
+
+};
+
+}
+  
 const add =
 modal.querySelector(
 "#editor-add-member"
@@ -459,8 +523,16 @@ return;
 
 
 const items =
-report.weekly_report_items || [];
+(report.weekly_report_items || [])
+.sort((a,b)=>
 
+(a.display_name || "")
+.localeCompare(
+b.display_name || "",
+"zh-CN"
+)
+
+);
 
 
 if(!items.length){
