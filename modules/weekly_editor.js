@@ -137,9 +137,9 @@ value="16"
 <input
 type="range"
 id="editor-event-font"
-min="10"
-max="20"
-value="10"
+min="1"
+max="15"
+value="8"
 />
 
 <span id="editor-event-font-value">
