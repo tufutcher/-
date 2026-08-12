@@ -299,6 +299,8 @@ renderEditorPoster(
 report
 );
 
+};  
+  
 }
 
 
@@ -332,6 +334,8 @@ renderEditorPoster(
 report
 );
 
+};
+  
 }
   
 const add =
