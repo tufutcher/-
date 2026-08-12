@@ -280,20 +280,24 @@ if(cardFont){
 
 cardFont.oninput = ()=>{
 
-setPosterCardFontSize(
-Number(cardFont.value)
-);
+const value =
+Number(cardFont.value);
 
+report.poster_card_font =
+value;
+
+setPosterCardFontSize(
+value
+);
 
 document.getElementById(
 "editor-card-font-value"
 ).textContent =
-cardFont.value;
+value;
 
-
-renderEditorPoster(report);
-
-};
+renderEditorPoster(
+report
+);
 
 }
 
@@ -309,20 +313,24 @@ if(eventFont){
 
 eventFont.oninput = ()=>{
 
-setPosterEventFontSize(
-Number(eventFont.value)
-);
+const value =
+Number(eventFont.value);
 
+report.poster_event_font =
+value;
+
+setPosterEventFontSize(
+value
+);
 
 document.getElementById(
 "editor-event-font-value"
 ).textContent =
-eventFont.value;
+value;
 
-
-renderEditorPoster(report);
-
-};
+renderEditorPoster(
+report
+);
 
 }
   
