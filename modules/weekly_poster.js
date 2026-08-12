@@ -53,15 +53,33 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     </div>`;
   }).join('');
 
-  const eventClass = getEventLengthClass(report.event_notes || '');
-
   wrap.innerHTML = `
   <div class="weekly-poster-canvas"
     style="--poster-cols:${columns};--poster-card-width:${cardWidth}px;--poster-card-height:${cardHeight}px;--poster-card-gap:${gap}px;--poster-font:${weeklyPosterFontScale};--poster-card-font:${report.poster_card_font||weeklyPosterCardFontSize}px;--poster-event-font:${report.poster_event_font||weeklyPosterEventFontSize}px;width:${posterWidth}px;height:${posterHeight}px;">
     <div class="weekly-poster-left">
       <div class="weekly-poster-date-vertical">${formatPosterDate(report.start_date,report.end_date)}</div>
       <div class="weekly-poster-title-vertical">本<br>周<br>创<br>作<br>报<br>告</div>
-      <div class="weekly-poster-event-box adaptive ${eventClass}">
+      <div
+      
+      class="weekly-poster-event-box"
+      
+      style="
+      
+      top:${
+      Math.max(
+      120,
+      250 -
+      (report.event_notes || "")
+      .split("\n").length
+      *
+      12
+      )
+      }px;
+      
+      bottom:0;
+      
+      "
+      >
         <div class="weekly-poster-event-title">这周群里发生了啥</div>
         <div class="weekly-poster-event-content">${formatEventText(report.event_notes || '暂无事件记录')}</div>
       </div>
@@ -71,13 +89,6 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     </div>
     <div class="poster-right">不<br>画<br>画<br>真<br>的<br>要<br>完<br>了</div>
   </div>`;
-}
-
-function getEventLengthClass(text){
-  const length = String(text).length;
-  if(length > 220) return 'event-long';
-  if(length > 100) return 'event-medium';
-  return 'event-short';
 }
 
 function renderMiniDateLine(report,item){
