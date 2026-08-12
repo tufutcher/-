@@ -451,29 +451,29 @@ padding-right:20px;
 /* 白色文字区 */
 .weekly-poster-card-text{
 
-padding:
-6px 6px 4px;
+padding:8px 6px 4px;
 
 box-sizing:border-box;
 
 text-align:center;
 
-overflow:hidden;
-
 display:flex;
 
 flex-direction:column;
 
+justify-content:center;
+
 align-items:center;
 
-justify-content:flex-start;
+gap:6px;
+
+overflow:hidden;
 
 }
 
 .weekly-poster-card-text p{
 
-margin:
-0 0 10px;
+margin:0;
 
 font-size:
 calc(var(--poster-card-font,16px) * .62);
@@ -506,7 +506,7 @@ line-height:1.2;
 
 opacity:.65;
 
-margin-top:4px;
+margin:0;
 
 }
 
@@ -514,7 +514,7 @@ margin-top:4px;
 
 display:block;
 
-margin-top:4px;
+margin:0;
 
 font-size:
 calc(var(--poster-card-font,16px) * .68);
