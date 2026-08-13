@@ -1,7 +1,8 @@
 import {
   saveWeeklyReportItems,
   uploadWeeklyCover,
-  findOrCreateMember
+  findOrCreateMember,
+  updateWeeklyReport
 } from "../api/weekly_report.js";
 
 import {
@@ -12,6 +13,9 @@ import {
 } from "./weekly_poster.js";
 
 let editorColumns = 9;
+let editorNameFont = 28;
+let editorCardFont = 16;
+let editorEventFont = 10;
 
 export function openWeeklyEditor(report){
   const old = document.getElementById("weekly-editor");
@@ -28,6 +32,14 @@ export function openWeeklyEditor(report){
   const modal = document.createElement("div");
   modal.id = "weekly-editor";
   modal.className = "modal-bg";
+  editorColumns = Number(report.poster_columns) || 9;
+  editorNameFont = Number(report.poster_name_font) || 28;
+  editorCardFont = Number(report.poster_card_font) || 16;
+  editorEventFont = Number(report.poster_event_font) || 10;
+  
+  setPosterNameFontSize(editorNameFont);
+  setPosterCardFontSize(editorCardFont);
+  setPosterEventFontSize(editorEventFont);
 
   modal.onclick = e => {
     if(e.target === modal){
@@ -43,13 +55,31 @@ export function openWeeklyEditor(report){
   };
   document.addEventListener("keydown", escHandler);
 
-  modal.innerHTML = `
+modal.innerHTML = `
+
 <div class="weekly-editor-layout">
+
   <div class="weekly-editor-sidebar">
-    <h2>编辑周报</h2>
+
+    <h2>编辑成员</h2>
 
     <section>
-      <h3>海报设置</h3>
+      <div id="editor-member-list"></div>
+
+      <button id="editor-add-member">
+        ＋ 添加成员
+      </button>
+    </section>
+
+    <button id="editor-save">
+      保存周报
+    </button>
+
+  </div>
+
+  <div class="weekly-editor-main">
+
+    <div class="weekly-editor-toolbar">
 
       <label>
         每行人数
@@ -59,37 +89,56 @@ export function openWeeklyEditor(report){
       </label>
 
       <label>
-        名字字体
-        <input type="range" id="editor-name-font" min="18" max="42" value="${report.poster_name_font}">
-        <span id="editor-name-font-value">${report.poster_name_font}</span>
+        名字字号
+        <input
+          type="range"
+          id="editor-name-font"
+          min="16"
+          max="48"
+          value="${editorNameFont}"
+        />
+        <span id="editor-name-font-value">${editorNameFont}</span>
       </label>
 
       <label>
         卡片正文
-        <input type="range" id="editor-card-font" min="10" max="20" value="${report.poster_card_font}">
-        <span id="editor-card-font-value">${report.poster_card_font}</span>
+        <input
+          type="range"
+          id="editor-card-font"
+          min="10"
+          max="20"
+          value="${editorCardFont}"
+        />
+        <span id="editor-card-font-value">${editorCardFont}</span>
       </label>
 
       <label>
         事件字体
-        <input type="range" id="editor-event-font" min="1" max="20" value="${report.poster_event_font}">
-        <span id="editor-event-font-value">${report.poster_event_font}</span>
+        <input
+          type="range"
+          id="editor-event-font"
+          min="1"
+          max="20"
+          value="${editorEventFont}"
+        />
+        <span id="editor-event-font-value">${editorEventFont}</span>
       </label>
-    </section>
 
-    <section>
-      <h3>成员管理</h3>
-      <div id="editor-member-list"></div>
-      <button id="editor-add-member" type="button">＋ 添加成员</button>
-    </section>
+      <button id="editor-export">
+        导出图片
+      </button>
 
-    <button id="editor-save" type="button">保存周报</button>
+    </div>
+
+    <div class="weekly-editor-preview">
+      <div id="editor-poster"></div>
+    </div>
+
   </div>
 
-  <div class="weekly-editor-preview">
-    <div id="editor-poster"></div>
-  </div>
-</div>`;
+</div>
+
+`;
 
   document.body.appendChild(modal);
 
@@ -98,13 +147,30 @@ export function openWeeklyEditor(report){
   bindEditorEvents(report, modal);
 }
 
+function renderColumnOptions(current){
+  let html = "";
+
+  for(let i = 6; i <= 18; i++){
+    html += `
+      <option value="${i}" ${Number(current) === i ? "selected" : ""}>
+        ${i}
+      </option>
+    `;
+  }
+
+  return html;
+}
+
 function bindEditorEvents(report, modal){
   const columns = modal.querySelector("#editor-columns");
   if(columns){
-    columns.onchange = () => {
-      const value = Number(columns.value) || 9;
-      editorColumns = value;
-      report.poster_columns = value;
+    columns.onchange = ()=>{
+      const value =
+        Number(columns.value) || 9;
+      editorColumns =
+        value;
+      report.poster_columns =
+        value;
       renderEditorPoster(report);
     };
   }
@@ -120,11 +186,47 @@ function bindEditorEvents(report, modal){
     };
   }
 
+  const nameFont =
+modal.querySelector(
+"#editor-name-font"
+);
+
+if(nameFont){
+
+nameFont.oninput = ()=>{
+
+const value =
+Number(nameFont.value) || 28;
+
+editorNameFont =
+value;
+
+report.poster_name_font =
+value;
+
+setPosterNameFontSize(
+value
+);
+
+document.getElementById(
+"editor-name-font-value"
+).textContent =
+value;
+
+renderEditorPoster(
+report
+);
+
+};
+
+}
+
   const cardFont = modal.querySelector("#editor-card-font");
   if(cardFont){
     cardFont.oninput = () => {
       const value = Number(cardFont.value) || 16;
       report.poster_card_font = value;
+      editorCardFont = value;
       setPosterCardFontSize(value);
       setText("editor-card-font-value", value);
       renderEditorPoster(report);
@@ -133,12 +235,22 @@ function bindEditorEvents(report, modal){
 
   const eventFont = modal.querySelector("#editor-event-font");
   if(eventFont){
-    eventFont.oninput = () => {
-      const value = Number(eventFont.value) || 10;
-      report.poster_event_font = value;
-      setPosterEventFontSize(value);
-      setText("editor-event-font-value", value);
-      renderEditorPoster(report);
+  eventFont.oninput = ()=>{
+    const value =
+    Number(eventFont.value) || 10;
+    editorEventFont =
+    value;
+    report.poster_event_font =
+    value;
+    setPosterEventFontSize(
+    value
+    );
+    document.getElementById(
+    "editor-event-font-value"
+    ).textContent =
+    value;
+    renderEditorPoster(
+    report
     };
   }
 
@@ -181,24 +293,50 @@ function bindEditorEvents(report, modal){
       save.textContent = "保存中...";
 
       sortItems(report);
-      const result = await saveWeeklyReportItems(
-        window.__sb,
-        report.id,
-        report.weekly_report_items || []
-      );
+const settingsResult =
+await updateWeeklyReport(
+  window.__sb,
+  report.id,
+  {
+    poster_columns: editorColumns,
+    poster_name_font: editorNameFont,
+    poster_card_font: editorCardFont,
+    poster_event_font: editorEventFont
+  }
+);
 
-      if(result){
-        report.weekly_report_items = result;
-        window.showToast?.("周报保存成功", "完成", "success");
-        renderEditorMembers(report);
-        renderEditorPoster(report);
-      }else{
-        window.showToast?.("保存失败", "错误", "error");
-      }
+if(settingsResult.data){
+  Object.assign(report, settingsResult.data);
+}
 
-      save.disabled = false;
-      save.textContent = "保存周报";
-    };
+const result =
+  await saveWeeklyReportItems(
+    window.__sb,
+    report.id,
+    report.weekly_report_items || []
+  );
+  
+  if(result){
+  
+    report.weekly_report_items =
+    result;
+  
+    window.showToast?.(
+      "周报保存成功",
+      "完成",
+      "success"
+    );
+  
+    renderEditorPoster(report);
+  
+  }else{
+  
+    window.showToast?.(
+      "保存失败",
+      "错误",
+      "error"
+    );
+  
   }
 }
 
