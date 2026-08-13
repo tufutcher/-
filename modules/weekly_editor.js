@@ -18,6 +18,8 @@ let editorCardFont = 16;
 let editorEventFont = 10;
 
 export function openWeeklyEditor(report){
+  ensureWeeklyEditorPatchCss();
+
   const old = document.getElementById("weekly-editor");
   if(old){
     old.remove();
@@ -216,6 +218,18 @@ export function openWeeklyEditor(report){
   renderEditorMembers(report);
   renderEditorPoster(report);
   bindEditorEvents(report, modal);
+}
+
+function ensureWeeklyEditorPatchCss(){
+  if(document.getElementById("weekly-editor-patch-css")){
+    return;
+  }
+
+  const link = document.createElement("link");
+  link.id = "weekly-editor-patch-css";
+  link.rel = "stylesheet";
+  link.href = "styles/weekly_editor_patch.css";
+  document.head.appendChild(link);
 }
 
 function closeEditor(modal, escHandler){
