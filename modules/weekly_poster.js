@@ -23,7 +23,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   if(!wrap) return;
 
   const items = report.weekly_report_items || [];
-  const columns = Math.max(1, Math.min(Number(options.columns) || 9, items.length || 1));
+  const columns = Math.max(1,Math.min(Number(report.poster_columns || options.columns || 9),items.length || 1));
   const cardWidth = 88;
   const cardHeight = 318;
   const gap = 7;
