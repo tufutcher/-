@@ -89,3 +89,166 @@
 .weekly-days-perfect{
   background-image:linear-gradient(90deg,#62b6ff,#7b61ff,#c56bff) !important;
 }
+
+/* =========================
+   Weekly proxy checkin redesign
+   ========================= */
+
+.calendar-gallery-proxy{
+  position:relative;
+  min-height:132px;
+  border-radius:24px !important;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 10%,rgba(12,192,223,.22),transparent 36%),
+    linear-gradient(145deg,#ffffff,#f4fbfd) !important;
+  border:1px solid rgba(12,192,223,.18) !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.055) !important;
+}
+
+.calendar-gallery-proxy::after{
+  content:"";
+  position:absolute;
+  right:-18px;
+  top:-22px;
+  width:92px;
+  height:92px;
+  border-radius:999px;
+  background:rgba(12,192,223,.12);
+}
+
+.calendar-proxy-placeholder{
+  position:relative;
+  z-index:1;
+  min-height:132px !important;
+  align-items:flex-start !important;
+  justify-content:flex-end !important;
+  gap:8px !important;
+  padding:18px !important;
+  text-align:left !important;
+  color:#222 !important;
+}
+
+.calendar-proxy-placeholder::before{
+  content:"代录";
+  display:inline-flex;
+  width:max-content;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(12,192,223,.13);
+  color:#087c91;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.calendar-proxy-placeholder strong{
+  color:#111 !important;
+  font-size:22px !important;
+  font-weight:950 !important;
+  letter-spacing:-.06em;
+  line-height:1.05;
+}
+
+.calendar-proxy-placeholder span{
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+  color:#666 !important;
+  font-size:13px !important;
+  line-height:1.55 !important;
+  text-align:left !important;
+}
+
+#profile-detail-modal .proxy-checkin-tip{
+  margin:0 0 14px;
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(12,192,223,.12);
+  color:#087c91;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-art-list .proxy-detail-empty{
+  min-height:0;
+  padding:0;
+  border-radius:28px;
+  background:transparent;
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-art-list .proxy-detail-placeholder{
+  width:100%;
+  min-height:180px;
+  align-items:flex-start;
+  justify-content:flex-end;
+  gap:10px;
+  padding:24px;
+  box-sizing:border-box;
+  border-radius:28px;
+  text-align:left;
+  color:#111;
+  background:
+    radial-gradient(circle at 16% 10%,rgba(12,192,223,.22),transparent 34%),
+    linear-gradient(145deg,#ffffff,#f3fbfd);
+  border:1px solid rgba(12,192,223,.18);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.7);
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-art-list .proxy-detail-placeholder::before{
+  content:"✦";
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  background:#111;
+  color:#fff;
+  font-size:22px;
+  line-height:1;
+  box-shadow:0 12px 28px rgba(0,0,0,.16);
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-art-list .proxy-detail-placeholder strong{
+  color:#111;
+  font-size:28px;
+  font-weight:950;
+  letter-spacing:-.07em;
+  line-height:1.08;
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-art-list .proxy-detail-placeholder span{
+  color:#777;
+  font-size:14px;
+  line-height:1.55;
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-note{
+  margin-top:14px;
+  padding:16px 18px;
+  border-radius:20px;
+  background:#f7f7f8;
+  color:#333;
+  font-size:15px;
+  line-height:1.65;
+  font-weight:650;
+  text-align:left;
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-actions{
+  margin-top:16px;
+}
+
+#profile-detail-modal .proxy-checkin-tip ~ .detail-actions #profile-detail-claim{
+  width:100%;
+  min-height:52px;
+  border-radius:18px;
+  background:#111;
+  color:#fff;
+  font-size:15px;
+  font-weight:900;
+  box-shadow:0 14px 34px rgba(0,0,0,.16);
+}
