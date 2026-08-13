@@ -268,7 +268,7 @@
   flex:0 0 auto;
   display:inline-flex;
   align-items:center;
-  gap:5px;
+  gap:0;
   width:auto;
   margin:0;
   padding:0;
@@ -278,11 +278,11 @@
 
 #checkin-modal .ci-custom-tag-input,
 #edit-modal .ci-custom-tag-input{
-  width:76px !important;
-  min-width:76px;
+  width:82px !important;
+  min-width:82px;
   height:auto !important;
   margin:0 !important;
-  padding:6px 10px !important;
+  padding:6px 12px !important;
   border-radius:999px !important;
   border:1px dashed rgba(0,0,0,.18) !important;
   background:#fff !important;
@@ -301,25 +301,7 @@
 
 #checkin-modal .ci-custom-tag-form button,
 #edit-modal .ci-custom-tag-form button{
-  width:auto !important;
-  min-width:0 !important;
-  height:auto !important;
-  margin:0 !important;
-  padding:6px 10px !important;
-  border:1px solid rgba(0,0,0,.12) !important;
-  border-radius:999px !important;
-  background:#fff !important;
-  color:#111 !important;
-  font-size:13px !important;
-  font-weight:700;
-  line-height:1 !important;
-  box-shadow:none !important;
-}
-
-#checkin-modal .ci-custom-tag-form button:hover,
-#edit-modal .ci-custom-tag-form button:hover{
-  background:#111 !important;
-  color:#fff !important;
+  display:none !important;
 }
 
 #checkin-modal .preset-tag.custom,
@@ -359,14 +341,8 @@
 @media (max-width:520px){
   #checkin-modal .ci-custom-tag-input,
   #edit-modal .ci-custom-tag-input{
-    width:70px !important;
-    min-width:70px;
-    font-size:12px !important;
-  }
-
-  #checkin-modal .ci-custom-tag-form button,
-  #edit-modal .ci-custom-tag-form button{
-    padding:6px 9px !important;
+    width:74px !important;
+    min-width:74px;
     font-size:12px !important;
   }
 }
