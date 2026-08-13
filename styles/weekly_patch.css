@@ -8,24 +8,19 @@
 }
 
 .weekly-poster-date-vertical{
-  writing-mode:horizontal-tb !important;
+  writing-mode:vertical-rl !important;
   text-orientation:mixed !important;
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  gap:1px !important;
+  display:block !important;
   line-height:1 !important;
-  letter-spacing:0 !important;
+  letter-spacing:1.5px !important;
   font-size:12px !important;
 }
 
-.weekly-poster-date-vertical span{
-  display:block !important;
-  white-space:nowrap !important;
-}
-
+.weekly-poster-date-vertical span,
 .weekly-poster-date-vertical .date-separator{
-  margin:2px 0 !important;
+  display:inline !important;
+  white-space:nowrap !important;
+  margin:0 !important;
 }
 
 .poster-right{
@@ -41,8 +36,17 @@
 }
 
 .weekly-poster-event-title{
-  font-size:9px !important;
+  display:flex !important;
+  flex-direction:row-reverse !important;
+  align-items:flex-start !important;
   gap:3px !important;
+  width:auto !important;
+  height:auto !important;
+  overflow:visible !important;
+  writing-mode:horizontal-tb !important;
+  text-orientation:mixed !important;
+  font-size:8px !important;
+  line-height:1 !important;
   color:rgba(255,255,255,.62) !important;
   white-space:nowrap !important;
   flex-wrap:nowrap !important;
@@ -50,6 +54,10 @@
 }
 
 .weekly-poster-event-title span{
+  display:block !important;
+  writing-mode:vertical-rl !important;
+  text-orientation:upright !important;
+  line-height:1 !important;
   white-space:nowrap !important;
   word-break:keep-all !important;
   overflow:visible !important;
