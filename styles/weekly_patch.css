@@ -3,7 +3,7 @@
 .weekly-poster-canvas{
   width:max-content !important;
   grid-template-columns:205px max-content 18px !important;
-  padding:42px 12px 42px 42px !important;
+  padding:42px 8px 42px 42px !important;
   column-gap:14px !important;
 }
 
@@ -11,11 +11,31 @@
   align-self:end;
   justify-self:center;
   text-align:center;
-  font-size:14px;
-  font-weight:900;
-  line-height:1.08;
-  letter-spacing:1px;
+  font-size:9px;
+  font-weight:400;
+  line-height:1.35;
+  letter-spacing:2.4px;
   color:rgba(255,255,255,.95);
+  text-shadow:none;
+}
+
+.weekly-poster-event-title{
+  font-size:9px !important;
+  gap:3px !important;
+  color:rgba(255,255,255,.62) !important;
+  white-space:nowrap !important;
+  flex-wrap:nowrap !important;
+  word-break:keep-all !important;
+}
+
+.weekly-poster-event-title span{
+  white-space:nowrap !important;
+  word-break:keep-all !important;
+  overflow:visible !important;
+}
+
+.weekly-poster-event-content{
+  padding-right:0 !important;
 }
 
 .weekly-days-low{
