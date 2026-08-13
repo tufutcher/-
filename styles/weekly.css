@@ -399,7 +399,7 @@ word-break:break-word;
   position:absolute;
   left:0;
   right:0;
-  bottom:-8px;
+  bottom:18px;
   z-index:40;
   text-align:center;
   color:white;
@@ -416,19 +416,19 @@ word-break:break-word;
 }
 
 .weekly-poster-badge-icon{
-  font-size:18px;
+  font-size:16px;
   line-height:1;
   filter:none;
 }
 
 .weekly-poster-name{
-  font-size:calc((var(--poster-card-font,16px) + 8px) * var(--poster-font-scale,1));
+  font-size:var(--poster-name-font,28px);
   font-weight:1000;
   line-height:.82;
   letter-spacing:-.8px;
   color:#fff;
   text-shadow:none;
-  -webkit-text-stroke:.55px #fff;
+  -webkit-text-stroke:.75px #fff;
   paint-order:stroke fill;
   white-space:nowrap;
   overflow:hidden;
@@ -438,7 +438,7 @@ word-break:break-word;
 
 /* 白色文字区 */
 .weekly-poster-card-text{
-padding:8px 6px 4px;
+padding:8px 2px 4px;
 box-sizing:border-box;
 text-align:center;
 display:flex;
