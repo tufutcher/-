@@ -23,7 +23,14 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   if(!wrap) return;
 
   const items = report.weekly_report_items || [];
-  const columns = Math.max(1,Math.min(Number(report.poster_columns || options.columns || 9),items.length || 1));
+  const columns = Math.max(
+    1,
+    Math.min(
+      Number(report.poster_columns || options.columns || 9),
+      items.length || 1
+    )
+  );
+
   const cardWidth = 88;
   const cardHeight = 318;
   const gap = 7;
@@ -32,8 +39,10 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   const posterWidth = 260 + columns * cardWidth + (columns - 1) * gap + 80;
   const posterHeight = Math.max(720, rows * cardHeight + 80);
 
-  const cards = items.map(item=>{
+  const cards = items.map(item => {
     const days = item.checkin_dates?.length || 0;
+    const badge = getWeeklyBadge(days);
+    const dayClass = getWeeklyDayClass(days);
 
     return `
     <div class="weekly-poster-card">
@@ -43,7 +52,8 @@ export function renderWeeklyPoster(report, wrap, options = {}){
           : `<div class="weekly-poster-empty-img">暂无图片</div>`}
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
-          ${getWeeklyBadge(days) ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon">${getWeeklyBadge(days)}</span></div>` : ''}
+          ${badge ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon">${badge}</span></div>` : ''}
+          ${days > 0 ? `<div class="weekly-poster-days ${dayClass}">打卡${days}天</div>` : ''}
           <div class="weekly-poster-name">${escapeHtml(item.display_name || '匿名')}</div>
         </div>
       </div>
@@ -65,7 +75,11 @@ export function renderWeeklyPoster(report, wrap, options = {}){
       <div class="weekly-poster-date-vertical">${formatPosterDate(report.start_date,report.end_date)}</div>
       <div class="weekly-poster-title-vertical">本<br>周<br>创<br>作<br>报<br>告</div>
       <div class="weekly-poster-event-box">
-        <div class="weekly-poster-event-title">这周群里发生了啥</div>
+        <div class="weekly-poster-event-title" aria-label="这周群里发生了啥？！">
+          <span>这周群里</span>
+          <span>发生了</span>
+          <span>啥？！</span>
+        </div>
         <div class="weekly-poster-event-content">${formatEventText(report.event_notes || '暂无事件记录')}</div>
       </div>
     </div>
@@ -77,27 +91,43 @@ export function renderWeeklyPoster(report, wrap, options = {}){
 }
 
 function renderMiniDateLine(report,item){
-  const dates=getDateRange(report.start_date,report.end_date);
-  const checked=item.checkin_dates||[];
-  return dates.map(date=>`<span class="${checked.includes(date)?'active':''}">${new Date(date).getDate()}</span>`).join('');
+  const dates = getDateRange(report.start_date,report.end_date);
+  const checked = item.checkin_dates || [];
+  return dates.map(date => `
+    <span class="${checked.includes(date) ? 'active' : ''}">
+      ${new Date(date).getDate()}
+    </span>
+  `).join('');
 }
 
 function getDateRange(start,end){
-  const result=[];
-  let current=new Date(start);
-  const last=new Date(end);
-  while(current<=last){
-    result.push(`${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${String(current.getDate()).padStart(2,'0')}`);
+  const result = [];
+  let current = new Date(start);
+  const last = new Date(end);
+
+  while(current <= last){
+    result.push(
+      `${current.getFullYear()}-${String(current.getMonth()+1).padStart(2,'0')}-${String(current.getDate()).padStart(2,'0')}`
+    );
     current.setDate(current.getDate()+1);
   }
+
   return result;
 }
 
 function getWeeklyBadge(days){
-  if(days===7)return '🎨';
-  if(days>=5)return '🔥';
-  if(days>=3)return '⭐';
+  if(days === 7) return '🎨';
+  if(days >= 5) return '🔥';
+  if(days >= 3) return '⭐';
   return '';
+}
+
+function getWeeklyDayClass(days){
+  if(days === 7) return 'weekly-days-perfect';
+  if(days >= 5) return 'weekly-days-fire';
+  if(days >= 3) return 'weekly-days-star';
+  if(days >= 1) return 'weekly-days-low';
+  return 'weekly-days-none';
 }
 
 function formatPosterDate(start,end){
@@ -110,9 +140,9 @@ function formatEventText(text){
 
 function escapeHtml(value){
   return String(value||'')
-  .replaceAll('&','&amp;')
-  .replaceAll('<','&lt;')
-  .replaceAll('>','&gt;')
-  .replaceAll('"','&quot;')
-  .replaceAll("'",'&#039;');
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'",'&#039;');
 }
