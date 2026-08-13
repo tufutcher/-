@@ -20,7 +20,6 @@
   margin-bottom:0;
 }
 
-/* 左侧标题区 */
 .weekly-poster-left{
   position:relative;
   display:flex;
@@ -51,7 +50,6 @@
   line-height:.94;
 }
 
-/* 左下事件框 */
 .weekly-poster-event-box{
   margin-top:auto;
   width:178px;
@@ -66,19 +64,30 @@
   position:absolute;
   right:12px;
   top:14px;
-  width:18px;
-  writing-mode:vertical-rl;
-  text-orientation:upright;
-  font-size:18px;
+  display:flex;
+  flex-direction:row-reverse;
+  align-items:flex-start;
+  gap:4px;
+  width:auto;
+  writing-mode:horizontal-tb;
+  text-orientation:mixed;
+  font-size:14px;
   font-weight:900;
   line-height:1;
-  color:rgba(255,255,255,.7);
+  color:rgba(255,255,255,.62);
   white-space:nowrap;
-  letter-spacing:1px;
+  letter-spacing:0;
+}
+
+.weekly-poster-event-title span{
+  writing-mode:vertical-rl;
+  text-orientation:upright;
+  white-space:nowrap;
 }
 
 .weekly-poster-event-content{
   margin-top:12px;
+  padding-right:56px;
   font-size:var(--poster-event-font,10px);
   line-height:1.45;
   font-weight:400;
@@ -86,7 +95,6 @@
   word-break:break-word;
 }
 
-/* 右侧成员区 */
 .weekly-poster-main{
   min-width:0;
   height:100%;
@@ -99,7 +107,6 @@
   align-content:start;
 }
 
-/* 单个成员卡 */
 .weekly-poster-card{
   width:var(--poster-card-width,88px);
   height:var(--poster-card-height,318px);
@@ -151,7 +158,6 @@
   font-weight:800;
 }
 
-/* 图片底部 badge + 名字 */
 .weekly-poster-card-info{
   position:absolute;
   left:0;
@@ -169,13 +175,48 @@
   flex-direction:column;
   align-items:center;
   gap:0;
-  margin-bottom:11px;
+  margin-bottom:2px;
 }
 
 .weekly-poster-badge-icon{
   font-size:16px;
   line-height:1;
   filter:none;
+}
+
+.weekly-poster-days{
+  display:block;
+  margin:0 0 4px;
+  font-size:calc(var(--poster-name-font,28px) * .28);
+  font-weight:1000;
+  line-height:1;
+  letter-spacing:.3px;
+  text-shadow:none;
+  background:linear-gradient(90deg,#fff,#fff);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.weekly-days-low{
+  background-image:linear-gradient(90deg,#8ec5fc,#e0c3fc);
+}
+
+.weekly-days-star{
+  background-image:linear-gradient(90deg,#ffe76a,#ffb100);
+}
+
+.weekly-days-fire{
+  background-image:linear-gradient(90deg,#ff4d00,#ffd36a);
+}
+
+.weekly-days-perfect{
+  background-image:linear-gradient(90deg,#7cff6b,#00d4ff,#a66bff,#ff6ad5);
+}
+
+.weekly-days-none{
+  color:rgba(255,255,255,.7);
+  background:none;
 }
 
 .weekly-poster-name{
@@ -192,7 +233,6 @@
   text-overflow:ellipsis;
 }
 
-/* 白色文字区 */
 .weekly-poster-card-text{
   padding:8px 2px 4px;
   box-sizing:border-box;
@@ -236,7 +276,6 @@
   line-height:1.2;
 }
 
-/* 底部日期条 */
 .weekly-poster-date-line{
   display:grid;
   grid-template-columns:repeat(7,1fr);
@@ -259,10 +298,6 @@
   opacity:1;
   background:rgba(255,255,255,.78);
 }
-
-/* =========================
-   Proxy / Calendar
-   ========================= */
 
 .proxy-checkin-tip{
   display:inline-flex;
@@ -342,10 +377,6 @@
   font-weight:700;
   cursor:pointer;
 }
-
-/* =========================
-   Weekly Editor Redesign
-   ========================= */
 
 #weekly-editor{
   display:flex;
@@ -627,8 +658,7 @@
   display:flex;
   justify-content:center;
   align-items:flex-start;
-  background:
-    radial-gradient(circle at top,#f7f7f8 0,#eeeeef 44%,#e6e6e8 100%);
+  background:radial-gradient(circle at top,#f7f7f8 0,#eeeeef 44%,#e6e6e8 100%);
 }
 
 #weekly-editor #editor-poster{
@@ -650,7 +680,6 @@
   margin-bottom:0;
 }
 
-/* 导出：避免编辑器缩放影响 html2canvas */
 .weekly-export-stage{
   position:fixed;
   left:-99999px;
