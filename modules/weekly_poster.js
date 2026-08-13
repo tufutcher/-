@@ -59,27 +59,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     <div class="weekly-poster-left">
       <div class="weekly-poster-date-vertical">${formatPosterDate(report.start_date,report.end_date)}</div>
       <div class="weekly-poster-title-vertical">本<br>周<br>创<br>作<br>报<br>告</div>
-      <div
-      
-      class="weekly-poster-event-box"
-      
-      style="
-      
-      top:${
-      Math.max(
-      120,
-      250 -
-      (report.event_notes || "")
-      .split("\n").length
-      *
-      12
-      )
-      }px;
-      
-      bottom:0;
-      
-      "
-      >
+      <div class="weekly-poster-event-box">
         <div class="weekly-poster-event-title">这周群里发生了啥</div>
         <div class="weekly-poster-event-content">${formatEventText(report.event_notes || '暂无事件记录')}</div>
       </div>
