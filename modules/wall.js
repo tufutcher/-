@@ -59,6 +59,17 @@ function avatarHtml(profile, name){
   return `<div class="person-avatar avatar-fallback">${first}</div>`;
 }
 
+function openWallProfile(userId){
+  if(!userId) return;
+
+  // readonly 主页必须使用全站 checkins；profileCheckins 是当前登录用户的个人页缓存。
+  if(window.state){
+    window.state.profileCheckins = null;
+  }
+
+  openReadonlyProfileModal(userId);
+}
+
 function getWeekKey(date){
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = (d.getUTCDay() + 6) % 7;
@@ -203,10 +214,7 @@ function bindCardClicks(){
   // 按人分组：点头像、名字、卡片空白区域，打开这个人的主页弹窗
   document.querySelectorAll(".person-card").forEach(card => {
     card.onclick = () => {
-      const userId = card.dataset.profileUserId;
-      if(!userId) return;
-
-      openReadonlyProfileModal(userId);
+      openWallProfile(card.dataset.profileUserId);
     };
   });
 }
@@ -294,7 +302,7 @@ function openDetail(item){
       if(!userId) return;
   
       modal.remove();
-      openReadonlyProfileModal(userId);
+      openWallProfile(userId);
     };
   }
 
