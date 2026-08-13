@@ -48,7 +48,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     <div class="weekly-poster-card">
       <div class="weekly-poster-img">
         ${item.cover_image_url
-          ? `<img src="${item.cover_image_url}" crossorigin="anonymous">`
+          ? `<img src="${escapeAttr(item.cover_image_url)}" crossorigin="anonymous" referrerpolicy="no-referrer" loading="eager" decoding="sync">`
           : `<div class="weekly-poster-empty-img">暂无图片</div>`}
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
@@ -97,15 +97,21 @@ function renderMiniDateLine(report, item){
 
   return dates.map(date => `
     <span class="${checked.includes(date) ? "active" : ""}">
-      ${new Date(date).getDate()}
+      ${Number(date.slice(-2))}
     </span>
   `).join("");
 }
 
 function getDateRange(start, end){
   const result = [];
-  let current = new Date(start);
-  const last = new Date(end);
+  if(!start || !end) return result;
+
+  let current = new Date(start + "T00:00:00");
+  const last = new Date(end + "T00:00:00");
+
+  if(Number.isNaN(current.getTime()) || Number.isNaN(last.getTime())){
+    return result;
+  }
 
   while(current <= last){
     result.push(
@@ -133,11 +139,17 @@ function getWeeklyDayClass(days){
 }
 
 function formatPosterDate(start, end){
-  return `${start.replaceAll("-", ".")}-${end.replaceAll("-", ".")}`;
+  return [start, end]
+    .map(date => String(date || "").split("-").map(part => `<span>${escapeHtml(part)}</span>`).join(""))
+    .join('<span class="date-separator">—</span>');
 }
 
 function formatEventText(text){
   return escapeHtml(text).replaceAll("\n", "<br>");
+}
+
+function escapeAttr(value){
+  return escapeHtml(value).replaceAll("`", "&#096;");
 }
 
 function escapeHtml(value){
