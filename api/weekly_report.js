@@ -88,7 +88,12 @@ export async function createWeeklyReport(sb, report){
       end_date: report.end_date,
       theme_color: report.theme_color || "#ff6a16",
       event_notes: report.event_notes || "",
-      contributors: report.contributors || ""
+      contributors: report.contributors || "",
+
+      poster_columns: report.poster_columns || 9,
+      poster_name_font: report.poster_name_font || 28,
+      poster_card_font: report.poster_card_font || 16,
+      poster_event_font: report.poster_event_font || 10
     })
     .select()
     .single();
@@ -102,16 +107,28 @@ export async function createWeeklyReport(sb, report){
 }
 
 export async function updateWeeklyReport(sb, reportId, patch){
+  const payload = {};
+
+  [
+    "title",
+    "start_date",
+    "end_date",
+    "theme_color",
+    "event_notes",
+    "contributors",
+    "poster_columns",
+    "poster_name_font",
+    "poster_card_font",
+    "poster_event_font"
+  ].forEach(key => {
+    if(patch[key] !== undefined){
+      payload[key] = patch[key];
+    }
+  });
+
   const { data, error } = await sb
     .from("weekly_reports")
-    .update({
-      title: patch.title,
-      start_date: patch.start_date,
-      end_date: patch.end_date,
-      theme_color: patch.theme_color,
-      event_notes: patch.event_notes,
-      contributors: patch.contributors
-    })
+    .update(payload)
     .eq("id", reportId)
     .select()
     .single();
