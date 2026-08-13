@@ -1,4 +1,9 @@
-import { TAG_CATEGORIES } from "./checkin_modal.js";
+import {
+  getTagCategories,
+  addCustomTag,
+  deleteCustomTag,
+  isCustomTag
+} from "./checkin_modal.js";
 import {
   updateCheckinNote,
   updateCheckinDate,
@@ -59,21 +64,34 @@ export function openEditModal(item){
   }
 
   function renderTagGroups(activeTags, mode){
-    return Object.keys(TAG_CATEGORIES).map(cat => {
-      const opts = TAG_CATEGORIES[cat].map(tag => {
+    const categories = getTagCategories();
+
+    return Object.keys(categories).map(cat => {
+      const opts = categories[cat].map(tag => {
         const onClass = activeTags.includes(tag) ? " on" : "";
+        const customClass = isCustomTag(cat, tag) ? " custom" : "";
+        const deleteButton = customClass
+          ? '<button class="ci-custom-tag-delete" data-custom-cat="' + escapeAttr(cat) + '" data-custom-tag="' + escapeAttr(tag) + '" type="button" title="删除自定义标签">×</button>'
+          : "";
 
         return (
-          '<span class="preset-tag' + onClass + '" data-mode="' + mode + '" data-tag="' + tag + '">' +
-            tag +
+          '<span class="preset-tag' + onClass + customClass + '" data-mode="' + mode + '" data-tag="' + escapeAttr(tag) + '">' +
+            escapeHtml(tag) +
+            deleteButton +
           '</span>'
         );
       }).join("");
 
       return (
         '<div class="ci-tag-row">' +
-          '<div class="ci-tag-label">' + cat + '</div>' +
-          '<div class="ci-tag-options">' + opts + '</div>' +
+          '<div class="ci-tag-label">' + escapeHtml(cat) + '</div>' +
+          '<div class="ci-tag-options">' +
+            opts +
+            '<form class="ci-custom-tag-form" data-mode="' + mode + '" data-custom-cat="' + escapeAttr(cat) + '">' +
+              '<input class="ci-custom-tag-input" maxlength="12" placeholder="＋自定义">' +
+              '<button type="submit">加</button>' +
+            '</form>' +
+          '</div>' +
         '</div>'
       );
     }).join("");
@@ -167,6 +185,42 @@ export function openEditModal(item){
     }
   }
 
+  function toggleTag(list, tag){
+    return list.includes(tag)
+      ? list.filter(item => item !== tag)
+      : [...list, tag];
+  }
+
+  function toggleGlobalTag(tag){
+    globalTags = toggleTag(globalTags, tag);
+
+    editImages = editImages.map(img => {
+      if(img.customTags) return img;
+
+      return {
+        ...img,
+        tags: [...globalTags]
+      };
+    });
+  }
+
+  function toggleSingleTag(tag){
+    const selected = selectedImage();
+    if(!selected) return;
+
+    selected.tags = toggleTag(selected.tags, tag);
+    selected.customTags = true;
+  }
+
+  function removeTagFromEdit(tag){
+    globalTags = globalTags.filter(item => item !== tag);
+
+    editImages = editImages.map(img => ({
+      ...img,
+      tags: (img.tags || []).filter(item => item !== tag)
+    }));
+  }
+
   function bindEditorEvents(){
     const closeBtn = document.getElementById("edit-close");
     if(closeBtn){
@@ -185,25 +239,41 @@ export function openEditModal(item){
       };
     });
 
-    modal.querySelectorAll('.preset-tag[data-mode="global"]').forEach(btn => {
-      btn.onclick = () => {
-        const tag = btn.dataset.tag;
+    modal.querySelectorAll(".ci-custom-tag-delete").forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const tag = btn.dataset.customTag;
+        deleteCustomTag(btn.dataset.customCat, tag);
+        removeTagFromEdit(tag);
+        saveCurrentForm();
+        renderEditor();
+      };
+    });
 
-        if(globalTags.includes(tag)){
-          globalTags = globalTags.filter(x => x !== tag);
-        } else {
-          globalTags.push(tag);
+    modal.querySelectorAll(".ci-custom-tag-form").forEach(form => {
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const input = form.querySelector("input");
+        const tag = addCustomTag(form.dataset.customCat, input?.value);
+
+        if(!tag){
+          return;
         }
 
-        editImages = editImages.map(img => {
-          if(img.customTags) return img;
+        if(form.dataset.mode === "single"){
+          toggleSingleTag(tag);
+        }else{
+          toggleGlobalTag(tag);
+        }
 
-          return {
-            ...img,
-            tags: [...globalTags]
-          };
-        });
+        saveCurrentForm();
+        renderEditor();
+      };
+    });
 
+    modal.querySelectorAll('.preset-tag[data-mode="global"]').forEach(btn => {
+      btn.onclick = () => {
+        toggleGlobalTag(btn.dataset.tag);
         saveCurrentForm();
         renderEditor();
       };
@@ -211,19 +281,7 @@ export function openEditModal(item){
 
     modal.querySelectorAll('.preset-tag[data-mode="single"]').forEach(btn => {
       btn.onclick = () => {
-        const selected = selectedImage();
-        if(!selected) return;
-
-        const tag = btn.dataset.tag;
-
-        if(selected.tags.includes(tag)){
-          selected.tags = selected.tags.filter(x => x !== tag);
-        } else {
-          selected.tags.push(tag);
-        }
-
-        selected.customTags = true;
-
+        toggleSingleTag(btn.dataset.tag);
         saveCurrentForm();
         renderEditor();
       };
@@ -344,3 +402,15 @@ export function openEditModal(item){
   renderEditor();
 }
 
+function escapeAttr(value){
+  return escapeHtml(value).replaceAll("`", "&#096;");
+}
+
+function escapeHtml(value){
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
