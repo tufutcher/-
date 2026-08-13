@@ -297,11 +297,7 @@ async function saveEditorReport(report, modal, save){
 
     if(settingsResult.data) Object.assign(report, settingsResult.data);
 
-    const result = await saveWeeklyReportItems(
-      window.__sb,
-      report.id,
-      report.weekly_report_items || []
-    );
+    const result = await saveWeeklyReportItems(window.__sb, report.id, report.weekly_report_items || []);
 
     if(result){
       report.weekly_report_items = result;
@@ -329,23 +325,32 @@ async function exportEditorPoster(report, exportBtn){
 
   const stage = document.createElement("div");
   stage.className = "weekly-export-stage";
+  stage.style.position = "fixed";
+  stage.style.left = "-100000px";
+  stage.style.top = "0";
+  stage.style.width = "max-content";
+  stage.style.height = "max-content";
+  stage.style.opacity = "1";
+  stage.style.pointerEvents = "none";
   document.body.appendChild(stage);
 
   try{
-    renderWeeklyPoster(report, stage, { columns: report.poster_columns || editorColumns });
+    const exportReport = await buildExportReport(report);
+    renderWeeklyPoster(exportReport, stage, { columns: exportReport.poster_columns || editorColumns });
 
     const poster = stage.querySelector(".weekly-poster-canvas");
-    if(!poster){
-      throw new Error("poster not found");
-    }
+    if(!poster) throw new Error("poster not found");
 
     poster.classList.add("is-exporting");
     await waitForPosterImages(poster);
+    await nextFrame();
 
     const canvas = await html2canvas(poster, {
       scale: 2,
-      backgroundColor: report.theme_color || "#ff6a16",
+      backgroundColor: exportReport.theme_color || "#ff6a16",
       useCORS: true,
+      allowTaint: false,
+      imageTimeout: 30000,
       logging: false
     });
 
@@ -364,6 +369,43 @@ async function exportEditorPoster(report, exportBtn){
   }
 }
 
+async function buildExportReport(report){
+  const items = await Promise.all(
+    (report.weekly_report_items || []).map(async item => {
+      const imageUrl = await imageUrlToDataUrl(item.cover_image_url || "");
+      return {
+        ...item,
+        cover_image_url: imageUrl || item.cover_image_url || ""
+      };
+    })
+  );
+
+  return {
+    ...report,
+    weekly_report_items: items
+  };
+}
+
+async function imageUrlToDataUrl(url){
+  if(!url || url.startsWith("data:")) return url || "";
+
+  try{
+    const response = await fetch(url, { mode: "cors", cache: "force-cache" });
+    if(!response.ok) return url;
+
+    const blob = await response.blob();
+    return await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result || url);
+      reader.onerror = () => resolve(url);
+      reader.readAsDataURL(blob);
+    });
+  }catch(err){
+    console.warn("weekly export image fallback:", err);
+    return url;
+  }
+}
+
 function waitForPosterImages(root){
   const images = Array.from(root.querySelectorAll("img"));
   return Promise.all(images.map(img => {
@@ -373,6 +415,12 @@ function waitForPosterImages(root){
       img.onerror = resolve;
     });
   }));
+}
+
+function nextFrame(){
+  return new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
 }
 
 function renderEditorEvents(report, modal){
