@@ -1,9 +1,14 @@
 let weeklyPosterFontScale = 1.4;
+let weeklyPosterNameFontSize = 28;
 let weeklyPosterCardFontSize = 16;
 let weeklyPosterEventFontSize = 10;
 
 export function setPosterFontScale(value){
   weeklyPosterFontScale = Number(value) || 1;
+}
+
+export function setPosterNameFontSize(value){
+  weeklyPosterNameFontSize = Number(value) || 28;
 }
 
 export function setPosterCardFontSize(value){
@@ -55,7 +60,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
 
   wrap.innerHTML = `
   <div class="weekly-poster-canvas"
-    style="--poster-cols:${columns};--poster-card-width:${cardWidth}px;--poster-card-height:${cardHeight}px;--poster-card-gap:${gap}px;--poster-font:${weeklyPosterFontScale};--poster-card-font:${report.poster_card_font||weeklyPosterCardFontSize}px;--poster-event-font:${report.poster_event_font||weeklyPosterEventFontSize}px;width:${posterWidth}px;height:${posterHeight}px;">
+    style="--poster-cols:${columns};--poster-card-width:${cardWidth}px;--poster-card-height:${cardHeight}px;--poster-card-gap:${gap}px;--poster-font:${weeklyPosterFontScale};--poster-name-font:${report.poster_name_font||weeklyPosterNameFontSize}px;--poster-card-font:${report.poster_card_font||weeklyPosterCardFontSize}px;--poster-event-font:${report.poster_event_font||weeklyPosterEventFontSize}px;width:${posterWidth}px;height:${posterHeight}px;">
     <div class="weekly-poster-left">
       <div class="weekly-poster-date-vertical">${formatPosterDate(report.start_date,report.end_date)}</div>
       <div class="weekly-poster-title-vertical">本<br>周<br>创<br>作<br>报<br>告</div>
