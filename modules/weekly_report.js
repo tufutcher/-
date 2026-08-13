@@ -25,7 +25,7 @@ export async function openWeeklyReportManager(){
   <div class="weekly-manager-head">
     <div>
       <h2>周报生成器</h2>
-      <p>创建周报、录入成员打卡日期，并生成周报海报。</p>
+      <p>新建周报后，在编辑器里设置标题、日期、主题色和本周事件。</p>
     </div>
 
     <button id="weekly-close" type="button">
@@ -33,69 +33,18 @@ export async function openWeeklyReportManager(){
     </button>
   </div>
 
-  <div class="weekly-create-box">
-
-    <label>
-      标题
-      <input
-        id="weekly-title"
-        value="本周创作报告"
-      >
-    </label>
-
-    <label>
-      开始日期
-      <input
-        id="weekly-start"
-        type="date"
-      >
-    </label>
-
-    <label>
-      结束日期
-      <input
-        id="weekly-end"
-        type="date"
-      >
-    </label>
-
-    <label>
-      主题色
-      <input
-        id="weekly-color"
-        type="color"
-        value="#ff6a16"
-      >
-    </label>
-
-    <label>
-      本周事件
-      <textarea
-        id="weekly-events"
-        placeholder="写这周群里发生了什么。"
-      ></textarea>
-    </label>
-
-    <label>
-      贡献者
-      <input
-        id="weekly-contributors"
-        placeholder="例如：安夏、古鸟"
-      >
-    </label>
-
-    <button id="weekly-create" type="button">
-      新建周报
-    </button>
-
-  </div>
-
   <div class="weekly-list-head">
     <h3>已有周报</h3>
 
-    <button id="weekly-refresh" type="button">
-      刷新
-    </button>
+    <div class="weekly-list-actions">
+      <button id="weekly-create" type="button">
+        新建周报
+      </button>
+
+      <button id="weekly-refresh" type="button">
+        刷新
+      </button>
+    </div>
   </div>
 
   <div id="weekly-report-list"></div>
@@ -104,9 +53,7 @@ export async function openWeeklyReportManager(){
 `;
 
   document.body.appendChild(modal);
-
   bindWeeklyBaseEvents(modal);
-
   await renderWeeklyReportList();
 }
 
@@ -247,53 +194,17 @@ function bindWeeklyListEvents(){
 }
 
 async function handleCreateWeeklyReport(){
-  const title =
-    document.getElementById("weekly-title").value.trim() ||
-    "本周创作报告";
-
-  const startDate =
-    document.getElementById("weekly-start").value;
-
-  const endDate =
-    document.getElementById("weekly-end").value;
-
-  const themeColor =
-    document.getElementById("weekly-color").value;
-
-  const eventNotes =
-    document.getElementById("weekly-events").value;
-
-  const contributors =
-    document.getElementById("weekly-contributors").value;
-
-  if(!startDate || !endDate){
-    window.showToast?.(
-      "请选择日期",
-      "失败",
-      "error"
-    );
-    return;
-  }
-
-  if(startDate > endDate){
-    window.showToast?.(
-      "开始日期不能晚于结束日期",
-      "失败",
-      "error"
-    );
-    return;
-  }
+  const startDate = formatDate(new Date());
+  const endDate = addDays(startDate, 6);
 
   const result = await createWeeklyReport(
     window.__sb,
     {
-      title,
+      title: "本周创作报告",
       start_date: startDate,
       end_date: endDate,
-      theme_color: themeColor,
-      event_notes: eventNotes,
-      contributors,
-
+      theme_color: "#ff6a16",
+      event_notes: "",
       poster_columns: 9,
       poster_name_font: 28,
       poster_card_font: 16,
@@ -301,7 +212,7 @@ async function handleCreateWeeklyReport(){
     }
   );
 
-  if(result.error){
+  if(result.error || !result.data){
     window.showToast?.(
       "创建失败",
       "错误",
@@ -310,6 +221,13 @@ async function handleCreateWeeklyReport(){
     return;
   }
 
+  const report = {
+    ...result.data,
+    weekly_report_items: []
+  };
+
+  weeklyReportsCache.unshift(report);
+
   window.showToast?.(
     "周报创建成功",
     "完成",
@@ -317,6 +235,21 @@ async function handleCreateWeeklyReport(){
   );
 
   await renderWeeklyReportList();
+  openWeeklyEditor(report);
+}
+
+function addDays(dateString, amount){
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + amount);
+  return formatDate(date);
+}
+
+function formatDate(date){
+  return date.getFullYear() +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0");
 }
 
 function escapeHtml(value){
