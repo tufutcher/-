@@ -1,0 +1,27 @@
+/* Weekly poster final visual overrides */
+
+.weekly-poster-canvas{
+  width:max-content !important;
+  grid-template-columns:205px max-content 18px !important;
+  padding:42px 12px 42px 42px !important;
+  column-gap:14px !important;
+}
+
+.poster-right{
+  align-self:end;
+  justify-self:center;
+  text-align:center;
+  font-size:14px;
+  font-weight:900;
+  line-height:1.08;
+  letter-spacing:1px;
+  color:rgba(255,255,255,.95);
+}
+
+.weekly-days-low{
+  background-image:linear-gradient(90deg,#ffffff,#ffffff) !important;
+}
+
+.weekly-days-perfect{
+  background-image:linear-gradient(90deg,#62b6ff,#7b61ff,#c56bff) !important;
+}
