@@ -359,15 +359,25 @@ async function exportEditorPoster(report, modal, exportBtn){
   exportBtn.disabled = true;
   exportBtn.textContent = "生成中...";
 
+  const stage = document.createElement("div");
+  stage.className = "weekly-export-stage";
+
+  const clone = poster.cloneNode(true);
+  clone.classList.add("is-exporting");
+
+  stage.appendChild(clone);
+  document.body.appendChild(stage);
+
   try{
-    poster.classList.add("is-exporting");
+    await waitForPosterImages(clone);
 
     const canvas = await html2canvas(
-      poster,
+      clone,
       {
         scale: 2,
         backgroundColor: report.theme_color || "#ff6a16",
-        useCORS: true
+        useCORS: true,
+        logging: false
       }
     );
 
@@ -391,11 +401,32 @@ async function exportEditorPoster(report, modal, exportBtn){
       "error"
     );
   }finally{
-    poster.classList.remove("is-exporting");
+    stage.remove();
 
     exportBtn.disabled = false;
     exportBtn.textContent = "导出图片";
   }
+}
+
+function waitForPosterImages(root){
+  const images = Array.from(root.querySelectorAll("img"));
+
+  if(!images.length){
+    return Promise.resolve();
+  }
+
+  return Promise.all(
+    images.map(img => {
+      if(img.complete){
+        return Promise.resolve();
+      }
+
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    })
+  );
 }
 
 function renderEditorMembers(report){
