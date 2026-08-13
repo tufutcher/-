@@ -20,7 +20,6 @@ let editorPanel = "members";
 
 export function openWeeklyEditor(report){
   ensureWeeklyEditorPatchCss();
-
   document.getElementById("weekly-editor")?.remove();
 
   report.title = report.title || "本周创作报告";
@@ -90,7 +89,6 @@ export function openWeeklyEditor(report){
   <main class="weekly-editor-main">
     <div class="weekly-editor-settings-panel">
       <div class="weekly-settings-fields">
-        <label class="settings-title-field"><span>标题</span><input id="editor-title" value="${escapeHtml(report.title)}"></label>
         <label><span>开始</span><input id="editor-start" type="date" value="${escapeHtml(report.start_date)}"></label>
         <label><span>结束</span><input id="editor-end" type="date" value="${escapeHtml(report.end_date)}"></label>
         <label class="weekly-color-field"><span>主题色</span><input id="editor-theme-color" type="color" value="${escapeHtml(report.theme_color)}"></label>
@@ -115,7 +113,7 @@ export function openWeeklyEditor(report){
   renderEditorEvents(report, modal);
   renderEditorMembers(report);
   renderEditorPoster(report);
-  bindEditorEvents(report, modal, escHandler);
+  bindEditorEvents(report, modal);
 }
 
 function ensureWeeklyEditorPatchCss(){
@@ -136,36 +134,40 @@ function bindEditorEvents(report, modal){
   bindPanelTabs(modal);
   bindMeta(report, modal);
 
-  bindRange(modal, "#editor-columns", value => {
+  bindControl(modal, "#editor-columns", "change", value => {
     editorColumns = Number(value) || 9;
     report.poster_columns = editorColumns;
-  }, "change");
+    renderEditorPoster(report);
+  });
 
-  bindRange(modal, "#editor-name-font", value => {
+  bindControl(modal, "#editor-name-font", "input", value => {
     editorNameFont = Number(value) || 28;
     report.poster_name_font = editorNameFont;
     setPosterNameFontSize(editorNameFont);
     setText("editor-name-font-value", editorNameFont);
+    renderEditorPoster(report);
   });
 
-  bindRange(modal, "#editor-card-font", value => {
+  bindControl(modal, "#editor-card-font", "input", value => {
     editorCardFont = Number(value) || 16;
     report.poster_card_font = editorCardFont;
     setPosterCardFontSize(editorCardFont);
     setText("editor-card-font-value", editorCardFont);
+    renderEditorPoster(report);
   });
 
-  bindRange(modal, "#editor-event-font", value => {
+  bindControl(modal, "#editor-event-font", "input", value => {
     editorEventFont = Number(value) || 10;
     report.poster_event_font = editorEventFont;
     setPosterEventFontSize(editorEventFont);
     setText("editor-event-font-value", editorEventFont);
+    renderEditorPoster(report);
   });
 
   modal.querySelector("#editor-export")?.addEventListener("click", async e => {
     report.event_notes = collectEditorEvents(report, modal);
     renderEditorPoster(report);
-    await exportEditorPoster(report, modal, e.currentTarget);
+    await exportEditorPoster(report, e.currentTarget);
   });
 
   modal.querySelector("#editor-save")?.addEventListener("click", async e => {
@@ -214,36 +216,20 @@ function bindPanelTabs(modal){
   });
 }
 
-function bindRange(modal, selector, apply, eventName = "input"){
+function bindControl(modal, selector, eventName, apply){
   const el = modal.querySelector(selector);
   if(!el) return;
-  el.addEventListener(eventName, () => {
-    apply(el.value);
-    renderEditorPosterFromModal(modal);
-  });
+  el.addEventListener(eventName, () => apply(el.value));
 }
 
 function bindMeta(report, modal){
-  const title = modal.querySelector("#editor-title");
   const start = modal.querySelector("#editor-start");
   const end = modal.querySelector("#editor-end");
   const color = modal.querySelector("#editor-theme-color");
   const events = modal.querySelector("#editor-event-list");
 
-  if(title){
-    title.oninput = () => {
-      report.title = title.value.trim() || "本周创作报告";
-      renderEditorPoster(report);
-    };
-  }
-
-  if(start){
-    start.onchange = () => updateDateRange(report, modal, start, end);
-  }
-
-  if(end){
-    end.onchange = () => updateDateRange(report, modal, start, end);
-  }
+  if(start) start.onchange = () => updateDateRange(report, modal, start, end);
+  if(end) end.onchange = () => updateDateRange(report, modal, start, end);
 
   if(color){
     color.oninput = () => {
@@ -332,10 +318,7 @@ async function saveEditorReport(report, modal, save){
   }
 }
 
-async function exportEditorPoster(report, modal, exportBtn){
-  const poster = modal.querySelector(".weekly-poster-canvas");
-  if(!poster) return;
-
+async function exportEditorPoster(report, exportBtn){
   if(typeof html2canvas === "undefined"){
     window.showToast?.("缺少图片导出组件", "失败", "error");
     return;
@@ -346,15 +329,20 @@ async function exportEditorPoster(report, modal, exportBtn){
 
   const stage = document.createElement("div");
   stage.className = "weekly-export-stage";
-
-  const clone = poster.cloneNode(true);
-  clone.classList.add("is-exporting");
-  stage.appendChild(clone);
   document.body.appendChild(stage);
 
   try{
-    await waitForPosterImages(clone);
-    const canvas = await html2canvas(clone, {
+    renderWeeklyPoster(report, stage, { columns: report.poster_columns || editorColumns });
+
+    const poster = stage.querySelector(".weekly-poster-canvas");
+    if(!poster){
+      throw new Error("poster not found");
+    }
+
+    poster.classList.add("is-exporting");
+    await waitForPosterImages(poster);
+
+    const canvas = await html2canvas(poster, {
       scale: 2,
       backgroundColor: report.theme_color || "#ff6a16",
       useCORS: true,
@@ -379,7 +367,7 @@ async function exportEditorPoster(report, modal, exportBtn){
 function waitForPosterImages(root){
   const images = Array.from(root.querySelectorAll("img"));
   return Promise.all(images.map(img => {
-    if(img.complete) return Promise.resolve();
+    if(img.complete && img.naturalWidth > 0) return Promise.resolve();
     return new Promise(resolve => {
       img.onload = resolve;
       img.onerror = resolve;
@@ -475,7 +463,7 @@ function renderEditorMembers(report){
 
   <label>代表图
     <div class="editor-cover-box">
-      ${item.cover_image_url ? `<img src="${item.cover_image_url}">` : `<div>暂无图片</div>`}
+      ${item.cover_image_url ? `<img src="${escapeAttr(item.cover_image_url)}">` : `<div>暂无图片</div>`}
       <button data-upload-index="${index}" type="button">上传</button>
     </div>
   </label>
@@ -552,15 +540,7 @@ function bindEditorMemberEvents(report){
   });
 }
 
-function renderEditorPosterFromModal(modal){
-  const poster = modal.querySelector("#editor-poster");
-  if(!poster) return;
-  const report = window.__activeWeeklyReport;
-  if(report) renderEditorPoster(report);
-}
-
 function renderEditorPoster(report){
-  window.__activeWeeklyReport = report;
   const box = document.getElementById("editor-poster");
   if(!box) return;
   renderWeeklyPoster(report, box, { columns: report.poster_columns || editorColumns });
@@ -623,6 +603,10 @@ function getReportYear(report){
 function normalizeColor(value){
   const color = String(value || "").trim();
   return /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#ff6a16";
+}
+
+function escapeAttr(value){
+  return escapeHtml(value).replaceAll("`", "&#096;");
 }
 
 function escapeHtml(value){
