@@ -252,3 +252,121 @@
   font-weight:900;
   box-shadow:0 14px 34px rgba(0,0,0,.16);
 }
+
+/* =========================
+   Custom tag controls polish
+   Keep original tag-row visual rhythm
+   ========================= */
+
+#checkin-modal .ci-tag-options,
+#edit-modal .ci-tag-options{
+  align-items:center;
+}
+
+#checkin-modal .ci-custom-tag-form,
+#edit-modal .ci-custom-tag-form{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  width:auto;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+
+#checkin-modal .ci-custom-tag-input,
+#edit-modal .ci-custom-tag-input{
+  width:76px !important;
+  min-width:76px;
+  height:auto !important;
+  margin:0 !important;
+  padding:6px 10px !important;
+  border-radius:999px !important;
+  border:1px dashed rgba(0,0,0,.18) !important;
+  background:#fff !important;
+  color:#111;
+  font-family:inherit;
+  font-size:13px !important;
+  line-height:1 !important;
+  box-sizing:border-box;
+  outline:none;
+}
+
+#checkin-modal .ci-custom-tag-input::placeholder,
+#edit-modal .ci-custom-tag-input::placeholder{
+  color:#777;
+}
+
+#checkin-modal .ci-custom-tag-form button,
+#edit-modal .ci-custom-tag-form button{
+  width:auto !important;
+  min-width:0 !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:6px 10px !important;
+  border:1px solid rgba(0,0,0,.12) !important;
+  border-radius:999px !important;
+  background:#fff !important;
+  color:#111 !important;
+  font-size:13px !important;
+  font-weight:700;
+  line-height:1 !important;
+  box-shadow:none !important;
+}
+
+#checkin-modal .ci-custom-tag-form button:hover,
+#edit-modal .ci-custom-tag-form button:hover{
+  background:#111 !important;
+  color:#fff !important;
+}
+
+#checkin-modal .preset-tag.custom,
+#edit-modal .preset-tag.custom{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding-right:5px;
+}
+
+#checkin-modal .ci-custom-tag-delete,
+#edit-modal .ci-custom-tag-delete{
+  width:16px !important;
+  height:16px !important;
+  min-width:16px !important;
+  max-width:16px !important;
+  margin:0 0 0 2px !important;
+  padding:0 !important;
+  border:none !important;
+  border-radius:50% !important;
+  background:rgba(0,0,0,.08) !important;
+  color:inherit !important;
+  font-size:12px !important;
+  line-height:1 !important;
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  box-shadow:none !important;
+}
+
+#checkin-modal .preset-tag.on .ci-custom-tag-delete,
+#edit-modal .preset-tag.on .ci-custom-tag-delete{
+  background:rgba(255,255,255,.24) !important;
+  color:#fff !important;
+}
+
+@media (max-width:520px){
+  #checkin-modal .ci-custom-tag-input,
+  #edit-modal .ci-custom-tag-input{
+    width:70px !important;
+    min-width:70px;
+    font-size:12px !important;
+  }
+
+  #checkin-modal .ci-custom-tag-form button,
+  #edit-modal .ci-custom-tag-form button{
+    padding:6px 9px !important;
+    font-size:12px !important;
+  }
+}
