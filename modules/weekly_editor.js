@@ -286,6 +286,85 @@ report
     };
   }
 
+  const exportBtn = modal.querySelector("#editor-export");
+
+if(exportBtn){
+
+  exportBtn.onclick = async () => {
+
+    const poster = modal.querySelector(".weekly-poster-canvas");
+
+    if(!poster){
+      return;
+    }
+
+    if(typeof html2canvas === "undefined"){
+      window.showToast?.(
+        "缺少图片导出组件",
+        "失败",
+        "error"
+      );
+      return;
+    }
+
+    exportBtn.disabled = true;
+    exportBtn.textContent = "生成中...";
+
+    try{
+
+      poster.classList.add("is-exporting");
+
+      const canvas = await html2canvas(
+        poster,
+        {
+          scale: 2,
+          backgroundColor: report.theme_color || "#ff6a16",
+          useCORS: true
+        }
+      );
+
+      poster.classList.remove("is-exporting");
+
+      const link = document.createElement("a");
+
+      link.download = "weekly-report.png";
+
+      link.href = canvas.toDataURL("image/png");
+
+      link.click();
+
+      window.showToast?.(
+        "周报图片已生成",
+        "完成",
+        "success"
+      );
+
+    }catch(err){
+
+      console.error(
+        "export weekly poster error:",
+        err
+      );
+
+      window.showToast?.(
+        "图片生成失败",
+        "错误",
+        "error"
+      );
+
+    }finally{
+
+      poster.classList.remove("is-exporting");
+
+      exportBtn.disabled = false;
+      exportBtn.textContent = "导出图片";
+
+    }
+
+  };
+
+}
+
   const save = modal.querySelector("#editor-save");
   if(save){
     save.onclick = async () => {
