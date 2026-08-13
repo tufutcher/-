@@ -399,7 +399,7 @@ word-break:break-word;
   position:absolute;
   left:0;
   right:0;
-  bottom:-2px;
+  bottom:-4px;
   z-index:40;
   text-align:center;
   color:white;
@@ -412,7 +412,7 @@ word-break:break-word;
   flex-direction:column;
   align-items:center;
   gap:0;
-  margin-bottom:6;
+  margin-bottom:11;
 }
 
 .weekly-poster-badge-icon{
