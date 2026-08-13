@@ -649,3 +649,20 @@
   transform:none;
   margin-bottom:0;
 }
+
+/* 导出：避免编辑器缩放影响 html2canvas */
+.weekly-export-stage{
+  position:fixed;
+  left:-99999px;
+  top:0;
+  width:max-content;
+  height:max-content;
+  pointer-events:none;
+  opacity:1;
+  z-index:-1;
+}
+
+.weekly-export-stage .weekly-poster-canvas{
+  transform:none !important;
+  margin:0 !important;
+}
