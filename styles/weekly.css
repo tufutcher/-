@@ -261,8 +261,10 @@ padding:40px;
 
 /* 左侧标题区 */
 .weekly-poster-left{
-  position:relative;
-  height:100%;
+position:relative;
+display:flex;
+flex-direction:column;
+height:100%;
 }
 
 .weekly-poster-date-vertical{
@@ -291,19 +293,12 @@ padding:40px;
 
 /* 左下事件框 */
 .weekly-poster-event-box{
-position:absolute;
-left:0;
-top:250px;
-bottom:0;
+margin-top:auto;
 width:178px;
-border:
-2px dotted rgba(255,255,255,.95);
+border:2px dotted rgba(255,255,255,.95);
 border-radius:8px;
-padding:
-18px 14px;
+padding:18px 14px;
 box-sizing:border-box;
-display:flex;
-flex-direction:column;
 }
 
 .weekly-poster-event-title{
@@ -319,23 +314,12 @@ flex-direction:column;
 }
 
 .weekly-poster-event-content{
-font-size:
-var(--poster-event-font,10px);
-font-weight:800;
+margin-top:12px;
+font-size:var(--poster-event-font,10px);
 line-height:1.45;
-word-break:break-word;
+font-weight:400;
 white-space:pre-wrap;
-position:absolute;
-
-left:16px;
-right:44px;
-
-top:18px;
-
-bottom:16px;
-
-overflow:hidden;
-padding-right:20px;
+word-break:break-word;
 }
 
 
