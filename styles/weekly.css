@@ -357,6 +357,7 @@ word-break:break-word;
 
 .weekly-poster-img{
   position:relative;
+  z-index:3;
   background:#eee;
   overflow:visible;
   min-height:0;
@@ -398,16 +399,11 @@ word-break:break-word;
   position:absolute;
   left:0;
   right:0;
-  bottom:-22px;
-  z-index:30;
-
+  bottom:-8px;
+  z-index:40;
   text-align:center;
-
   color:white;
-
-  text-shadow:
-  0 2px 8px rgba(0,0,0,.65);
-
+  text-shadow:none;
   pointer-events:none;
 }
 
@@ -415,21 +411,25 @@ word-break:break-word;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:2px;
-  margin-bottom:2px;
+  gap:0;
+  margin-bottom:0;
 }
 
 .weekly-poster-badge-icon{
-  font-size:26px;
+  font-size:18px;
   line-height:1;
-  filter:drop-shadow(0 2px 4px rgba(0,0,0,.45));
+  filter:none;
 }
 
 .weekly-poster-name{
   font-size:calc((var(--poster-card-font,16px) + 8px) * var(--poster-font-scale,1));
   font-weight:1000;
-  line-height:.86;
-  letter-spacing:-.5px;
+  line-height:.82;
+  letter-spacing:-.8px;
+  color:#fff;
+  text-shadow:none;
+  -webkit-text-stroke:.55px #fff;
+  paint-order:stroke fill;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -447,6 +447,8 @@ justify-content:center;
 align-items:center;
 gap:3px;
 overflow:hidden;
+position:relative;
+z-index:1;
 }
 
 .weekly-poster-card-text p{
