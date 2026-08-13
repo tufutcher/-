@@ -23,14 +23,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   if(!wrap) return;
 
   const items = report.weekly_report_items || [];
-  const columns = Math.max(
-    1,
-    Math.min(
-      Number(report.poster_columns || options.columns || 9),
-      items.length || 1
-    )
-  );
-
+  const columns = Math.max(1, Math.min(Number(report.poster_columns || options.columns || 9), items.length || 1));
   const cardWidth = 88;
   const cardHeight = 318;
   const gap = 7;
@@ -47,9 +40,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     return `
     <div class="weekly-poster-card">
       <div class="weekly-poster-img">
-        ${item.cover_image_url
-          ? `<img src="${escapeAttr(item.cover_image_url)}" crossorigin="anonymous" referrerpolicy="no-referrer" loading="eager" decoding="sync">`
-          : `<div class="weekly-poster-empty-img">暂无图片</div>`}
+        ${item.cover_image_url ? `<img src="${escapeAttr(item.cover_image_url)}" crossorigin="anonymous" loading="eager">` : `<div class="weekly-poster-empty-img">暂无图片</div>`}
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
           ${badge ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon">${badge}</span></div>` : ""}
@@ -62,9 +53,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
         <strong>获得称号</strong>
         <b>「${escapeHtml(item.nickname_title || "继续创作中")}」</b>
       </div>
-      <div class="weekly-poster-date-line">
-        ${renderMiniDateLine(report, item)}
-      </div>
+      <div class="weekly-poster-date-line">${renderMiniDateLine(report, item)}</div>
     </div>`;
   }).join("");
 
@@ -77,16 +66,12 @@ export function renderWeeklyPoster(report, wrap, options = {}){
       ${eventNotes ? `
       <div class="weekly-poster-event-box">
         <div class="weekly-poster-event-title" aria-label="这周群里发生了啥？！">
-          <span>这周群里</span>
-          <span>发生了</span>
-          <span>啥？！</span>
+          <span>这周群里</span><span>发生了</span><span>啥？！</span>
         </div>
         <div class="weekly-poster-event-content">${formatEventText(eventNotes)}</div>
       </div>` : ""}
     </div>
-    <div class="weekly-poster-main">
-      <div class="weekly-poster-grid">${cards}</div>
-    </div>
+    <div class="weekly-poster-main"><div class="weekly-poster-grid">${cards}</div></div>
     <div class="poster-right">不<br>画<br>画<br>真<br>的<br>要<br>完<br>了</div>
   </div>`;
 }
@@ -94,12 +79,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
 function renderMiniDateLine(report, item){
   const dates = getDateRange(report.start_date, report.end_date);
   const checked = item.checkin_dates || [];
-
-  return dates.map(date => `
-    <span class="${checked.includes(date) ? "active" : ""}">
-      ${Number(date.slice(-2))}
-    </span>
-  `).join("");
+  return dates.map(date => `<span class="${checked.includes(date) ? "active" : ""}">${Number(date.slice(-2))}</span>`).join("");
 }
 
 function getDateRange(start, end){
@@ -108,18 +88,12 @@ function getDateRange(start, end){
 
   let current = new Date(start + "T00:00:00");
   const last = new Date(end + "T00:00:00");
-
-  if(Number.isNaN(current.getTime()) || Number.isNaN(last.getTime())){
-    return result;
-  }
+  if(Number.isNaN(current.getTime()) || Number.isNaN(last.getTime())) return result;
 
   while(current <= last){
-    result.push(
-      `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}-${String(current.getDate()).padStart(2, "0")}`
-    );
+    result.push(`${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, "0")}-${String(current.getDate()).padStart(2, "0")}`);
     current.setDate(current.getDate() + 1);
   }
-
   return result;
 }
 
@@ -139,9 +113,11 @@ function getWeeklyDayClass(days){
 }
 
 function formatPosterDate(start, end){
-  return [start, end]
-    .map(date => String(date || "").split("-").map(part => `<span>${escapeHtml(part)}</span>`).join(""))
-    .join('<span class="date-separator">—</span>');
+  return `${formatDotDate(start)} - ${formatDotDate(end)}`;
+}
+
+function formatDotDate(date){
+  return String(date || "").replaceAll("-", ".");
 }
 
 function formatEventText(text){
