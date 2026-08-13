@@ -55,75 +55,98 @@ export function openWeeklyEditor(report){
 
   document.addEventListener("keydown", escHandler);
 
-  modal.innerHTML = `
+modal.innerHTML = `
 <div class="weekly-editor-layout">
 
-  <div class="weekly-editor-sidebar">
-    <h2>编辑成员</h2>
+  <aside class="weekly-editor-sidebar">
 
-    <section>
-      <div id="editor-member-list"></div>
+    <div class="weekly-editor-sidebar-head">
+      <h2>编辑成员</h2>
+      <p>修改打卡日期、代表图、总结和称号。</p>
+    </div>
 
-      <button id="editor-add-member" type="button">
-        ＋ 添加成员
-      </button>
-    </section>
+    <div id="editor-member-list"></div>
 
-    <button id="editor-save" type="button">
-      保存周报
+    <button
+      id="editor-add-member"
+      class="editor-add-member"
+      type="button"
+    >
+      ＋ 添加成员
     </button>
-  </div>
 
-  <div class="weekly-editor-main">
+  </aside>
+
+  <main class="weekly-editor-main">
 
     <div class="weekly-editor-toolbar">
 
-      <label>
-        每行人数
-        <select id="editor-columns">
-          ${renderColumnOptions(editorColumns)}
-        </select>
-      </label>
+      <div class="weekly-toolbar-controls">
 
-      <label>
-        名字字号
-        <input
-          type="range"
-          id="editor-name-font"
-          min="16"
-          max="48"
-          value="${editorNameFont}"
+        <label>
+          <span>每行人数</span>
+          <select id="editor-columns">
+            ${renderColumnOptions(editorColumns)}
+          </select>
+        </label>
+
+        <label>
+          <span>名字字号</span>
+          <input
+            type="range"
+            id="editor-name-font"
+            min="16"
+            max="48"
+            value="${editorNameFont}"
+          >
+          <em id="editor-name-font-value">${editorNameFont}</em>
+        </label>
+
+        <label>
+          <span>卡片正文</span>
+          <input
+            type="range"
+            id="editor-card-font"
+            min="10"
+            max="20"
+            value="${editorCardFont}"
+          >
+          <em id="editor-card-font-value">${editorCardFont}</em>
+        </label>
+
+        <label>
+          <span>事件字体</span>
+          <input
+            type="range"
+            id="editor-event-font"
+            min="1"
+            max="20"
+            value="${editorEventFont}"
+          >
+          <em id="editor-event-font-value">${editorEventFont}</em>
+        </label>
+
+      </div>
+
+      <div class="weekly-toolbar-actions">
+
+        <button
+          id="editor-save"
+          class="editor-save"
+          type="button"
         >
-        <span id="editor-name-font-value">${editorNameFont}</span>
-      </label>
+          保存周报
+        </button>
 
-      <label>
-        卡片正文
-        <input
-          type="range"
-          id="editor-card-font"
-          min="10"
-          max="20"
-          value="${editorCardFont}"
+        <button
+          id="editor-export"
+          class="editor-export"
+          type="button"
         >
-        <span id="editor-card-font-value">${editorCardFont}</span>
-      </label>
+          导出图片
+        </button>
 
-      <label>
-        事件字体
-        <input
-          type="range"
-          id="editor-event-font"
-          min="1"
-          max="20"
-          value="${editorEventFont}"
-        >
-        <span id="editor-event-font-value">${editorEventFont}</span>
-      </label>
-
-      <button id="editor-export" type="button">
-        导出图片
-      </button>
+      </div>
 
     </div>
 
@@ -131,7 +154,7 @@ export function openWeeklyEditor(report){
       <div id="editor-poster"></div>
     </div>
 
-  </div>
+  </main>
 
 </div>
 `;
