@@ -7,6 +7,27 @@
   column-gap:14px !important;
 }
 
+.weekly-poster-date-vertical{
+  writing-mode:horizontal-tb !important;
+  text-orientation:mixed !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  gap:1px !important;
+  line-height:1 !important;
+  letter-spacing:0 !important;
+  font-size:12px !important;
+}
+
+.weekly-poster-date-vertical span{
+  display:block !important;
+  white-space:nowrap !important;
+}
+
+.weekly-poster-date-vertical .date-separator{
+  margin:2px 0 !important;
+}
+
 .poster-right{
   align-self:end;
   justify-self:center;
@@ -38,8 +59,23 @@
   padding-right:0 !important;
 }
 
+.weekly-poster-days{
+  -webkit-background-clip:text !important;
+  background-clip:text !important;
+  color:transparent !important;
+  -webkit-text-fill-color:transparent !important;
+}
+
 .weekly-days-low{
   background-image:linear-gradient(90deg,#ffffff,#ffffff) !important;
+}
+
+.weekly-days-star{
+  background-image:linear-gradient(90deg,#ffe76a,#ffb100) !important;
+}
+
+.weekly-days-fire{
+  background-image:linear-gradient(90deg,#ff4d00,#ffd36a) !important;
 }
 
 .weekly-days-perfect{
