@@ -23,6 +23,17 @@ export function openWeeklyEditor(report){
     old.remove();
   }
 
+  if(!report.start_date){
+    report.start_date = formatDate(new Date());
+  }
+
+  if(!report.end_date){
+    report.end_date = addDays(report.start_date, 6);
+  }
+
+  report.title = report.title || "本周创作报告";
+  report.theme_color = normalizeColor(report.theme_color);
+
   editorColumns = Number(report.poster_columns) || 9;
   editorNameFont = Number(report.poster_name_font) || 28;
   editorCardFont = Number(report.poster_card_font) || 16;
@@ -55,11 +66,10 @@ export function openWeeklyEditor(report){
 
   document.addEventListener("keydown", escHandler);
 
-modal.innerHTML = `
+  modal.innerHTML = `
 <div class="weekly-editor-layout">
 
   <aside class="weekly-editor-sidebar">
-
     <div class="weekly-editor-sidebar-head">
       <h2>编辑成员</h2>
       <p>修改打卡日期、代表图、总结和称号。</p>
@@ -74,15 +84,12 @@ modal.innerHTML = `
     >
       ＋ 添加成员
     </button>
-
   </aside>
 
   <main class="weekly-editor-main">
 
     <div class="weekly-editor-toolbar">
-
       <div class="weekly-toolbar-controls">
-
         <label>
           <span>每行人数</span>
           <select id="editor-columns">
@@ -125,11 +132,9 @@ modal.innerHTML = `
           >
           <em id="editor-event-font-value">${editorEventFont}</em>
         </label>
-
       </div>
 
       <div class="weekly-toolbar-actions">
-
         <button
           id="editor-save"
           class="editor-save"
@@ -145,9 +150,55 @@ modal.innerHTML = `
         >
           导出图片
         </button>
+      </div>
+    </div>
 
+    <div class="weekly-editor-report-panel">
+      <div class="weekly-report-fields">
+        <label>
+          <span>标题</span>
+          <input
+            id="editor-title"
+            value="${escapeHtml(report.title)}"
+          >
+        </label>
+
+        <label>
+          <span>开始日期</span>
+          <input
+            id="editor-start"
+            type="date"
+            value="${escapeHtml(report.start_date)}"
+          >
+        </label>
+
+        <label>
+          <span>结束日期</span>
+          <input
+            id="editor-end"
+            type="date"
+            value="${escapeHtml(report.end_date)}"
+          >
+        </label>
+
+        <label class="weekly-color-field">
+          <span>主题色</span>
+          <input
+            id="editor-theme-color"
+            type="color"
+            value="${escapeHtml(report.theme_color)}"
+          >
+        </label>
       </div>
 
+      <div class="weekly-event-editor">
+        <div class="weekly-event-editor-head">
+          <strong>本周事件</strong>
+          <span>按日期填写；空日期不会显示在海报里。</span>
+        </div>
+
+        <div id="editor-event-list"></div>
+      </div>
     </div>
 
     <div class="weekly-editor-preview">
@@ -161,6 +212,7 @@ modal.innerHTML = `
 
   document.body.appendChild(modal);
 
+  renderEditorEvents(report, modal);
   renderEditorMembers(report);
   renderEditorPoster(report);
   bindEditorEvents(report, modal);
@@ -172,77 +224,64 @@ function closeEditor(modal, escHandler){
 }
 
 function bindEditorEvents(report, modal){
-  const columns = modal.querySelector("#editor-columns");
+  bindReportMetaEvents(report, modal);
 
+  const columns = modal.querySelector("#editor-columns");
   if(columns){
     columns.onchange = () => {
       const value = Number(columns.value) || 9;
-
       editorColumns = value;
       report.poster_columns = value;
-
       renderEditorPoster(report);
     };
   }
 
   const nameFont = modal.querySelector("#editor-name-font");
-
   if(nameFont){
     nameFont.oninput = () => {
       const value = Number(nameFont.value) || 28;
-
       editorNameFont = value;
       report.poster_name_font = value;
-
       setPosterNameFontSize(value);
       setText("editor-name-font-value", value);
-
       renderEditorPoster(report);
     };
   }
 
   const cardFont = modal.querySelector("#editor-card-font");
-
   if(cardFont){
     cardFont.oninput = () => {
       const value = Number(cardFont.value) || 16;
-
       editorCardFont = value;
       report.poster_card_font = value;
-
       setPosterCardFontSize(value);
       setText("editor-card-font-value", value);
-
       renderEditorPoster(report);
     };
   }
 
   const eventFont = modal.querySelector("#editor-event-font");
-
   if(eventFont){
     eventFont.oninput = () => {
       const value = Number(eventFont.value) || 10;
-
       editorEventFont = value;
       report.poster_event_font = value;
-
       setPosterEventFontSize(value);
       setText("editor-event-font-value", value);
-
       renderEditorPoster(report);
     };
   }
 
   const exportBtn = modal.querySelector("#editor-export");
-
   if(exportBtn){
     exportBtn.onclick = async () => {
+      report.event_notes = collectEditorEvents(report, modal);
+      renderEditorPoster(report);
       await exportEditorPoster(report, modal, exportBtn);
     };
   }
 
   const add = modal.querySelector("#editor-add-member");
-
   if(add){
     add.onclick = async () => {
       const name = prompt("请输入成员名字");
@@ -265,9 +304,7 @@ function bindEditorEvents(report, modal){
         return;
       }
 
-      report.weekly_report_items =
-        report.weekly_report_items || [];
-
+      report.weekly_report_items = report.weekly_report_items || [];
       report.weekly_report_items.push({
         member_id: member.id,
         display_name: member.display_name,
@@ -286,57 +323,164 @@ function bindEditorEvents(report, modal){
   }
 
   const save = modal.querySelector("#editor-save");
-
   if(save){
     save.onclick = async () => {
-      save.disabled = true;
-      save.textContent = "保存中...";
-
-      sortItems(report);
-
-      const settingsResult = await updateWeeklyReport(
-        window.__sb,
-        report.id,
-        {
-          poster_columns: editorColumns,
-          poster_name_font: editorNameFont,
-          poster_card_font: editorCardFont,
-          poster_event_font: editorEventFont
-        }
-      );
-
-      if(settingsResult.data){
-        Object.assign(report, settingsResult.data);
-      }
-
-      const result = await saveWeeklyReportItems(
-        window.__sb,
-        report.id,
-        report.weekly_report_items || []
-      );
-
-      if(result){
-        report.weekly_report_items = result;
-
-        window.showToast?.(
-          "周报保存成功",
-          "完成",
-          "success"
-        );
-
-        renderEditorMembers(report);
-        renderEditorPoster(report);
-      }else{
-        window.showToast?.(
-          "保存失败",
-          "错误",
-          "error"
-        );
-      }
-
-      save.disabled = false;
-      save.textContent = "保存周报";
+      await saveEditorReport(report, modal, save);
     };
+  }
+}
+
+function bindReportMetaEvents(report, modal){
+  const titleInput = modal.querySelector("#editor-title");
+  const startInput = modal.querySelector("#editor-start");
+  const endInput = modal.querySelector("#editor-end");
+  const colorInput = modal.querySelector("#editor-theme-color");
+  const eventList = modal.querySelector("#editor-event-list");
+
+  if(titleInput){
+    titleInput.oninput = () => {
+      report.title = titleInput.value.trim() || "本周创作报告";
+    };
+  }
+
+  if(startInput){
+    startInput.onchange = () => {
+      report.event_notes = collectEditorEvents(report, modal);
+      report.start_date = startInput.value;
+
+      if(report.end_date && report.start_date > report.end_date){
+        report.end_date = report.start_date;
+        if(endInput){
+          endInput.value = report.end_date;
+        }
+      }
+
+      renderEditorEvents(report, modal);
+      renderEditorMembers(report);
+      renderEditorPoster(report);
+    };
+  }
+
+  if(endInput){
+    endInput.onchange = () => {
+      report.event_notes = collectEditorEvents(report, modal);
+      report.end_date = endInput.value;
+
+      if(report.start_date && report.start_date > report.end_date){
+        report.start_date = report.end_date;
+        if(startInput){
+          startInput.value = report.start_date;
+        }
+      }
+
+      renderEditorEvents(report, modal);
+      renderEditorMembers(report);
+      renderEditorPoster(report);
+    };
+  }
+
+  if(colorInput){
+    colorInput.oninput = () => {
+      report.theme_color = normalizeColor(colorInput.value);
+      renderEditorPoster(report);
+    };
+  }
+
+  if(eventList){
+    eventList.oninput = e => {
+      if(e.target.matches("[data-event-date]")){
+        report.event_notes = collectEditorEvents(report, modal);
+        renderEditorPoster(report);
+      }
+    };
+  }
+}
+
+async function saveEditorReport(report, modal, save){
+  report.event_notes = collectEditorEvents(report, modal);
+  report.theme_color = normalizeColor(report.theme_color);
+
+  if(!report.start_date || !report.end_date){
+    window.showToast?.(
+      "请选择开始日期和结束日期",
+      "失败",
+      "error"
+    );
+    return;
+  }
+
+  if(report.start_date > report.end_date){
+    window.showToast?.(
+      "开始日期不能晚于结束日期",
+      "失败",
+      "error"
+    );
+    return;
+  }
+
+  save.disabled = true;
+  save.textContent = "保存中...";
+
+  try{
+    sortItems(report);
+
+    const settingsResult = await updateWeeklyReport(
+      window.__sb,
+      report.id,
+      {
+        title: report.title || "本周创作报告",
+        start_date: report.start_date,
+        end_date: report.end_date,
+        theme_color: report.theme_color,
+        event_notes: report.event_notes,
+        poster_columns: editorColumns,
+        poster_name_font: editorNameFont,
+        poster_card_font: editorCardFont,
+        poster_event_font: editorEventFont
+      }
+    );
+
+    if(settingsResult.error){
+      window.showToast?.(
+        "周报设置保存失败",
+        "错误",
+        "error"
+      );
+      return;
+    }
+
+    if(settingsResult.data){
+      Object.assign(report, settingsResult.data);
+    }
+
+    const result = await saveWeeklyReportItems(
+      window.__sb,
+      report.id,
+      report.weekly_report_items || []
+    );
+
+    if(result){
+      report.weekly_report_items = result;
+
+      window.showToast?.(
+        "周报保存成功",
+        "完成",
+        "success"
+      );
+
+      renderEditorEvents(report, modal);
+      renderEditorMembers(report);
+      renderEditorPoster(report);
+    }else{
+      window.showToast?.(
+        "保存失败",
+        "错误",
+        "error"
+      );
+    }
+  }finally{
+    save.disabled = false;
+    save.textContent = "保存周报";
   }
 }
 
@@ -382,7 +526,6 @@ async function exportEditorPoster(report, modal, exportBtn){
     );
 
     const link = document.createElement("a");
-
     link.download = "weekly-report.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
@@ -402,7 +545,6 @@ async function exportEditorPoster(report, modal, exportBtn){
     );
   }finally{
     stage.remove();
-
     exportBtn.disabled = false;
     exportBtn.textContent = "导出图片";
   }
@@ -427,6 +569,118 @@ function waitForPosterImages(root){
       });
     })
   );
+}
+
+function renderEditorEvents(report, modal){
+  const box = modal.querySelector("#editor-event-list");
+
+  if(!box){
+    return;
+  }
+
+  const dates = getDateRange(report.start_date, report.end_date);
+
+  if(!dates.length){
+    box.innerHTML = `
+      <div class="weekly-empty">
+        请先选择开始日期和结束日期。
+      </div>
+    `;
+    return;
+  }
+
+  const eventMap = parseEventNotes(report.event_notes, report);
+
+  box.innerHTML = dates.map(date => {
+    return `
+<label class="editor-event-item">
+  <span>${formatChineseDate(date)}</span>
+  <textarea
+    data-event-date="${date}"
+    placeholder="这一天发生了什么"
+  >${escapeHtml(eventMap[date] || "")}</textarea>
+</label>
+`;
+  }).join("");
+}
+
+function collectEditorEvents(report, modal){
+  const dates = getDateRange(report.start_date, report.end_date);
+  const inputs = Array.from(
+    modal.querySelectorAll("[data-event-date]")
+  );
+
+  if(!dates.length || !inputs.length){
+    return "";
+  }
+
+  const lines = [];
+
+  dates.forEach(date => {
+    const input = inputs.find(
+      item => item.dataset.eventDate === date
+    );
+
+    if(!input){
+      return;
+    }
+
+    const value = input.value.trim();
+
+    if(value){
+      lines.push(`${formatChineseDate(date)}\n${value}`);
+    }
+  });
+
+  return lines.join("\n\n");
+}
+
+function parseEventNotes(text, report){
+  const raw = String(text || "").trim();
+  const result = {};
+
+  if(!raw){
+    return result;
+  }
+
+  const year = getReportYear(report);
+  const lines = raw.split(/\r?\n/);
+  let currentDate = "";
+  let foundDateHeading = false;
+
+  lines.forEach(line => {
+    const match = line.trim().match(/^(\d{1,2})月(\d{1,2})日$/);
+
+    if(match){
+      const month = String(match[1]).padStart(2, "0");
+      const day = String(match[2]).padStart(2, "0");
+      currentDate = `${year}-${month}-${day}`;
+      foundDateHeading = true;
+
+      if(!result[currentDate]){
+        result[currentDate] = [];
+      }
+
+      return;
+    }
+
+    if(currentDate){
+      result[currentDate].push(line);
+    }
+  });
+
+  Object.keys(result).forEach(date => {
+    result[date] = result[date].join("\n").trim();
+  });
+
+  if(!foundDateHeading){
+    const dates = getDateRange(report.start_date, report.end_date);
+    if(dates[0]){
+      result[dates[0]] = raw;
+    }
+  }
+
+  return result;
 }
 
 function renderEditorMembers(report){
@@ -517,8 +771,7 @@ function renderEditorDates(report, item, index){
   );
 
   return dates.map(date => {
-    const checked =
-      item.checkin_dates?.includes(date);
+    const checked = item.checkin_dates?.includes(date);
 
     return `
 <label class="editor-date-item">
@@ -540,9 +793,7 @@ function bindEditorMemberEvents(report){
     .forEach(btn => {
       btn.onclick = () => {
         const index = Number(btn.dataset.index);
-
         report.weekly_report_items.splice(index, 1);
-
         renderEditorMembers(report);
         renderEditorPoster(report);
       };
@@ -553,16 +804,13 @@ function bindEditorMemberEvents(report){
     .forEach(input => {
       input.onchange = () => {
         const index = Number(input.dataset.dateIndex);
-
         const dates = Array.from(
           document.querySelectorAll(
             `[data-date-index="${index}"]:checked`
           )
         ).map(x => x.value);
 
-        report.weekly_report_items[index].checkin_dates =
-          dates;
-
+        report.weekly_report_items[index].checkin_dates = dates;
         renderEditorPoster(report);
       };
     });
@@ -572,10 +820,7 @@ function bindEditorMemberEvents(report){
     .forEach(input => {
       input.oninput = () => {
         const index = Number(input.dataset.summaryIndex);
-
-        report.weekly_report_items[index].summary =
-          input.value;
-
+        report.weekly_report_items[index].summary = input.value;
         renderEditorPoster(report);
       };
     });
@@ -585,10 +830,7 @@ function bindEditorMemberEvents(report){
     .forEach(input => {
       input.oninput = () => {
         const index = Number(input.dataset.titleIndex);
-
-        report.weekly_report_items[index].nickname_title =
-          input.value;
-
+        report.weekly_report_items[index].nickname_title = input.value;
         renderEditorPoster(report);
       };
     });
@@ -598,7 +840,6 @@ function bindEditorMemberEvents(report){
     .forEach(btn => {
       btn.onclick = () => {
         const index = Number(btn.dataset.uploadIndex);
-
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
@@ -611,16 +852,10 @@ function bindEditorMemberEvents(report){
           }
 
           btn.textContent = "上传中...";
-
-          const url = await uploadWeeklyCover(
-            window.__sb,
-            file
-          );
+          const url = await uploadWeeklyCover(window.__sb, file);
 
           if(url){
-            report.weekly_report_items[index].cover_image_url =
-              url;
-
+            report.weekly_report_items[index].cover_image_url = url;
             renderEditorMembers(report);
             renderEditorPoster(report);
           }else{
@@ -688,22 +923,56 @@ function setText(id, value){
 function getDateRange(start, end){
   const result = [];
 
-  let d = new Date(start);
-  const last = new Date(end);
+  if(!start || !end){
+    return result;
+  }
+
+  let d = new Date(start + "T00:00:00");
+  const last = new Date(end + "T00:00:00");
+
+  if(Number.isNaN(d.getTime()) || Number.isNaN(last.getTime()) || d > last){
+    return result;
+  }
 
   while(d <= last){
-    result.push(
-      d.getFullYear() +
-      "-" +
-      String(d.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(d.getDate()).padStart(2, "0")
-    );
-
+    result.push(formatDate(d));
     d.setDate(d.getDate() + 1);
   }
 
   return result;
+}
+
+function addDays(dateString, amount){
+  const date = new Date(dateString + "T00:00:00");
+  date.setDate(date.getDate() + amount);
+  return formatDate(date);
+}
+
+function formatDate(date){
+  return date.getFullYear() +
+    "-" +
+    String(date.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(date.getDate()).padStart(2, "0");
+}
+
+function formatChineseDate(dateString){
+  const date = new Date(dateString + "T00:00:00");
+
+  return (date.getMonth() + 1) +
+    "月" +
+    date.getDate() +
+    "日";
+}
+
+function getReportYear(report){
+  const date = new Date((report.start_date || formatDate(new Date())) + "T00:00:00");
+  return date.getFullYear();
+}
+
+function normalizeColor(value){
+  const color = String(value || "").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(color) ? color : "#ff6a16";
 }
 
 function escapeHtml(value){
