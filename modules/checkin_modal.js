@@ -11,6 +11,8 @@ export const TAG_CATEGORIES = {
   "完成度": ["草稿", "线稿", "上色", "完成稿"]
 };
 
+const CUSTOM_TAG_STORAGE_KEY = "drawclub_custom_tags_v1";
+
 const NOTE_PLACEHOLDERS = [
   "遇到了什么难点？作画过程是否顺利？",
   "这张画的灵感是哪来的？",
@@ -27,6 +29,89 @@ let checkinModalOptions = {
   presetDate: "",
   onSuccess: null
 };
+
+export function getTagCategories(){
+  const customMap = loadCustomTagMap();
+  const result = {};
+
+  Object.keys(TAG_CATEGORIES).forEach(cat => {
+    const presets = TAG_CATEGORIES[cat] || [];
+    const custom = customMap[cat] || [];
+    result[cat] = Array.from(new Set([...presets, ...custom]));
+  });
+
+  return result;
+}
+
+export function isCustomTag(category, tag){
+  return (loadCustomTagMap()[category] || []).includes(tag);
+}
+
+export function addCustomTag(category, value){
+  const tag = normalizeCustomTag(value);
+
+  if(!tag || !TAG_CATEGORIES[category]){
+    return "";
+  }
+
+  const customMap = loadCustomTagMap();
+  const current = customMap[category] || [];
+  const preset = TAG_CATEGORIES[category] || [];
+
+  if(!preset.includes(tag) && !current.includes(tag)){
+    customMap[category] = [...current, tag];
+    saveCustomTagMap(customMap);
+  }
+
+  return tag;
+}
+
+export function deleteCustomTag(category, tag){
+  const customMap = loadCustomTagMap();
+
+  if(!customMap[category]){
+    return;
+  }
+
+  customMap[category] = customMap[category].filter(item => item !== tag);
+  saveCustomTagMap(customMap);
+}
+
+function loadCustomTagMap(){
+  const empty = Object.fromEntries(
+    Object.keys(TAG_CATEGORIES).map(cat => [cat, []])
+  );
+
+  try{
+    const raw = localStorage.getItem(CUSTOM_TAG_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+
+    Object.keys(TAG_CATEGORIES).forEach(cat => {
+      const values = Array.isArray(parsed[cat]) ? parsed[cat] : [];
+      empty[cat] = values.map(normalizeCustomTag).filter(Boolean);
+    });
+  }catch(err){
+    console.warn("load custom tags failed", err);
+  }
+
+  return empty;
+}
+
+function saveCustomTagMap(map){
+  try{
+    localStorage.setItem(CUSTOM_TAG_STORAGE_KEY, JSON.stringify(map));
+  }catch(err){
+    console.warn("save custom tags failed", err);
+  }
+}
+
+function normalizeCustomTag(value){
+  return String(value || "")
+    .trim()
+    .replace(/^#+/, "")
+    .replace(/\s+/g, " ")
+    .slice(0, 12);
+}
 
 // 发布打卡弹窗：选图、设日期、打标签、提交记录
 export function openCheckinModal(options = {}){
@@ -118,7 +203,6 @@ function initDateInput(){
   if(!dateInput) return;
 
   const today = localTodayString();
-
   let pickedDate = checkinModalOptions.presetDate || today;
 
   if(pickedDate > today){
@@ -252,7 +336,6 @@ function renderTagPanel(tagPanel){
     tagPanel.innerHTML = `
       <div class="ci-tag-box single">
         <div class="ci-section-title">单张标签</div>
-
         ${renderTagGroups(selected.tags, "single")}
 
         <div class="ci-single-actions">
@@ -297,6 +380,34 @@ function bindImageListEvents(wrap, tagPanel){
     btn.onclick = (e) => {
       e.stopPropagation();
       removePendingImage(btn.dataset.removeId);
+    };
+  });
+
+  tagPanel.querySelectorAll(".ci-custom-tag-delete").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const tag = btn.dataset.customTag;
+      deleteCustomTag(btn.dataset.customCat, tag);
+      removeTagFromDraft(tag);
+      renderImgList();
+    };
+  });
+
+  tagPanel.querySelectorAll(".ci-custom-tag-form").forEach(form => {
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const input = form.querySelector("input");
+      const tag = addCustomTag(form.dataset.customCat, input?.value);
+
+      if(!tag){
+        return;
+      }
+
+      if(form.dataset.mode === "single"){
+        toggleSingleTag(tag);
+      }else{
+        toggleGlobalTag(tag);
+      }
     };
   });
 
@@ -371,6 +482,14 @@ function resetSelectedImageTags(){
   renderImgList();
 }
 
+function removeTagFromDraft(tag){
+  globalTags = globalTags.filter(item => item !== tag);
+  pendingImages = pendingImages.map(img => ({
+    ...img,
+    tags: (img.tags || []).filter(item => item !== tag)
+  }));
+}
+
 function getSelectedImage(){
   return pendingImages.find(img => img.id === selectedImageId);
 }
@@ -382,21 +501,34 @@ function toggleTag(list, tag){
 }
 
 function renderTagGroups(activeTags, mode){
-  return Object.keys(TAG_CATEGORIES).map(cat => {
-    const opts = TAG_CATEGORIES[cat].map(tag => {
+  const categories = getTagCategories();
+
+  return Object.keys(categories).map(cat => {
+    const opts = categories[cat].map(tag => {
       const onClass = activeTags.includes(tag) ? " on" : "";
+      const customClass = isCustomTag(cat, tag) ? " custom" : "";
+      const deleteButton = customClass
+        ? `<button class="ci-custom-tag-delete" data-custom-cat="${escapeAttr(cat)}" data-custom-tag="${escapeAttr(tag)}" type="button" title="删除自定义标签">×</button>`
+        : "";
 
       return `
-        <span class="preset-tag${onClass}" data-mode="${mode}" data-tag="${tag}">
-          ${tag}
+        <span class="preset-tag${onClass}${customClass}" data-mode="${mode}" data-tag="${escapeAttr(tag)}">
+          ${escapeHtml(tag)}
+          ${deleteButton}
         </span>
       `;
     }).join("");
 
     return `
       <div class="ci-tag-row">
-        <div class="ci-tag-label">${cat}</div>
-        <div class="ci-tag-options">${opts}</div>
+        <div class="ci-tag-label">${escapeHtml(cat)}</div>
+        <div class="ci-tag-options">
+          ${opts}
+          <form class="ci-custom-tag-form" data-mode="${mode}" data-custom-cat="${escapeAttr(cat)}">
+            <input class="ci-custom-tag-input" maxlength="12" placeholder="＋自定义">
+            <button type="submit">加</button>
+          </form>
+        </div>
       </div>
     `;
   }).join("");
@@ -562,4 +694,17 @@ async function refreshCheckins(sb){
       checkins: freshCheckins
     });
   }
+}
+
+function escapeAttr(value){
+  return escapeHtml(value).replaceAll("`", "&#096;");
+}
+
+function escapeHtml(value){
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
