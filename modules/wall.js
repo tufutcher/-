@@ -46,8 +46,44 @@ export function renderWall(items, profiles = []){
   `;
 }
 
-function getProfile(userId, username){
-  return allProfiles.find(p => p.id === userId) || allProfiles.find(p => p.username === username) || null;
+function getProfile(userId, username, memberId){
+  return allProfiles.find(p => p.id === userId) ||
+    allProfiles.find(p => memberId && p.member_id === memberId) ||
+    allProfiles.find(p => p.username === username) ||
+    null;
+}
+
+function getProfileForCheckin(item){
+  return getProfile(item.user_id, item.username, item.member_id);
+}
+
+function getPersonGroupKey(item){
+  const profile = getProfileForCheckin(item);
+
+  if(profile?.id){
+    return "profile:" + profile.id;
+  }
+
+  if(item.member_id){
+    return "member:" + item.member_id;
+  }
+
+  if(item.user_id){
+    return "user:" + item.user_id;
+  }
+
+  return "name:" + (item.username || "anonymous");
+}
+
+function getPersonGroupInfo(item){
+  const profile = getProfileForCheckin(item);
+
+  return {
+    userId: profile?.id || item.user_id || "",
+    memberId: profile?.member_id || item.member_id || "",
+    name: profile?.username || item.username || "匿名",
+    profile
+  };
 }
 
 function avatarHtml(profile, name){
@@ -109,7 +145,7 @@ function badgesHtml(badges){
 }
 
 function personCardHtml(group){
-  const profile = getProfile(group.userId, group.name);
+  const profile = group.profile || getProfile(group.userId, group.name, group.memberId);
   const badges = computeBadgesFor(group.items);
 
   const thumbs = group.items
@@ -157,14 +193,25 @@ function renderWallContent(items, mode){
   const groups = {};
 
   items.forEach(item => {
-    const key = item.user_id || item.username || "anonymous";
+    const key = getPersonGroupKey(item);
+    const info = getPersonGroupInfo(item);
 
     if(!groups[key]){
       groups[key] = {
-        userId: item.user_id,
-        name: item.username || "匿名",
+        userId: info.userId,
+        memberId: info.memberId,
+        name: info.name,
+        profile: info.profile,
         items: []
       };
+    }
+
+    if(info.profile && !groups[key].profile){
+      groups[key].profile = info.profile;
+    }
+
+    if(info.userId && !groups[key].userId){
+      groups[key].userId = info.userId;
     }
 
     groups[key].items.push(item);
@@ -228,10 +275,11 @@ function openDetail(item){
   modal.className = "modal-bg detail-viewer-bg";
 
   const imgs = item.checkin_images || [];
-  const profile = getProfile(item.user_id, item.username);
-  const username = item.username || profile?.username || "匿名";
+  const profile = getProfileForCheckin(item);
+  const username = profile?.username || item.username || "匿名";
+  const profileUserId = profile?.id || item.user_id || "";
   const user = window.__user;
-  const isOwner = user && user.id === item.user_id;
+  const isOwner = user && profileUserId && user.id === profileUserId;
 
   const imagesHtml = imgs.map(img => {
     const tagsHtml = img.tags?.length
@@ -254,7 +302,7 @@ function openDetail(item){
     <div class="detail-viewer-card">
 
       <div class="detail-viewer-head">
-        <button class="detail-author-card" data-profile-user-id="${item.user_id}" type="button">
+        <button class="detail-author-card" data-profile-user-id="${profileUserId}" type="button">
           ${avatarHtml(profile, username).replace("person-avatar", "detail-avatar")}
           <div>
             <div class="detail-author">${username}</div>
