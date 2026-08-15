@@ -22,57 +22,50 @@ export function setPosterEventFontSize(value){
 export function renderWeeklyPoster(report, wrap, options = {}){
   if(!wrap) return;
 
-  ensureMultiWeekPosterStyles();
-
   const items = report.weekly_report_items || [];
-  const dates = getDateRange(report.start_date, report.end_date);
-  const isMultiWeek = dates.length > 14;
-  const weekCount = Math.max(1, Math.ceil((dates.length || 7) / 7));
+  const dateCount = getDateRange(report.start_date, report.end_date).length;
+  const isMultiWeek = dateCount > 14;
   const columns = Math.max(1, Math.min(Number(report.poster_columns || options.columns || 9), items.length || 1));
   const cardWidth = 88;
-  const cardHeight = isMultiWeek ? 220 + weekCount * 18 : 318;
   const gap = 7;
+  const dateRows = isMultiWeek ? Math.max(1, Math.ceil(dateCount / 7)) : 1;
+  const imageHeight = 220;
+  const textHeight = isMultiWeek ? 0 : 82;
+  const dateLineHeight = isMultiWeek ? dateRows * 16 : 16;
+  const cardHeight = imageHeight + textHeight + dateLineHeight;
   const rows = Math.ceil(items.length / columns);
   const posterWidth = 260 + columns * cardWidth + (columns - 1) * gap + 80;
   const posterHeight = Math.max(720, rows * cardHeight + 80);
   const eventNotes = String(report.event_notes || "").trim();
 
   const cards = items.map(item => {
-    const checkedDates = item.checkin_dates || [];
-    const days = checkedDates.length;
-    const badgeHtml = isMultiWeek
-      ? renderMultiWeekBadgeRow(report, item)
-      : renderSingleWeekBadge(days);
-    const dayClass = isMultiWeek
-      ? getMultiWeekDayClass(report, item)
-      : getWeeklyDayClass(days);
-    const cardText = isMultiWeek
-      ? ""
-      : `
-      <div class="weekly-poster-card-text">
-        <p>${escapeHtml(item.summary || "本周继续创作")}</p>
-        <strong>获得称号</strong>
-        <b>「${escapeHtml(item.nickname_title || "继续创作中")}」</b>
-      </div>`;
+    const days = item.checkin_dates?.length || 0;
+    const badges = isMultiWeek ? getMultiWeekBadges(report, item) : getWeeklyBadge(days);
+    const dayClass = getWeeklyDayClass(days);
 
     return `
-    <div class="weekly-poster-card ${isMultiWeek ? "weekly-poster-card-multiweek" : ""}">
+    <div class="weekly-poster-card ${isMultiWeek ? "weekly-poster-card-multi" : ""}">
       <div class="weekly-poster-img">
         ${item.cover_image_url ? `<img src="${escapeAttr(item.cover_image_url)}" crossorigin="anonymous" loading="eager">` : `<div class="weekly-poster-empty-img">暂无图片</div>`}
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
-          ${badgeHtml}
+          ${badges ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon">${badges}</span></div>` : ""}
           ${days > 0 ? `<div class="weekly-poster-days ${dayClass}">打卡${days}天</div>` : ""}
           <div class="weekly-poster-name">${escapeHtml(item.display_name || "匿名")}</div>
         </div>
       </div>
-      ${cardText}
-      <div class="weekly-poster-date-line">${renderMiniDateLine(dates, item)}</div>
+      ${isMultiWeek ? "" : `
+      <div class="weekly-poster-card-text">
+        <p>${escapeHtml(item.summary || "本周继续创作")}</p>
+        <strong>获得称号</strong>
+        <b>「${escapeHtml(item.nickname_title || "继续创作中")}"</b>
+      </div>`}
+      <div class="weekly-poster-date-line ${isMultiWeek ? "weekly-poster-date-line-multi" : ""}">${renderMiniDateLine(report, item)}</div>
     </div>`;
   }).join("");
 
   wrap.innerHTML = `
-  <div class="weekly-poster-canvas ${isMultiWeek ? "weekly-poster-multiweek" : ""}"
+  <div class="weekly-poster-canvas"
     style="--weekly-theme:${report.theme_color || "#ff6a16"};--poster-cols:${columns};--poster-card-width:${cardWidth}px;--poster-card-height:${cardHeight}px;--poster-card-gap:${gap}px;--poster-font:${weeklyPosterFontScale};--poster-name-font:${report.poster_name_font || weeklyPosterNameFontSize}px;--poster-card-font:${report.poster_card_font || weeklyPosterCardFontSize}px;--poster-event-font:${report.poster_event_font || weeklyPosterEventFontSize}px;width:${posterWidth}px;height:${posterHeight}px;">
     <div class="weekly-poster-left">
       <div class="weekly-poster-date-vertical">${formatPosterDate(report.start_date, report.end_date)}</div>
@@ -90,7 +83,8 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   </div>`;
 }
 
-function renderMiniDateLine(dates, item){
+function renderMiniDateLine(report, item){
+  const dates = getDateRange(report.start_date, report.end_date);
   const checked = item.checkin_dates || [];
   return dates.map(date => `<span class="${checked.includes(date) ? "active" : ""}">${Number(date.slice(-2))}</span>`).join("");
 }
@@ -110,25 +104,6 @@ function getDateRange(start, end){
   return result;
 }
 
-function renderSingleWeekBadge(days){
-  const badge = getWeeklyBadge(days);
-  return badge ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon">${badge}</span></div>` : "";
-}
-
-function renderMultiWeekBadgeRow(report, item){
-  const badges = getMultiWeekBadges(report, item);
-
-  if(!badges.length){
-    return "";
-  }
-
-  return `
-    <div class="weekly-poster-badge weekly-poster-badge-row">
-      ${badges.map(badge => `<span class="weekly-poster-badge-icon">${badge}</span>`).join("")}
-    </div>
-  `;
-}
-
 function getMultiWeekBadges(report, item){
   const dates = getDateRange(report.start_date, report.end_date);
   const checked = new Set(item.checkin_dates || []);
@@ -138,27 +113,10 @@ function getMultiWeekBadges(report, item){
     const weekDates = dates.slice(i, i + 7);
     const days = weekDates.filter(date => checked.has(date)).length;
     const badge = getWeeklyBadge(days);
-
-    if(badge){
-      badges.push(badge);
-    }
+    if(badge) badges.push(badge);
   }
 
-  return badges;
-}
-
-function getMultiWeekDayClass(report, item){
-  const dates = getDateRange(report.start_date, report.end_date);
-  const checked = new Set(item.checkin_dates || []);
-  let bestWeekDays = 0;
-
-  for(let i = 0; i < dates.length; i += 7){
-    const weekDates = dates.slice(i, i + 7);
-    const days = weekDates.filter(date => checked.has(date)).length;
-    bestWeekDays = Math.max(bestWeekDays, days);
-  }
-
-  return getWeeklyDayClass(bestWeekDays);
+  return badges.join(" ");
 }
 
 function getWeeklyBadge(days){
@@ -186,72 +144,6 @@ function formatDotDate(date){
 
 function formatEventText(text){
   return escapeHtml(text).replaceAll("\n", "<br>");
-}
-
-function ensureMultiWeekPosterStyles(){
-  if(document.getElementById("weekly-multiweek-poster-style")) return;
-
-  const style = document.createElement("style");
-  style.id = "weekly-multiweek-poster-style";
-  style.textContent = `
-    .weekly-poster-multiweek .weekly-poster-grid{
-      align-items:start;
-    }
-
-    .weekly-poster-card-multiweek{
-      height:var(--poster-card-height,346px);
-      grid-template-rows:220px minmax(18px,auto) !important;
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-img{
-      height:220px;
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-card-info{
-      bottom:6px;
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-badge-row{
-      display:flex;
-      flex-direction:row;
-      align-items:center;
-      justify-content:center;
-      gap:2px;
-      width:100%;
-      max-width:100%;
-      margin:0 0 3px;
-      padding:0 4px;
-      box-sizing:border-box;
-      flex-wrap:wrap;
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-badge-row .weekly-poster-badge-icon{
-      font-size:13px;
-      line-height:1;
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-date-line{
-      height:auto;
-      min-height:18px;
-      grid-template-columns:repeat(7,1fr);
-      grid-auto-rows:18px;
-      align-self:stretch;
-      font-size:7px;
-      line-height:1;
-      overflow:visible;
-      background:#fff;
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-date-line span{
-      min-height:18px;
-      border-top:1px solid rgba(0,0,0,.08);
-    }
-
-    .weekly-poster-card-multiweek .weekly-poster-date-line span:nth-child(7n+1){
-      border-left:none;
-    }
-  `;
-  document.head.appendChild(style);
 }
 
 function escapeAttr(value){
