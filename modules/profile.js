@@ -16,6 +16,10 @@ import {
 import { loadProfileCheckins } from "../api/checkin.js";
 import { openWeeklyReportManager } from "./weekly_report.js";
 import {openWeeklyEditor} from "./weekly_editor.js";
+import {
+  buildArtworksFromCheckins,
+  getArtworkCover
+} from "./artwork.js";
 
 const PIE_COLORS = ["#1a1a1a", "#5b8def", "#f0a13c", "#4cb38f"];
 let profileCalendarDate = new Date();
@@ -191,21 +195,14 @@ function dataModeTitle(){
 }
 
 // 个人页作品档案与创作分析
-function getGalleryImages(items){
-  return items.flatMap(item =>
-    (item.checkin_images || []).map(img => ({
-      id: img.id,
-      image_url: img.image_url,
-      created_at: item.created_at,
-      checkin_id: item.id
-    }))
-  );
+function getGalleryArtworks(items){
+  return buildArtworksFromCheckins(items);
 }
 
 function renderGalleryView(items){
-  const images = getGalleryImages(items);
+  const artworks = getGalleryArtworks(items);
 
-  if(!images.length){
+  if(!artworks.length){
     return '<div class="empty archive-empty">这个范围内还没有作品</div>';
   }
 
@@ -215,12 +212,23 @@ function renderGalleryView(items){
 
   return (
     '<div class="' + boardClass + '">' +
-      images.map(img =>
-        '<button class="gallery-tile" data-checkin-id="' + img.checkin_id + '" type="button">' +
-          '<img src="' + img.image_url + '" alt="">' +
-          '<span class="gallery-date">' + fmtDate(img.created_at) + '</span>' +
-        '</button>'
-      ).join("") +
+      artworks.map(artwork => {
+        const cover = getArtworkCover(artwork);
+        if(!cover?.image_url) return "";
+
+        const progressCount = artwork.progresses?.length || 0;
+        const progressMark = progressCount > 1
+          ? '<span class="gallery-progress-count">' + progressCount + '阶段</span>'
+          : "";
+
+        return (
+          '<button class="gallery-tile" data-checkin-id="' + cover.checkin_id + '" data-artwork-id="' + artwork.id + '" type="button">' +
+            '<img src="' + cover.image_url + '" alt="">' +
+            '<span class="gallery-date">' + fmtDate(artwork.created_at) + '</span>' +
+            progressMark +
+          '</button>'
+        );
+      }).join("") +
     '</div>'
   );
 }
@@ -411,8 +419,12 @@ function pieSvg(tagCount, catName){
 }
 
 // 渲染个人主页。readonly 用于别人主页弹窗，skipBind 用于避免重复绑定全局事件。
-function getProfileItems(state, targetUserId){
-  const all = state.profileCheckins || state.checkins || [];
+function getProfileItems(state, targetUserId, options = {}){
+  const readonly = !!options.readonly;
+  const isOwnProfile = !readonly && targetUserId === state.user?.id;
+  const all = isOwnProfile
+    ? (state.profileCheckins || state.checkins || [])
+    : (state.checkins || []);
   const targetProfile = getProfileByUserId(state, targetUserId);
   const targetMemberId = targetProfile?.member_id;
 
@@ -436,7 +448,7 @@ export function renderProfile(state, options = {}){
   const readonly = !!options.readonly;
   const skipBind = !!options.skipBind;
 
-  const mine = getProfileItems(state, targetUserId);
+  const mine = getProfileItems(state, targetUserId, { readonly });
   const stats = computeStats(mine);
   const currentStreak = computeCurrentStreak(mine);
   const totalDays = new Set(mine.map(item => dateKey(item.created_at))).size;
@@ -660,7 +672,7 @@ export function openReadonlyProfileModal(userId){
   }
 
   function bindReadonlyProfileEvents(){
-    const mine = (state.checkins || []).filter(item => item.user_id === userId);
+    const mine = getProfileItems(state, userId, { readonly: true });
 
     const dataFilter = modal.querySelector("#profile-data-filter");
     if(dataFilter){
