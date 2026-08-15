@@ -11,6 +11,7 @@ import "../modules/artwork_detail.js";
 import "../modules/profile_modes.js";
 import "../modules/edit_artwork_meta.js";
 import "../modules/artwork_merge_manager.js";
+import "../modules/weekly_export_fix.js";
 
 const sb = initSupabase();
 window.__sb = sb;
