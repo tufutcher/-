@@ -31,14 +31,85 @@ export async function createCheckin(sb, userId, username, note, createdAt){
 
   return data;
 }
-export async function addCheckinImage(sb, checkinId, userId, imageUrl, storagePath, tags){
+
+export async function addCheckinImage(sb, checkinId, userId, imageUrl, storagePath, tags, options = {}){
+  const basePayload = {
+    checkin_id: checkinId,
+    user_id: userId,
+    image_url: imageUrl,
+    storage_path: storagePath,
+    tags: tags || []
+  };
+
+  const artworkPayload = {
+    ...basePayload,
+    artwork_id: options.artwork_id || createArtworkId(),
+    progress_label: options.progress_label || "作品",
+    progress_order: Number.isFinite(Number(options.progress_order))
+      ? Number(options.progress_order)
+      : 0,
+    progress_date: options.progress_date || null,
+    is_artwork_cover: options.is_artwork_cover ?? true
+  };
+
+  const withArtwork = await insertCheckinImage(sb, artworkPayload);
+
+  if(!withArtwork.error){
+    return withArtwork.data;
+  }
+
+  // 兼容还没执行 SQL 迁移的线上数据库：如果 artwork 字段不存在，退回旧 payload，避免打卡失败。
+  if(isArtworkSchemaMissing(withArtwork.error)){
+    console.warn("artwork columns are not ready; falling back to legacy checkin image insert", withArtwork.error);
+
+    const legacy = await insertCheckinImage(sb, basePayload);
+
+    if(legacy.error){
+      alert("图片记录写入失败：" + legacy.error.message);
+      return null;
+    }
+
+    return legacy.data;
+  }
+
+  alert("图片记录写入失败：" + withArtwork.error.message);
+  return null;
+}
+
+async function insertCheckinImage(sb, payload){
   const { data, error } = await sb
     .from("checkin_images")
-    .insert({ checkin_id: checkinId, user_id: userId, image_url: imageUrl, storage_path: storagePath, tags: tags || [] })
+    .insert(payload)
     .select()
     .single();
-  if(error){ alert("图片记录写入失败：" + error.message); return null; }
-  return data;
+
+  return { data, error };
+}
+
+function isArtworkSchemaMissing(error){
+  const message = String(error?.message || "").toLowerCase();
+  const code = String(error?.code || "");
+
+  return code === "PGRST204"
+    || message.includes("artwork_id")
+    || message.includes("progress_label")
+    || message.includes("progress_order")
+    || message.includes("progress_date")
+    || message.includes("is_artwork_cover")
+    || message.includes("schema cache")
+    || message.includes("column") && message.includes("does not exist");
+}
+
+function createArtworkId(){
+  if(window.crypto?.randomUUID){
+    return window.crypto.randomUUID();
+  }
+
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, char => {
+    const random = Math.random() * 16 | 0;
+    const value = char === "x" ? random : (random & 0x3 | 0x8);
+    return value.toString(16);
+  });
 }
 
 export async function updateCheckinNote(sb, checkinId, note){
@@ -134,7 +205,7 @@ export async function adminDeleteCheckinWithImages(sb, checkinId){
   });
 
   if(error){
-    window.showToast?.("数据库记录删除失败：" + error.message, "删除失败", "error");
+    window.showToast?.("数据库记录删除失败：" + error.message, "删除失败");
     return false;
   }
 
