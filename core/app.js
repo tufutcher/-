@@ -8,6 +8,9 @@ import { openCheckinModal } from "../modules/checkin_modal.js";
 import { openAuthModal } from "../modules/auth_modal.js";
 import { showToast, showConfettiSuccess, showConfirm } from "../modules/feedback.js";
 import "../modules/artwork_detail.js";
+import "../modules/profile_modes.js";
+import "../modules/edit_artwork_meta.js";
+import "../modules/artwork_merge_manager.js";
 
 const sb = initSupabase();
 window.__sb = sb;
