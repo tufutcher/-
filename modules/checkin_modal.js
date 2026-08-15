@@ -4,6 +4,10 @@ import {
   addCheckinImage,
   loadCheckins
 } from "../api/checkin.js";
+import {
+  buildArtworksFromCheckins,
+  getArtworkCover
+} from "./artwork.js";
 
 export const TAG_CATEGORIES = {
   "内容": ["生物", "场景", "人物", "物件"],
@@ -12,6 +16,7 @@ export const TAG_CATEGORIES = {
 };
 
 const CUSTOM_TAG_STORAGE_KEY = "drawclub_custom_tags_v1";
+const PROGRESS_LABELS = ["作品", "草稿", "线稿", "上色", "完成稿"];
 
 const NOTE_PLACEHOLDERS = [
   "遇到了什么难点？作画过程是否顺利？",
@@ -239,12 +244,18 @@ async function addFilesToDraft(fileList){
 
   for(const file of files){
     const preview = await readAsDataUrl(file);
+    const tags = [...globalTags];
 
     pendingImages.push({
       id: createImageId(),
+      artwork_id: createArtworkId(),
+      artworkMode: "new",
+      existingArtworkId: "",
+      progress_label: inferProgressLabel(tags),
+      progress_order: pendingImages.length,
       file,
       preview,
-      tags: [...globalTags],
+      tags,
       customTags: false
     });
   }
@@ -254,6 +265,14 @@ async function addFilesToDraft(fileList){
 
 function createImageId(){
   return "img_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+}
+
+function createArtworkId(){
+  if(window.crypto?.randomUUID){
+    return window.crypto.randomUUID();
+  }
+
+  return "art_" + Date.now() + "_" + Math.random().toString(36).slice(2, 10);
 }
 
 function readAsDataUrl(file){
@@ -304,14 +323,16 @@ function renderThumbGrid(wrap){
   const gridHtml = pendingImages.map((img, index) => {
     const selectedClass = img.id === selectedImageId ? " selected" : "";
     const customMark = img.customTags ? '<span class="ci-custom-mark">单独</span>' : "";
+    const progressMark = `<span class="ci-progress-mark">${escapeHtml(img.progress_label || "作品")}</span>`;
     const pointer = img.id === selectedImageId ? '<span class="ci-thumb-pointer"></span>' : "";
 
     return `
-      <button class="ci-thumb${selectedClass}" data-id="${img.id}" type="button">
+      <button class="ci-thumb${selectedClass}" data-id="${escapeAttr(img.id)}" type="button">
         <img src="${img.preview}">
         <span class="ci-thumb-num">${index + 1}</span>
         ${customMark}
-        <span class="ci-thumb-remove" data-remove-id="${img.id}">×</span>
+        ${progressMark}
+        <span class="ci-thumb-remove" data-remove-id="${escapeAttr(img.id)}">×</span>
         ${pointer}
       </button>
     `;
@@ -336,6 +357,7 @@ function renderTagPanel(tagPanel){
     tagPanel.innerHTML = `
       <div class="ci-tag-box single">
         <div class="ci-section-title">单张标签</div>
+        ${renderArtworkSettings(selected)}
         ${renderTagGroups(selected.tags, "single")}
 
         <div class="ci-single-actions">
@@ -352,7 +374,69 @@ function renderTagPanel(tagPanel){
     <div class="ci-tag-box">
       <div class="ci-section-title">套用标签</div>
       <div class="hint-text ci-tag-hint">选择的标签会套用到所有图片。点击图片可单独修改。</div>
+      ${renderGlobalArtworkHint()}
       ${renderTagGroups(globalTags, "global")}
+    </div>
+  `;
+}
+
+function renderGlobalArtworkHint(){
+  return `
+    <div class="ci-artwork-hint">
+      每张图片会默认生成一个独立作品。点击图片后，可把它设成已有作品的某个进度。
+    </div>
+  `;
+}
+
+function renderArtworkSettings(selected){
+  const artworks = getAvailableArtworks().filter(artwork => artwork.id !== selected.artwork_id);
+  const canJoin = artworks.length > 0;
+  const mode = selected.artworkMode === "existing" && canJoin ? "existing" : "new";
+
+  if(mode !== selected.artworkMode){
+    selected.artworkMode = mode;
+  }
+
+  const selectedExistingId = selected.existingArtworkId || artworks[0]?.id || "";
+
+  if(mode === "existing" && !selected.existingArtworkId && selectedExistingId){
+    selected.existingArtworkId = selectedExistingId;
+  }
+
+  const artworkOptions = artworks.slice(0, 40).map(artwork => {
+    const cover = getArtworkCover(artwork);
+    const label = `${fmtShortDate(artwork.created_at)} · ${cover?.progress_label || "作品"}`;
+
+    return `<option value="${escapeAttr(artwork.id)}" ${artwork.id === selectedExistingId ? "selected" : ""}>${escapeHtml(label)}</option>`;
+  }).join("");
+
+  return `
+    <div class="ci-artwork-panel">
+      <div class="ci-artwork-row">
+        <label>作品关系</label>
+        <select id="ci-artwork-mode" class="ci-artwork-select">
+          <option value="new" ${mode === "new" ? "selected" : ""}>新作品</option>
+          <option value="existing" ${mode === "existing" ? "selected" : ""} ${canJoin ? "" : "disabled"}>加入已有作品</option>
+        </select>
+      </div>
+
+      ${mode === "existing" ? `
+        <div class="ci-artwork-row">
+          <label>已有作品</label>
+          <select id="ci-existing-artwork" class="ci-artwork-select">
+            ${artworkOptions}
+          </select>
+        </div>
+      ` : ""}
+
+      <div class="ci-artwork-row">
+        <label>当前进度</label>
+        <select id="ci-progress-label" class="ci-artwork-select">
+          ${PROGRESS_LABELS.map(label => `
+            <option value="${escapeAttr(label)}" ${selected.progress_label === label ? "selected" : ""}>${escapeHtml(label)}</option>
+          `).join("")}
+        </select>
+      </div>
     </div>
   `;
 }
@@ -382,6 +466,8 @@ function bindImageListEvents(wrap, tagPanel){
       removePendingImage(btn.dataset.removeId);
     };
   });
+
+  bindArtworkSettingEvents();
 
   tagPanel.querySelectorAll(".ci-custom-tag-delete").forEach(btn => {
     btn.onclick = (e) => {
@@ -437,6 +523,43 @@ function bindImageListEvents(wrap, tagPanel){
   }
 }
 
+function bindArtworkSettingEvents(){
+  const selected = getSelectedImage();
+  if(!selected) return;
+
+  const modeSelect = document.getElementById("ci-artwork-mode");
+  if(modeSelect){
+    modeSelect.onchange = () => {
+      selected.artworkMode = modeSelect.value === "existing" ? "existing" : "new";
+
+      if(selected.artworkMode === "new"){
+        selected.existingArtworkId = "";
+      }else if(!selected.existingArtworkId){
+        const first = getAvailableArtworks().find(artwork => artwork.id !== selected.artwork_id);
+        selected.existingArtworkId = first?.id || "";
+      }
+
+      renderImgList();
+    };
+  }
+
+  const existingSelect = document.getElementById("ci-existing-artwork");
+  if(existingSelect){
+    existingSelect.onchange = () => {
+      selected.existingArtworkId = existingSelect.value || "";
+      renderImgList();
+    };
+  }
+
+  const progressSelect = document.getElementById("ci-progress-label");
+  if(progressSelect){
+    progressSelect.onchange = () => {
+      selected.progress_label = progressSelect.value || "作品";
+      renderImgList();
+    };
+  }
+}
+
 function removePendingImage(id){
   pendingImages = pendingImages.filter(img => img.id !== id);
 
@@ -455,7 +578,8 @@ function toggleGlobalTag(tag){
 
     return {
       ...img,
-      tags: [...globalTags]
+      tags: [...globalTags],
+      progress_label: inferProgressLabel(globalTags, img.progress_label)
     };
   });
 
@@ -467,6 +591,7 @@ function toggleSingleTag(tag){
   if(!selected) return;
 
   selected.tags = toggleTag(selected.tags, tag);
+  selected.progress_label = inferProgressLabel(selected.tags, selected.progress_label);
   selected.customTags = true;
 
   renderImgList();
@@ -477,6 +602,7 @@ function resetSelectedImageTags(){
   if(!selected) return;
 
   selected.tags = [...globalTags];
+  selected.progress_label = inferProgressLabel(globalTags, selected.progress_label);
   selected.customTags = false;
 
   renderImgList();
@@ -498,6 +624,47 @@ function toggleTag(list, tag){
   return list.includes(tag)
     ? list.filter(x => x !== tag)
     : [...list, tag];
+}
+
+function inferProgressLabel(tags = [], current = "作品"){
+  const matched = PROGRESS_LABELS.find(label => label !== "作品" && tags.includes(label));
+
+  if(matched){
+    return matched;
+  }
+
+  return current || "作品";
+}
+
+function getAvailableArtworks(){
+  const appState = window.state || {};
+  const user = window.__user;
+  const profile = appState.profile;
+  const source = appState.profileCheckins?.length
+    ? appState.profileCheckins
+    : (appState.checkins || []);
+
+  if(!user || !source.length){
+    return [];
+  }
+
+  return buildArtworksFromCheckins(source)
+    .filter(artwork => {
+      if(artwork.user_id === user.id) return true;
+      if(profile?.member_id && artwork.member_id === profile.member_id) return true;
+      return false;
+    })
+    .filter(artwork => getArtworkCover(artwork)?.image_url)
+    .slice(0, 80);
+}
+
+function fmtShortDate(date){
+  if(!date) return "未知日期";
+
+  const d = new Date(date);
+  if(Number.isNaN(d.getTime())) return "未知日期";
+
+  return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 function renderTagGroups(activeTags, mode){
@@ -634,7 +801,12 @@ async function uploadPendingImages(sb, user, btn){
     uploadedImages.push({
       url,
       path,
-      tags: img.tags
+      tags: img.tags,
+      artwork_id: img.artworkMode === "existing" && img.existingArtworkId
+        ? img.existingArtworkId
+        : img.artwork_id,
+      progress_label: img.progress_label || inferProgressLabel(img.tags),
+      progress_order: img.progress_order || 0
     });
   }
 
@@ -666,7 +838,14 @@ async function saveImageRecords(sb, checkin, user, uploadedImages){
       user.id,
       img.url,
       img.path,
-      img.tags
+      img.tags,
+      {
+        artwork_id: img.artwork_id,
+        progress_label: img.progress_label,
+        progress_order: img.progress_order,
+        progress_date: checkin.created_at,
+        is_artwork_cover: true
+      }
     );
 
     if(!imageRecord) return false;
