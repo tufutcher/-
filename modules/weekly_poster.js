@@ -61,6 +61,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     : 16;
   const badgeLetterSpacing = maxBadgeCount >= 6 ? -2 : (maxBadgeCount >= 4 ? -1 : 0);
   const badgeStyle = `font-size:${badgeFontSize}px;letter-spacing:${badgeLetterSpacing}px;white-space:nowrap;display:block;line-height:1;transform:scaleX(.92);transform-origin:center;`;
+  const longRangeDaysStyle = "background:none !important;background-image:none !important;color:#fff !important;-webkit-text-fill-color:#fff !important;text-shadow:none !important;";
 
   const cards = itemModels.map(model => {
     const item = model.item;
@@ -69,10 +70,12 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     const cardStyle = `grid-template-rows:${imageHeight}px ${textHeight}px ${dateLineHeight}px;height:${itemCardHeight}px;`;
     const dateLineStyle = `grid-template-columns:repeat(7,1fr);grid-auto-rows:16px;height:${dateLineHeight}px;`;
     const badgeText = model.badges.join("");
-    const asciiNameClass = hasAscii(item.display_name) ? " weekly-poster-name-ascii" : "";
-    const asciiNameStyle = hasAscii(item.display_name)
-      ? ' style="letter-spacing:-2.4px;display:block;transform:scaleX(.78);transform-origin:center;font-stretch:condensed;"'
-      : "";
+    const isAsciiName = hasAscii(item.display_name);
+    const asciiNameClass = isAsciiName ? " weekly-poster-name-ascii" : "";
+    const nameStyle = isAsciiName
+      ? ' style="font-size:calc(var(--poster-name-font,28px) + 2px);letter-spacing:-2.4px;display:block;transform:translateY(-2px) scaleX(.78);transform-origin:center;font-stretch:condensed;"'
+      : ' style="font-size:calc(var(--poster-name-font,28px) + 2px);transform:translateY(-2px);"';
+    const daysStyle = isLongRange ? ` style="${longRangeDaysStyle}"` : "";
 
     return `
     <div class="weekly-poster-card ${isLongRange ? "weekly-poster-card-multi" : ""}" style="${cardStyle}">
@@ -81,8 +84,8 @@ export function renderWeeklyPoster(report, wrap, options = {}){
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
           ${badgeText ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon" style="${badgeStyle}">${badgeText}</span></div>` : ""}
-          ${model.days > 0 ? `<div class="weekly-poster-days ${model.dayClass}">打卡${model.days}天</div>` : ""}
-          <div class="weekly-poster-name${asciiNameClass}"${asciiNameStyle}>${escapeHtml(item.display_name || "匿名")}</div>
+          ${model.days > 0 ? `<div class="weekly-poster-days ${model.dayClass}"${daysStyle}>打卡${model.days}天</div>` : ""}
+          <div class="weekly-poster-name${asciiNameClass}"${nameStyle}>${escapeHtml(item.display_name || "匿名")}</div>
         </div>
       </div>
       ${model.textHtml}
