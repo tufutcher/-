@@ -12,6 +12,7 @@ import "../modules/profile_modes.js";
 import "../modules/edit_artwork_meta.js";
 import "../modules/artwork_merge_manager.js";
 import "../modules/weekly_export_fix.js";
+import "../modules/weekly_editor_helper.js";
 
 const sb = initSupabase();
 window.__sb = sb;
