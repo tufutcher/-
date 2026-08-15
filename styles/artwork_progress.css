@@ -1,0 +1,91 @@
+/* Artwork / progress controls inside checkin modal */
+
+#checkin-modal .ci-artwork-hint{
+  margin:0 0 10px;
+  padding:9px 12px;
+  border-radius:16px;
+  background:#f7f8f9;
+  color:#777;
+  font-size:12px;
+  line-height:1.45;
+}
+
+#checkin-modal .ci-artwork-panel{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin:0 0 12px;
+  padding:10px;
+  border-radius:18px;
+  background:#f7f8f9;
+}
+
+#checkin-modal .ci-artwork-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+#checkin-modal .ci-artwork-row label{
+  flex:0 0 auto;
+  margin:0;
+  color:#777;
+  font-size:12px;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+#checkin-modal .ci-artwork-select{
+  flex:1;
+  min-width:0;
+  height:32px;
+  padding:0 12px;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:999px;
+  background:#fff;
+  color:#111;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:750;
+  outline:none;
+}
+
+#checkin-modal .ci-progress-mark{
+  position:absolute;
+  left:6px;
+  bottom:6px;
+  z-index:2;
+  max-width:calc(100% - 12px);
+  padding:3px 6px;
+  border-radius:999px;
+  background:rgba(17,17,17,.72);
+  color:#fff;
+  font-size:10px;
+  font-weight:850;
+  line-height:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+#checkin-modal .ci-thumb .ci-custom-mark + .ci-progress-mark{
+  bottom:24px;
+}
+
+@media (max-width:520px){
+  #checkin-modal .ci-artwork-panel{
+    padding:9px;
+  }
+
+  #checkin-modal .ci-artwork-row{
+    gap:8px;
+  }
+
+  #checkin-modal .ci-artwork-select{
+    font-size:12px;
+    padding:0 10px;
+  }
+}
