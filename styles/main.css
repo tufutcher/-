@@ -4,6 +4,7 @@
 @import "./checkin.css";
 @import "./weekly.css";
 @import "./weekly_patch.css";
+@import "./artwork_progress.css";
 
 *{box-sizing:border-box;}
 body{
