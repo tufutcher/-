@@ -52,14 +52,17 @@ async function exportCurrentWeeklyPoster(btn){
     document.body.appendChild(stage);
 
     await inlineImages(clone);
+    freezeCoverImagesForExport(clone);
+    normalizeVerticalDateForExport(clone);
+    normalizeExportTextForCanvas(clone);
     await waitForFonts();
     await waitForImages(clone);
     await nextFrame();
 
     btn.textContent = "生成图片中...";
 
-    const width = Math.ceil(clone.scrollWidth || clone.offsetWidth || source.scrollWidth);
-    const height = Math.ceil(clone.scrollHeight || clone.offsetHeight || source.scrollHeight);
+    const width = Math.ceil(readPixelValue(clone.style.width) || clone.scrollWidth || clone.offsetWidth || source.scrollWidth);
+    const height = Math.ceil(readPixelValue(clone.style.height) || clone.scrollHeight || clone.offsetHeight || source.scrollHeight);
     const scale = chooseExportScale(width, height);
 
     const canvas = await html2canvas(clone, {
@@ -75,7 +78,8 @@ async function exportCurrentWeeklyPoster(btn){
       allowTaint: false,
       imageTimeout: 30000,
       logging: false,
-      removeContainer: true
+      removeContainer: true,
+      foreignObjectRendering: false
     });
 
     const blob = await canvasToBlob(canvas);
@@ -157,6 +161,7 @@ async function inlineImages(root){
       const dataUrl = await imageToDataUrl(src);
       if(dataUrl){
         img.removeAttribute("srcset");
+        img.removeAttribute("sizes");
         img.crossOrigin = "anonymous";
         img.src = dataUrl;
       }
@@ -164,6 +169,72 @@ async function inlineImages(root){
       console.warn("weekly export image inline failed", src, error);
     }
   }));
+}
+
+// html2canvas 对 object-fit: cover/contain 的还原不稳定，尤其是导出克隆节点时。
+// 这里把代表图转成父容器 background-image，再把原 img 透明保留占位，避免导出时图片被横向/纵向压扁。
+function freezeCoverImagesForExport(root){
+  root.querySelectorAll(".weekly-poster-img").forEach(box => {
+    const img = box.querySelector("img");
+    if(!img?.src) return;
+
+    const imgStyle = getComputedStyle(img);
+    const fit = imgStyle.objectFit || "cover";
+    const position = imgStyle.objectPosition || "center";
+
+    box.style.setProperty("background-image", `url("${img.src}")`, "important");
+    box.style.setProperty("background-size", fit === "contain" ? "contain" : "cover", "important");
+    box.style.setProperty("background-position", position, "important");
+    box.style.setProperty("background-repeat", "no-repeat", "important");
+    box.style.setProperty("background-color", "#eee", "important");
+
+    img.style.setProperty("opacity", "0", "important");
+    img.style.setProperty("width", "100%", "important");
+    img.style.setProperty("height", "100%", "important");
+    img.style.setProperty("object-fit", fit, "important");
+    img.style.setProperty("object-position", position, "important");
+  });
+}
+
+// html2canvas 对 writing-mode: vertical-rl 的支持不稳定。
+// 左上日期改成普通 flex 竖排字符，导出时就不会旋转/错位。
+function normalizeVerticalDateForExport(root){
+  const dateNode = root.querySelector(".weekly-poster-date-vertical");
+  if(!dateNode) return;
+
+  const text = dateNode.textContent || "";
+  const chars = Array.from(text.replace(/\s+/g, ""));
+
+  dateNode.innerHTML = chars.map(char => `<span>${escapeHtml(char)}</span>`).join("");
+  dateNode.style.setProperty("writing-mode", "horizontal-tb", "important");
+  dateNode.style.setProperty("text-orientation", "mixed", "important");
+  dateNode.style.setProperty("display", "flex", "important");
+  dateNode.style.setProperty("flex-direction", "column", "important");
+  dateNode.style.setProperty("align-items", "center", "important");
+  dateNode.style.setProperty("gap", "1px", "important");
+  dateNode.style.setProperty("line-height", "1", "important");
+  dateNode.style.setProperty("letter-spacing", "0", "important");
+
+  dateNode.querySelectorAll("span").forEach(span => {
+    span.style.setProperty("display", "block", "important");
+    span.style.setProperty("line-height", "1", "important");
+    span.style.setProperty("white-space", "nowrap", "important");
+  });
+}
+
+function normalizeExportTextForCanvas(root){
+  root.querySelectorAll(".weekly-poster-name-ascii").forEach(node => {
+    node.style.setProperty("letter-spacing", "-2.2px", "important");
+    node.style.setProperty("transform", "scaleX(.78)", "important");
+    node.style.setProperty("transform-origin", "center", "important");
+    node.style.setProperty("white-space", "nowrap", "important");
+  });
+
+  root.querySelectorAll(".weekly-poster-badge-icon").forEach(node => {
+    node.style.setProperty("white-space", "nowrap", "important");
+    node.style.setProperty("display", "block", "important");
+    node.style.setProperty("line-height", "1", "important");
+  });
 }
 
 async function imageToDataUrl(url){
@@ -217,6 +288,11 @@ function chooseExportScale(width, height){
   return Math.max(1.5, Math.sqrt(maxPixels / Math.max(1, width * height)));
 }
 
+function readPixelValue(value){
+  const match = String(value || "").match(/^([\d.]+)px$/);
+  return match ? Number(match[1]) : 0;
+}
+
 function getCanvasBackground(node){
   const bg = getComputedStyle(node).backgroundColor;
   return bg && bg !== "rgba(0, 0, 0, 0)" ? bg : null;
@@ -242,4 +318,13 @@ function buildExportFilename(){
   ].join("");
 
   return `weekly-report-${stamp}.png`;
+}
+
+function escapeHtml(value){
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
