@@ -96,6 +96,7 @@ function openArtworkDetailModal(artwork){
   `;
 
   document.body.appendChild(modal);
+  bindTimelineControls(modal);
 
   const close = () => {
     modal.remove();
@@ -132,7 +133,7 @@ function renderProgressCard(progress, index, total){
     : "";
 
   return `
-    <article class="artwork-progress-card">
+    <article class="artwork-progress-card" data-progress-index="${index}">
       <img src="${escapeAttr(progress.image_url)}" alt="">
       <div class="artwork-progress-caption">
         <b>${escapeHtml(progress.progress_label || `进度${index + 1}`)}</b>
@@ -149,13 +150,70 @@ function renderTimeline(progresses){
   return `
     <div class="artwork-progress-timeline">
       ${progresses.map((progress, index) => `
-        <span>
+        <button class="artwork-progress-step ${index === 0 ? "on" : ""}" data-progress-index="${index}" type="button">
           <b>${index + 1}</b>
           ${escapeHtml(progress.progress_label || "作品")}
-        </span>
+        </button>
       `).join("")}
     </div>
   `;
+}
+
+function bindTimelineControls(modal){
+  const track = modal.querySelector(".artwork-progress-track");
+  const cards = Array.from(modal.querySelectorAll(".artwork-progress-card"));
+  const steps = Array.from(modal.querySelectorAll(".artwork-progress-step"));
+
+  if(!track || !cards.length || !steps.length) return;
+
+  const setActive = (index) => {
+    steps.forEach((step, stepIndex) => {
+      step.classList.toggle("on", stepIndex === index);
+    });
+  };
+
+  steps.forEach(step => {
+    step.onclick = () => {
+      const index = Number(step.dataset.progressIndex || 0);
+      const target = cards[index];
+      if(!target) return;
+
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center"
+      });
+
+      setActive(index);
+    };
+  });
+
+  let ticking = false;
+  track.addEventListener("scroll", () => {
+    if(ticking) return;
+    ticking = true;
+
+    requestAnimationFrame(() => {
+      const trackBox = track.getBoundingClientRect();
+      const center = trackBox.left + trackBox.width / 2;
+      let activeIndex = 0;
+      let minDistance = Infinity;
+
+      cards.forEach((card, index) => {
+        const box = card.getBoundingClientRect();
+        const cardCenter = box.left + box.width / 2;
+        const distance = Math.abs(cardCenter - center);
+
+        if(distance < minDistance){
+          minDistance = distance;
+          activeIndex = index;
+        }
+      });
+
+      setActive(activeIndex);
+      ticking = false;
+    });
+  }, { passive:true });
 }
 
 function getSourceCheckin(checkinId){
@@ -182,6 +240,10 @@ function injectArtworkDetailStyles(){
     .artwork-detail-card{
       overflow:hidden;
       padding:18px;
+    }
+
+    .artwork-detail-close{
+      display:flex !important;
     }
 
     .artwork-detail-head{
@@ -255,19 +317,28 @@ function injectArtworkDetailStyles(){
       margin-top:12px;
     }
 
-    .artwork-progress-timeline span{
-      display:inline-flex;
+    .artwork-progress-step{
+      display:inline-flex !important;
       align-items:center;
       gap:5px;
-      padding:6px 9px;
-      border-radius:999px;
-      background:#f2f3f4;
-      color:#666;
-      font-size:12px;
-      font-weight:750;
+      width:auto !important;
+      min-height:0 !important;
+      margin:0 !important;
+      padding:6px 9px !important;
+      border-radius:999px !important;
+      background:#f2f3f4 !important;
+      color:#666 !important;
+      font-size:12px !important;
+      font-weight:750 !important;
+      box-shadow:none !important;
     }
 
-    .artwork-progress-timeline b{
+    .artwork-progress-step.on{
+      background:#111 !important;
+      color:#fff !important;
+    }
+
+    .artwork-progress-step b{
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -278,6 +349,11 @@ function injectArtworkDetailStyles(){
       color:#fff;
       font-size:10px;
       line-height:1;
+    }
+
+    .artwork-progress-step.on b{
+      background:#fff;
+      color:#111;
     }
 
     @media (max-width:520px){
