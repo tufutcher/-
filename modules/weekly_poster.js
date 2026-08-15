@@ -60,6 +60,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     ? Math.max(9, Math.min(16, Math.floor(74 / maxBadgeCount)))
     : 16;
   const badgeLetterSpacing = maxBadgeCount >= 6 ? -2 : (maxBadgeCount >= 4 ? -1 : 0);
+  const badgeStyle = `font-size:${badgeFontSize}px;letter-spacing:${badgeLetterSpacing}px;white-space:nowrap;display:block;line-height:1;transform:scaleX(.92);transform-origin:center;`;
 
   const cards = itemModels.map(model => {
     const item = model.item;
@@ -69,6 +70,9 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     const dateLineStyle = `grid-template-columns:repeat(7,1fr);grid-auto-rows:16px;height:${dateLineHeight}px;`;
     const badgeText = model.badges.join("");
     const asciiNameClass = hasAscii(item.display_name) ? " weekly-poster-name-ascii" : "";
+    const asciiNameStyle = hasAscii(item.display_name)
+      ? ' style="letter-spacing:-2.4px;display:block;transform:scaleX(.78);transform-origin:center;font-stretch:condensed;"'
+      : "";
 
     return `
     <div class="weekly-poster-card ${isLongRange ? "weekly-poster-card-multi" : ""}" style="${cardStyle}">
@@ -76,9 +80,9 @@ export function renderWeeklyPoster(report, wrap, options = {}){
         ${item.cover_image_url ? `<img src="${escapeAttr(item.cover_image_url)}" crossorigin="anonymous" loading="eager">` : `<div class="weekly-poster-empty-img">暂无图片</div>`}
         <div class="weekly-poster-img-mask"></div>
         <div class="weekly-poster-card-info">
-          ${badgeText ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon">${badgeText}</span></div>` : ""}
+          ${badgeText ? `<div class="weekly-poster-badge"><span class="weekly-poster-badge-icon" style="${badgeStyle}">${badgeText}</span></div>` : ""}
           ${model.days > 0 ? `<div class="weekly-poster-days ${model.dayClass}">打卡${model.days}天</div>` : ""}
-          <div class="weekly-poster-name${asciiNameClass}">${escapeHtml(item.display_name || "匿名")}</div>
+          <div class="weekly-poster-name${asciiNameClass}"${asciiNameStyle}>${escapeHtml(item.display_name || "匿名")}</div>
         </div>
       </div>
       ${model.textHtml}
@@ -103,6 +107,19 @@ export function renderWeeklyPoster(report, wrap, options = {}){
     <div class="weekly-poster-main"><div class="weekly-poster-grid">${cards}</div></div>
     <div class="poster-right">不<br>画<br>画<br>真<br>的<br>要<br>完<br>了</div>
   </div>`;
+
+  applyPosterRuntimeStyles(wrap, { hasEvents, leftWidth });
+}
+
+function applyPosterRuntimeStyles(wrap, options){
+  const canvas = wrap.querySelector?.(".weekly-poster-canvas");
+  if(!canvas) return;
+
+  if(!options.hasEvents){
+    canvas.style.setProperty("grid-template-columns", `${options.leftWidth}px max-content 18px`, "important");
+    canvas.style.setProperty("padding-left", "30px", "important");
+    canvas.style.setProperty("column-gap", "10px", "important");
+  }
 }
 
 function hasPosterText(item){
