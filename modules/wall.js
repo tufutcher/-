@@ -1,10 +1,12 @@
 import { openReadonlyProfileModal } from "./profile.js";
 import { deleteCheckinWithImages, loadCheckins } from "../api/checkin.js";
 import { openEditModal } from "./edit_modal.js";
+import { buildArtworksFromCheckins, getArtworkCover } from "./artwork.js";
 
 let currentMode = "time";
 let allCheckins = [];
 let allProfiles = [];
+let allArtworks = [];
 
 function fmtDate(date){
   const d = new Date(date);
@@ -26,9 +28,27 @@ function cardHtml(item){
   `;
 }
 
+function artworkCardHtml(artwork){
+  const cover = getArtworkCover(artwork);
+  if(!cover) return "";
+
+  const progressCount = artwork.progresses?.length || 1;
+  const extra = progressCount > 1 ? `<div class="extra-count">+${progressCount - 1}</div>` : "";
+
+  return `
+    <div class="wall-card gallery-card artwork-card" data-artwork-id="${escapeAttr(artwork.id)}">
+      <div class="wall-card-img-wrap">
+        <img src="${escapeAttr(cover.image_url)}">
+        ${extra}
+      </div>
+    </div>
+  `;
+}
+
 export function renderWall(items, profiles = []){
   allCheckins = items;
   allProfiles = profiles;
+  allArtworks = buildArtworksFromCheckins(items);
 
   return `
     <section class="wall-hero wall-logo-hero">
@@ -47,52 +67,28 @@ export function renderWall(items, profiles = []){
 }
 
 function getProfile(userId, username, memberId){
-  return allProfiles.find(p => p.id === userId) ||
-    allProfiles.find(p => memberId && p.member_id === memberId) ||
-    allProfiles.find(p => p.username === username) ||
-    null;
+  return allProfiles.find(p => userId && p.id === userId)
+    || allProfiles.find(p => memberId && p.member_id === memberId)
+    || allProfiles.find(p => username && p.username === username)
+    || null;
 }
 
-function getProfileForCheckin(item){
+function getProfileForItem(item){
   return getProfile(item.user_id, item.username, item.member_id);
 }
 
-function getPersonGroupKey(item){
-  const profile = getProfileForCheckin(item);
-
-  if(profile?.id){
-    return "profile:" + profile.id;
-  }
-
-  if(item.member_id){
-    return "member:" + item.member_id;
-  }
-
-  if(item.user_id){
-    return "user:" + item.user_id;
-  }
-
-  return "name:" + (item.username || "anonymous");
-}
-
-function getPersonGroupInfo(item){
-  const profile = getProfileForCheckin(item);
-
-  return {
-    userId: profile?.id || item.user_id || "",
-    memberId: profile?.member_id || item.member_id || "",
-    name: profile?.username || item.username || "匿名",
-    profile
-  };
+function getProfileUserId(item){
+  const profile = getProfileForItem(item);
+  return profile?.id || item.user_id || "";
 }
 
 function avatarHtml(profile, name){
   if(profile?.avatar_url){
-    return `<img class="person-avatar" src="${profile.avatar_url}">`;
+    return `<img class="person-avatar" src="${escapeAttr(profile.avatar_url)}">`;
   }
 
   const first = (name || "匿").trim().slice(0, 1) || "匿";
-  return `<div class="person-avatar avatar-fallback">${first}</div>`;
+  return `<div class="person-avatar avatar-fallback">${escapeHtml(first)}</div>`;
 }
 
 function openWallProfile(userId){
@@ -145,7 +141,7 @@ function badgesHtml(badges){
 }
 
 function personCardHtml(group){
-  const profile = group.profile || getProfile(group.userId, group.name, group.memberId);
+  const profile = getProfile(group.userId, group.name, group.memberId);
   const badges = computeBadgesFor(group.items);
 
   const thumbs = group.items
@@ -155,19 +151,19 @@ function personCardHtml(group){
       const img = item.checkin_images[0];
 
       return `
-        <button class="person-thumb" data-id="${item.id}" type="button">
-          <img src="${img.image_url}">
+        <button class="person-thumb" data-id="${escapeAttr(item.id)}" type="button">
+          <img src="${escapeAttr(img.image_url)}">
         </button>
       `;
     })
     .join("");
 
   return `
-    <div class="person-card" data-profile-user-id="${group.userId}">
+    <div class="person-card" data-profile-user-id="${escapeAttr(group.userId || "")}">
       <div class="person-head">
         ${avatarHtml(profile, group.name)}
         <div class="person-meta">
-          <div class="person-name">${group.name || "匿名"}</div>
+          <div class="person-name">${escapeHtml(group.name || "匿名")}</div>
           <div class="person-count">${group.items.length} 次打卡</div>
         </div>
       </div>
@@ -182,36 +178,31 @@ function personCardHtml(group){
 }
 
 function renderWallContent(items, mode){
-  if(!items.length){
-    return `<div class="card empty">还没有人打卡，点右下角"＋"第一个来！</div>`;
+  if(mode === "time"){
+    if(!allArtworks.length){
+      return `<div class="card empty">还没有人打卡，点右下角"＋"第一个来！</div>`;
+    }
+
+    return `<div class="wall-grid">${allArtworks.map(artworkCardHtml).join("")}</div>`;
   }
 
-  if(mode === "time"){
-    return `<div class="wall-grid">${items.map(cardHtml).join("")}</div>`;
+  if(!items.length){
+    return `<div class="card empty">还没有人打卡，点右下角"＋"第一个来！</div>`;
   }
 
   const groups = {};
 
   items.forEach(item => {
-    const key = getPersonGroupKey(item);
-    const info = getPersonGroupInfo(item);
+    const profile = getProfileForItem(item);
+    const key = profile?.id || item.user_id || item.member_id || item.username || "anonymous";
 
     if(!groups[key]){
       groups[key] = {
-        userId: info.userId,
-        memberId: info.memberId,
-        name: info.name,
-        profile: info.profile,
+        userId: profile?.id || item.user_id || "",
+        memberId: profile?.member_id || item.member_id || "",
+        name: profile?.username || item.username || "匿名",
         items: []
       };
-    }
-
-    if(info.profile && !groups[key].profile){
-      groups[key].profile = info.profile;
-    }
-
-    if(info.userId && !groups[key].userId){
-      groups[key].userId = info.userId;
     }
 
     groups[key].items.push(item);
@@ -240,8 +231,16 @@ export function bindWallEvents(){
 }
 
 function bindCardClicks(){
-  // 普通打卡墙：点作品卡片，打开作品详情
-  document.querySelectorAll(".wall-card").forEach(card => {
+  // 新打卡墙：点作品卡片，打开作品进度详情
+  document.querySelectorAll(".artwork-card").forEach(card => {
+    card.onclick = () => {
+      const artwork = allArtworks.find(x => x.id === card.dataset.artworkId);
+      if(artwork) openArtworkDetail(artwork);
+    };
+  });
+
+  // 旧结构兜底：点普通打卡卡片，打开作品详情
+  document.querySelectorAll(".wall-card:not(.artwork-card)").forEach(card => {
     card.onclick = () => {
       const item = allCheckins.find(x => x.id === card.dataset.id);
       if(item) openDetail(item);
@@ -266,7 +265,7 @@ function bindCardClicks(){
   });
 }
 
-function openDetail(item){
+function openArtworkDetail(artwork){
   const old = document.getElementById("detail-modal");
   if(old) old.remove();
 
@@ -274,25 +273,29 @@ function openDetail(item){
   modal.id = "detail-modal";
   modal.className = "modal-bg detail-viewer-bg";
 
-  const imgs = item.checkin_images || [];
-  const profile = getProfileForCheckin(item);
-  const username = profile?.username || item.username || "匿名";
-  const profileUserId = profile?.id || item.user_id || "";
+  const profile = getProfile(artwork.user_id, artwork.username, artwork.member_id);
+  const username = artwork.username || profile?.username || "匿名";
+  const profileUserId = profile?.id || artwork.user_id || "";
+  const cover = getArtworkCover(artwork);
+  const sourceCheckin = allCheckins.find(x => x.id === cover?.checkin_id);
   const user = window.__user;
-  const isOwner = user && profileUserId && user.id === profileUserId;
+  const isOwner = user && sourceCheckin && user.id === sourceCheckin.user_id;
 
-  const imagesHtml = imgs.map(img => {
-    const tagsHtml = img.tags?.length
+  const imagesHtml = (artwork.progresses || []).map((progress, index) => {
+    const tagsHtml = progress.tags?.length
       ? `
         <div class="tags detail-tags">
-          ${img.tags.map(t => `<span>#${t}</span>`).join("")}
+          ${progress.tags.map(t => `<span>#${escapeHtml(t)}</span>`).join("")}
         </div>
       `
       : "";
 
     return `
       <div class="detail-art-block">
-        <img src="${img.image_url}">
+        <img src="${escapeAttr(progress.image_url)}">
+        <div class="hint-text detail-progress-meta">
+          ${escapeHtml(progress.progress_label || `进度${index + 1}`)} · ${fmtDate(progress.progress_date || progress.checkin_created_at)}
+        </div>
         ${tagsHtml}
       </div>
     `;
@@ -302,10 +305,106 @@ function openDetail(item){
     <div class="detail-viewer-card">
 
       <div class="detail-viewer-head">
-        <button class="detail-author-card" data-profile-user-id="${profileUserId}" type="button">
+        <button class="detail-author-card" data-profile-user-id="${escapeAttr(profileUserId)}" type="button">
           ${avatarHtml(profile, username).replace("person-avatar", "detail-avatar")}
           <div>
-            <div class="detail-author">${username}</div>
+            <div class="detail-author">${escapeHtml(username)}</div>
+            <div class="detail-date">${fmtDate(artwork.created_at)}</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="detail-art-list">
+        ${imagesHtml}
+      </div>
+
+      ${artwork.note ? `<div class="note detail-note">${escapeHtml(artwork.note)}</div>` : ""}
+
+      ${isOwner ? `
+        <div class="detail-actions">
+          <button id="detail-edit">编辑原打卡</button>
+        </div>
+      ` : ""}
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const escClose = (e) => {
+    if(e.key === "Escape"){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
+  };
+  
+  document.addEventListener("keydown", escClose);
+
+  modal.onclick = (e) => {
+    if(e.target === modal){
+      modal.remove();
+      document.removeEventListener("keydown", escClose);
+    }
+  };
+
+  const authorCard = modal.querySelector(".detail-author-card");
+  if(authorCard){
+    authorCard.onclick = () => {
+      const userId = authorCard.dataset.profileUserId;
+      if(!userId) return;
+  
+      modal.remove();
+      openWallProfile(userId);
+    };
+  }
+
+  if(isOwner && sourceCheckin){
+    document.getElementById("detail-edit").onclick = () => {
+      modal.remove();
+      openEditModal(sourceCheckin);
+    };
+  }
+}
+
+function openDetail(item){
+  const old = document.getElementById("detail-modal");
+  if(old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "detail-modal";
+  modal.className = "modal-bg detail-viewer-bg";
+
+  const imgs = item.checkin_images || [];
+  const profile = getProfile(item.user_id, item.username, item.member_id);
+  const username = item.username || profile?.username || "匿名";
+  const profileUserId = profile?.id || item.user_id || "";
+  const user = window.__user;
+  const isOwner = user && user.id === item.user_id;
+
+  const imagesHtml = imgs.map(img => {
+    const tagsHtml = img.tags?.length
+      ? `
+        <div class="tags detail-tags">
+          ${img.tags.map(t => `<span>#${escapeHtml(t)}</span>`).join("")}
+        </div>
+      `
+      : "";
+
+    return `
+      <div class="detail-art-block">
+        <img src="${escapeAttr(img.image_url)}">
+        ${tagsHtml}
+      </div>
+    `;
+  }).join("");
+
+  modal.innerHTML = `
+    <div class="detail-viewer-card">
+
+      <div class="detail-viewer-head">
+        <button class="detail-author-card" data-profile-user-id="${escapeAttr(profileUserId)}" type="button">
+          ${avatarHtml(profile, username).replace("person-avatar", "detail-avatar")}
+          <div>
+            <div class="detail-author">${escapeHtml(username)}</div>
             <div class="detail-date">${fmtDate(item.created_at)}</div>
           </div>
         </button>
@@ -315,7 +414,7 @@ function openDetail(item){
         ${imagesHtml}
       </div>
 
-      ${item.note ? `<div class="note detail-note">${item.note}</div>` : ""}
+      ${item.note ? `<div class="note detail-note">${escapeHtml(item.note)}</div>` : ""}
 
       ${isOwner ? `
         <div class="detail-actions">
@@ -360,4 +459,17 @@ function openDetail(item){
       openEditModal(item);
     };
   }
+}
+
+function escapeAttr(value){
+  return escapeHtml(value).replaceAll("`", "&#096;");
+}
+
+function escapeHtml(value){
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
