@@ -23,8 +23,19 @@ create table if not exists public.checkin_images (
   image_url text not null,
   storage_path text not null,
   tags text[] default '{}',
+  artwork_id uuid,
+  progress_label text default '作品',
+  progress_order integer default 0,
+  progress_date timestamptz,
+  is_artwork_cover boolean default true,
   created_at timestamptz default now()
 );
+
+create index if not exists checkin_images_artwork_id_idx
+on public.checkin_images(artwork_id);
+
+create index if not exists checkin_images_progress_date_idx
+on public.checkin_images(progress_date);
 
 alter table public.profiles enable row level security;
 alter table public.checkins enable row level security;
