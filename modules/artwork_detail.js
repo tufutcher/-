@@ -66,10 +66,11 @@ function openArtworkDetailModal(artwork){
   const user = window.__user;
   const isOwner = !!(user && sourceCheckin && user.id === sourceCheckin.user_id);
   const progresses = artwork.progresses || [];
+  const initialIndex = Math.max(0, progresses.length - 1);
 
   modal.innerHTML = `
     <div class="detail-viewer-card artwork-detail-card">
-      <button class="detail-x artwork-detail-close" type="button" aria-label="关闭">×</button>
+      <button class="artwork-detail-close" type="button" aria-label="关闭">×</button>
 
       <div class="detail-viewer-head artwork-detail-head">
         <div>
@@ -79,8 +80,12 @@ function openArtworkDetailModal(artwork){
         <div class="artwork-progress-total">${progresses.length || 1} 个进度</div>
       </div>
 
-      <div class="artwork-progress-track" aria-label="作品进度">
-        ${progresses.map((progress, index) => renderProgressCard(progress, index, progresses.length)).join("")}
+      <div class="artwork-progress-shell">
+        <button class="artwork-progress-nav prev" data-progress-step="-1" type="button" aria-label="上一张">‹</button>
+        <div class="artwork-progress-track" aria-label="作品进度">
+          ${progresses.map((progress, index) => renderProgressCard(progress, index, progresses.length)).join("")}
+        </div>
+        <button class="artwork-progress-nav next" data-progress-step="1" type="button" aria-label="下一张">›</button>
       </div>
 
       ${renderTimeline(progresses)}
@@ -96,18 +101,44 @@ function openArtworkDetailModal(artwork){
   `;
 
   document.body.appendChild(modal);
-  bindTimelineControls(modal);
+
+  let activeIndex = initialIndex;
 
   const close = () => {
     modal.remove();
-    document.removeEventListener("keydown", escClose);
+    document.removeEventListener("keydown", keyHandler);
   };
 
-  const escClose = (e) => {
-    if(e.key === "Escape") close();
+  const goTo = (index, behavior = "smooth") => {
+    if(!progresses.length) return;
+
+    const nextIndex = Math.max(0, Math.min(progresses.length - 1, index));
+    const card = modal.querySelector(`[data-progress-card="${nextIndex}"]`);
+
+    if(card){
+      card.scrollIntoView({ behavior, block:"nearest", inline:"center" });
+    }
+
+    activeIndex = nextIndex;
+    updateActiveProgress(modal, activeIndex, progresses.length);
   };
 
-  document.addEventListener("keydown", escClose);
+  const keyHandler = (e) => {
+    if(e.key === "Escape"){
+      close();
+      return;
+    }
+
+    if(e.key === "ArrowLeft"){
+      goTo(activeIndex - 1);
+    }
+
+    if(e.key === "ArrowRight"){
+      goTo(activeIndex + 1);
+    }
+  };
+
+  document.addEventListener("keydown", keyHandler);
 
   modal.onclick = (e) => {
     if(e.target === modal) close();
@@ -115,12 +146,31 @@ function openArtworkDetailModal(artwork){
 
   modal.querySelector(".artwork-detail-close")?.addEventListener("click", close);
 
+  modal.querySelectorAll("[data-progress-step]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      goTo(activeIndex + Number(btn.dataset.progressStep || 0));
+    });
+  });
+
+  modal.querySelectorAll("[data-progress-index]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      goTo(Number(btn.dataset.progressIndex || 0));
+    });
+  });
+
+  bindTrackScrollSync(modal, (index) => {
+    activeIndex = index;
+    updateActiveProgress(modal, activeIndex, progresses.length);
+  });
+
   if(isOwner && sourceCheckin){
     modal.querySelector("#artwork-detail-edit")?.addEventListener("click", () => {
       close();
       openEditModal(sourceCheckin);
     });
   }
+
+  requestAnimationFrame(() => goTo(initialIndex, "auto"));
 }
 
 function renderProgressCard(progress, index, total){
@@ -133,7 +183,7 @@ function renderProgressCard(progress, index, total){
     : "";
 
   return `
-    <article class="artwork-progress-card" data-progress-index="${index}">
+    <article class="artwork-progress-card" data-progress-card="${index}">
       <img src="${escapeAttr(progress.image_url)}" alt="">
       <div class="artwork-progress-caption">
         <b>${escapeHtml(progress.progress_label || `进度${index + 1}`)}</b>
@@ -150,7 +200,7 @@ function renderTimeline(progresses){
   return `
     <div class="artwork-progress-timeline">
       ${progresses.map((progress, index) => `
-        <button class="artwork-progress-step ${index === 0 ? "on" : ""}" data-progress-index="${index}" type="button">
+        <button data-progress-index="${index}" type="button">
           <b>${index + 1}</b>
           ${escapeHtml(progress.progress_label || "作品")}
         </button>
@@ -159,61 +209,49 @@ function renderTimeline(progresses){
   `;
 }
 
-function bindTimelineControls(modal){
+function bindTrackScrollSync(modal, onChange){
   const track = modal.querySelector(".artwork-progress-track");
-  const cards = Array.from(modal.querySelectorAll(".artwork-progress-card"));
-  const steps = Array.from(modal.querySelectorAll(".artwork-progress-step"));
+  if(!track) return;
 
-  if(!track || !cards.length || !steps.length) return;
+  let timer = null;
 
-  const setActive = (index) => {
-    steps.forEach((step, stepIndex) => {
-      step.classList.toggle("on", stepIndex === index);
-    });
-  };
-
-  steps.forEach(step => {
-    step.onclick = () => {
-      const index = Number(step.dataset.progressIndex || 0);
-      const target = cards[index];
-      if(!target) return;
-
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center"
-      });
-
-      setActive(index);
-    };
-  });
-
-  let ticking = false;
   track.addEventListener("scroll", () => {
-    if(ticking) return;
-    ticking = true;
+    clearTimeout(timer);
 
-    requestAnimationFrame(() => {
-      const trackBox = track.getBoundingClientRect();
-      const center = trackBox.left + trackBox.width / 2;
-      let activeIndex = 0;
-      let minDistance = Infinity;
+    timer = setTimeout(() => {
+      const cards = Array.from(track.querySelectorAll("[data-progress-card]"));
+      if(!cards.length) return;
 
-      cards.forEach((card, index) => {
-        const box = card.getBoundingClientRect();
-        const cardCenter = box.left + box.width / 2;
+      const center = track.scrollLeft + track.clientWidth / 2;
+      let bestIndex = 0;
+      let bestDistance = Infinity;
+
+      cards.forEach(card => {
+        const index = Number(card.dataset.progressCard || 0);
+        const cardCenter = card.offsetLeft + card.clientWidth / 2;
         const distance = Math.abs(cardCenter - center);
 
-        if(distance < minDistance){
-          minDistance = distance;
-          activeIndex = index;
+        if(distance < bestDistance){
+          bestDistance = distance;
+          bestIndex = index;
         }
       });
 
-      setActive(activeIndex);
-      ticking = false;
-    });
+      onChange(bestIndex);
+    }, 80);
   }, { passive:true });
+}
+
+function updateActiveProgress(modal, index, total){
+  modal.querySelectorAll("[data-progress-index]").forEach(btn => {
+    btn.classList.toggle("on", Number(btn.dataset.progressIndex) === index);
+  });
+
+  const prev = modal.querySelector('.artwork-progress-nav[data-progress-step="-1"]');
+  const next = modal.querySelector('.artwork-progress-nav[data-progress-step="1"]');
+
+  if(prev) prev.disabled = index <= 0;
+  if(next) next.disabled = index >= total - 1;
 }
 
 function getSourceCheckin(checkinId){
@@ -243,7 +281,26 @@ function injectArtworkDetailStyles(){
     }
 
     .artwork-detail-close{
+      position:absolute;
+      right:16px;
+      top:16px;
+      z-index:20;
+      width:38px !important;
+      height:38px !important;
+      min-width:38px !important;
+      max-width:38px !important;
+      margin:0 !important;
+      padding:0 !important;
+      border:none !important;
+      border-radius:50% !important;
+      background:rgba(245,245,245,.94) !important;
+      color:#111 !important;
+      font-size:24px !important;
+      line-height:1 !important;
       display:flex !important;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 10px 24px rgba(0,0,0,.08) !important;
     }
 
     .artwork-detail-head{
@@ -261,6 +318,10 @@ function injectArtworkDetailStyles(){
       font-weight:850;
     }
 
+    .artwork-progress-shell{
+      position:relative;
+    }
+
     .artwork-progress-track{
       display:flex;
       gap:14px;
@@ -269,6 +330,7 @@ function injectArtworkDetailStyles(){
       scroll-snap-type:x mandatory;
       scrollbar-width:none;
       padding-bottom:4px;
+      scroll-behavior:smooth;
     }
 
     .artwork-progress-track::-webkit-scrollbar{
@@ -310,6 +372,42 @@ function injectArtworkDetailStyles(){
       margin-top:8px;
     }
 
+    .artwork-progress-nav{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      z-index:10;
+      width:38px !important;
+      height:38px !important;
+      min-width:38px !important;
+      max-width:38px !important;
+      margin:0 !important;
+      padding:0 !important;
+      border-radius:50% !important;
+      background:rgba(17,17,17,.74) !important;
+      color:#fff !important;
+      font-size:28px !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 12px 30px rgba(0,0,0,.16) !important;
+      backdrop-filter:blur(10px);
+    }
+
+    .artwork-progress-nav.prev{
+      left:10px;
+    }
+
+    .artwork-progress-nav.next{
+      right:10px;
+    }
+
+    .artwork-progress-nav:disabled{
+      opacity:.24;
+      pointer-events:none;
+    }
+
     .artwork-progress-timeline{
       display:flex;
       flex-wrap:wrap;
@@ -317,28 +415,27 @@ function injectArtworkDetailStyles(){
       margin-top:12px;
     }
 
-    .artwork-progress-step{
-      display:inline-flex !important;
+    .artwork-progress-timeline button{
+      width:auto !important;
+      margin:0 !important;
+      display:inline-flex;
       align-items:center;
       gap:5px;
-      width:auto !important;
-      min-height:0 !important;
-      margin:0 !important;
       padding:6px 9px !important;
       border-radius:999px !important;
       background:#f2f3f4 !important;
       color:#666 !important;
       font-size:12px !important;
-      font-weight:750 !important;
+      font-weight:750;
       box-shadow:none !important;
     }
 
-    .artwork-progress-step.on{
+    .artwork-progress-timeline button.on{
       background:#111 !important;
       color:#fff !important;
     }
 
-    .artwork-progress-step b{
+    .artwork-progress-timeline b{
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -351,7 +448,7 @@ function injectArtworkDetailStyles(){
       line-height:1;
     }
 
-    .artwork-progress-step.on b{
+    .artwork-progress-timeline button.on b{
       background:#fff;
       color:#111;
     }
@@ -369,6 +466,14 @@ function injectArtworkDetailStyles(){
         align-items:flex-start;
         flex-direction:column;
         gap:3px;
+      }
+
+      .artwork-progress-nav{
+        width:34px !important;
+        height:34px !important;
+        min-width:34px !important;
+        max-width:34px !important;
+        font-size:24px !important;
       }
     }
   `;
