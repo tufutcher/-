@@ -7,6 +7,7 @@ import { renderProfile } from "../modules/profile.js";
 import { openCheckinModal } from "../modules/checkin_modal.js";
 import { openAuthModal } from "../modules/auth_modal.js";
 import { showToast, showConfettiSuccess, showConfirm } from "../modules/feedback.js";
+import "../modules/artwork_detail.js";
 
 const sb = initSupabase();
 window.__sb = sb;
