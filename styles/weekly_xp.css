@@ -254,7 +254,7 @@
 #weekly-xp-overview .weekly-xp-table-head,
 #weekly-xp-overview .weekly-xp-person-row{
   display:grid;
-  grid-template-columns:42px minmax(130px,1.05fr) 68px minmax(185px,.9fr) minmax(185px,1fr);
+  grid-template-columns:36px minmax(125px,.8fr) 66px minmax(195px,.9fr) minmax(260px,1.25fr);
   gap:12px;
   align-items:center;
 }
@@ -291,8 +291,31 @@
 #weekly-xp-overview .weekly-xp-member strong{
   overflow-wrap:anywhere;
   color:#242429;
-  font-size:13px;
+  font-size:14px;
   font-weight:950;
+}
+#weekly-xp-overview .weekly-xp-member-heading{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px 8px;
+  min-width:0;
+}
+#weekly-xp-overview .weekly-xp-badges{
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:2px;
+  min-width:0;
+  white-space:nowrap;
+}
+#weekly-xp-overview .weekly-xp-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:17px;
+  line-height:1;
+  flex:0 0 auto;
 }
 #weekly-xp-overview .weekly-xp-member span{
   color:#8a8a92;
@@ -328,6 +351,20 @@
   font-size:10px;
   white-space:nowrap;
 }
+#weekly-xp-overview .weekly-xp-counts .weekly-xp-count-draw{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:max-content;
+  max-width:100%;
+  padding:5px 8px;
+  border-radius:6px;
+  background:#0CC0DF;
+  color:#fff;
+  font-weight:850;
+}
+#weekly-xp-overview .weekly-xp-counts .weekly-xp-count-draw b{color:#fff;}
 #weekly-xp-overview .weekly-xp-counts b{
   color:#25252a;
   font-size:11px;
@@ -342,10 +379,17 @@
   height:5px;
   border-radius:50%;
 }
-#weekly-xp-overview i.draw{background:#f28a32}
-#weekly-xp-overview i.reflect{background:#3c8ddc}
-#weekly-xp-overview i.deep{background:#8a5bd6}
-#weekly-xp-overview i.challenge{background:#27a875}
+#weekly-xp-overview i.draw{background:#0CC0DF}
+#weekly-xp-overview i.reflect{background:#398CE6}
+#weekly-xp-overview i.deep{background:#8B5BD6}
+#weekly-xp-overview i.challenge{background:#ED5555}
+#weekly-xp-overview .weekly-xp-legend span:first-child{
+  padding:5px 8px;
+  border-radius:6px;
+  background:#0CC0DF;
+  color:#fff;
+}
+#weekly-xp-overview .weekly-xp-legend span:first-child i{display:none}
 #weekly-xp-overview .weekly-xp-calendar-wrap{min-width:0}
 #weekly-xp-overview .weekly-xp-calendar-label{
   margin-bottom:5px;
@@ -354,7 +398,7 @@
   font-weight:850;
   text-align:right;
 }
-#weekly-xp-overview .weekly-xp-mini-calendar{width:100%;max-width:220px;margin-left:auto}
+#weekly-xp-overview .weekly-xp-mini-calendar{width:100%;max-width:280px;margin-left:auto}
 #weekly-xp-overview .weekly-xp-weekdays,
 #weekly-xp-overview .weekly-xp-calendar-grid{
   display:grid;
@@ -372,7 +416,7 @@
   position:relative;
   display:flex;
   min-width:0;
-  height:18px;
+  height:21px;
   align-items:center;
   justify-content:center;
   border-radius:3px;
@@ -393,10 +437,11 @@
   gap:1px;
 }
 #weekly-xp-overview .weekly-xp-day i{width:3px;height:3px}
-#weekly-xp-overview .weekly-xp-day.is-active{background:#fff0e2;color:#3a3028;outline:1px solid #f6d3b3}
+#weekly-xp-overview .weekly-xp-day.is-active{background:#e7faff;color:#202024;outline:1px solid #bceef7}
 #weekly-xp-overview .weekly-xp-day.is-blank{visibility:hidden;background:transparent}
-#weekly-xp-overview .weekly-xp-mini-calendar.is-week .weekly-xp-day{height:25px}
+#weekly-xp-overview .weekly-xp-mini-calendar.is-week .weekly-xp-day{height:28px}
 #weekly-xp-overview .weekly-xp-mini-calendar.is-week .weekly-xp-day b{font-size:10px}
+#weekly-xp-overview .weekly-xp-mini-calendar.is-month .weekly-xp-day b{font-size:9px}
 #weekly-xp-overview .weekly-xp-poster-footer{
   display:flex;
   align-items:center;
@@ -493,7 +538,7 @@
   #weekly-xp-overview .weekly-xp-counts{grid-column:2/4;grid-row:2;grid-template-columns:repeat(4,minmax(0,1fr))}
   #weekly-xp-overview .weekly-xp-calendar-wrap{grid-column:2/4;grid-row:3}
   #weekly-xp-overview .weekly-xp-mini-calendar{max-width:none}
-  #weekly-xp-overview .weekly-xp-mini-calendar.is-month .weekly-xp-day{height:20px}
+  #weekly-xp-overview .weekly-xp-mini-calendar.is-month .weekly-xp-day{height:24px}
   #weekly-xp-overview.poster-mode{padding:8px}
   #weekly-xp-overview.poster-mode .weekly-xp-poster{padding:18px 10px}
 }
