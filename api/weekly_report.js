@@ -174,7 +174,7 @@ export async function saveWeeklyReportItems(sb, reportId, items){
     .select("reflection_dates, deep_reflection_dates, challenge_dates").limit(1);
   if(schemaError){
     console.error("weekly XP migration required:", schemaError);
-    window.showToast?.("请先在 Supabase 执行 supabase-xp-migration.sql，再保存周报。", "数据库未升级", "error");
+    window.showToast?.("请先在 Supabase 执行 supabase-xp-migration.sql，再保存报告。", "数据库未升级", "error");
     return null;
   }
   await deleteProxyCheckinsForReport(sb, reportId);
