@@ -309,7 +309,7 @@ function renderPersonRow(person, index, period, mode){
         <span><i class="challenge"></i>挑战 <b>${person.challenge}</b> 天</span>
       </div>
       <div class="weekly-xp-calendar-wrap">
-        <div class="weekly-xp-calendar-label">${mode === "week" ? "本周月历" : "整月日历 · " + period.subtitle}</div>
+        <div class="weekly-xp-calendar-label">${mode === "week" ? "本周日历" : "整月日历 · " + period.subtitle}</div>
         ${calendar}
       </div>
     </article>`;
