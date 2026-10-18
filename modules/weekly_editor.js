@@ -32,6 +32,7 @@ export function openWeeklyEditor(report){
   editorCardFont = Number(report.poster_card_font) || 16;
   editorEventFont = Number(report.poster_event_font) || 10;
   report.challenge_multiplier = Number(report.challenge_multiplier) || 1;
+  report.hide_member_text = report.hide_member_text !== false;
 
   Object.assign(report, {
     poster_columns: editorColumns,
@@ -63,7 +64,7 @@ export function openWeeklyEditor(report){
   <aside class="weekly-editor-sidebar">
     <div class="weekly-editor-sidebar-head">
       <h2>编辑内容</h2>
-      <p>切换编辑成员或本周事件。</p>
+      <p>切换编辑成员或本期事件。</p>
     </div>
 
     <div class="weekly-editor-panel-switch">
@@ -79,7 +80,7 @@ export function openWeeklyEditor(report){
     <div class="weekly-editor-side-panel ${editorPanel === "events" ? "is-active" : ""}" data-panel-name="events">
       <div class="weekly-event-editor">
         <div class="weekly-event-editor-head">
-          <strong>本周事件</strong>
+          <strong>本期事件</strong>
           <span>空日期不会显示。</span>
         </div>
         <div id="editor-event-list"></div>
@@ -100,7 +101,8 @@ export function openWeeklyEditor(report){
       </div>
       <div class="weekly-settings-actions">
         <label class="weekly-xp-multiplier">挑战倍率 <select id="editor-challenge-multiplier"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option></select></label>
-        <button id="editor-save" class="editor-save" type="button">保存周报</button>
+        <label class="weekly-hide-member-text"><input id="editor-hide-member-text" type="checkbox" ${report.hide_member_text ? "checked" : ""}>隐藏评价和称号</label>
+        <button id="editor-save" class="editor-save" type="button">保存报告</button>
         <button id="editor-export" class="editor-export" type="button">导出图片</button>
       </div>
     </div>
@@ -116,6 +118,13 @@ export function openWeeklyEditor(report){
   renderEditorMembers(report);
   renderEditorPoster(report);
   bindEditorEvents(report, modal);
+  const hideMemberText = modal.querySelector("#editor-hide-member-text");
+  if(hideMemberText){
+    hideMemberText.onchange = () => {
+      report.hide_member_text = hideMemberText.checked;
+      renderEditorPoster(report);
+    };
+  }
   const multiplier = modal.querySelector("#editor-challenge-multiplier");
   if(multiplier){
     multiplier.value = String([1,2,3].includes(Number(report.challenge_multiplier)) ? report.challenge_multiplier : 1);
@@ -302,11 +311,12 @@ async function saveEditorReport(report, modal, save){
       poster_name_font: editorNameFont,
       poster_card_font: editorCardFont,
       poster_event_font: editorEventFont,
-      challenge_multiplier: report.challenge_multiplier
+      challenge_multiplier: report.challenge_multiplier,
+      hide_member_text: report.hide_member_text
     });
 
     if(settingsResult.error){
-      window.showToast?.("周报设置保存失败", "错误", "error");
+      window.showToast?.("报告设置保存失败", "错误", "error");
       return;
     }
 
@@ -316,7 +326,7 @@ async function saveEditorReport(report, modal, save){
 
     if(result){
       report.weekly_report_items = result;
-      window.showToast?.("周报保存成功", "完成", "success");
+      window.showToast?.("报告保存成功", "完成", "success");
       renderEditorEvents(report, modal);
       renderEditorMembers(report);
       renderEditorPoster(report);
@@ -325,7 +335,7 @@ async function saveEditorReport(report, modal, save){
     }
   }finally{
     save.disabled = false;
-    save.textContent = "保存周报";
+    save.textContent = "保存报告";
   }
 }
 
@@ -370,7 +380,7 @@ async function exportEditorPoster(report, exportBtn){
     });
 
     const link = document.createElement("a");
-    link.download = "weekly-report.png";
+    link.download = "creative-report.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
     window.showToast?.("周报图片已生成", "完成", "success");
