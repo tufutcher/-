@@ -4,7 +4,8 @@ alter table public.weekly_report_items
   add column if not exists deep_reflection_dates date[] not null default '{}',
   add column if not exists challenge_dates date[] not null default '{}';
 alter table public.weekly_reports
-  add column if not exists challenge_multiplier integer not null default 1;
+  add column if not exists challenge_multiplier integer not null default 1,
+  add column if not exists hide_member_text boolean not null default true;
 alter table public.weekly_reports
   drop constraint if exists weekly_reports_challenge_multiplier_check;
 alter table public.weekly_reports
