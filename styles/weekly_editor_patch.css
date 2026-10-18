@@ -225,3 +225,10 @@
   display:block !important;
   object-fit:cover !important;
 }
+
+/* XP 日期勾选沿用原有编辑器，保留海报样式不变。 */
+#weekly-editor .weekly-xp-row{margin:10px 0;padding:10px;border:1px solid #e9e9ed;border-radius:12px;background:#fafafa}
+#weekly-editor .weekly-xp-row>strong{display:block;font-size:12px;margin-bottom:7px;color:#292929}
+#weekly-editor .weekly-xp-totals{margin:10px 0;color:#35586a;font-weight:850;font-size:12px}
+#weekly-editor .weekly-xp-multiplier{display:flex;align-items:center;gap:5px;white-space:nowrap;font-weight:800;font-size:12px}
+#weekly-editor .weekly-xp-multiplier select{border-radius:8px;border:1px solid #ddd;padding:5px;background:#fff}
