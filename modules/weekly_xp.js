@@ -291,25 +291,59 @@ export async function openWeeklyXpOverview(initialMode = "month"){
 function renderPersonRow(person, index, period, mode){
   const ordinal = String(index + 1).padStart(2, "0");
   const calendar = renderMiniCalendar(person, period.start, period.end, mode);
+  const badges = renderXpBadges(person, period.start, period.end, mode);
   return `
     <article class="weekly-xp-person-row">
       <div class="weekly-xp-rank-number">${ordinal}</div>
       <div class="weekly-xp-member">
-        <strong>${escapeHtml(person.name)}</strong>
-        <span>绘画 ${person.draw} 天 · 有效反思 ${person.reflect} 天 · 深度反思 ${person.deep} 天 · 挑战 ${person.challenge} 天</span>
+        <div class="weekly-xp-member-heading">
+          <strong>${escapeHtml(person.name)}</strong>
+          <div class="weekly-xp-badges" aria-label="${mode === "week" ? "本周打卡徽章" : "本月打卡徽章"}">${badges}</div>
+        </div>
       </div>
       <div class="weekly-xp-score"><b>${person.xp}</b><span>XP</span></div>
       <div class="weekly-xp-counts">
-        <span><i class="draw"></i>画 <b>${person.draw}</b></span>
-        <span><i class="reflect"></i>有效 <b>${person.reflect}</b></span>
-        <span><i class="deep"></i>深度 <b>${person.deep}</b></span>
-        <span><i class="challenge"></i>挑 <b>${person.challenge}</b></span>
+        <span class="weekly-xp-count-draw">画画 <b>${person.draw}</b> 天</span>
+        <span><i class="reflect"></i>有效反思 <b>${person.reflect}</b> 天</span>
+        <span><i class="deep"></i>深度反思 <b>${person.deep}</b> 天</span>
+        <span><i class="challenge"></i>挑战 <b>${person.challenge}</b> 天</span>
       </div>
       <div class="weekly-xp-calendar-wrap">
-        <div class="weekly-xp-calendar-label">${mode === "week" ? "星期" : period.subtitle}</div>
+        <div class="weekly-xp-calendar-label">${mode === "week" ? "本周月历" : "整月日历 · " + period.subtitle}</div>
         ${calendar}
       </div>
     </article>`;
+}
+
+function renderXpBadges(person, start, end, mode){
+  const checkins = new Set(person.dates.filter(day => day.checkin && day.date >= start && day.date <= end).map(day => day.date));
+  const dates = getDateRange(start, end);
+  const groups = [];
+
+  if(mode === "week"){
+    groups.push(dates);
+  }else{
+    const firstOffset = (parseLocalDate(start).getDay() + 6) % 7;
+    const grouped = new Map();
+    dates.forEach((date, index) => {
+      const weekIndex = Math.floor((firstOffset + index) / 7);
+      if(!grouped.has(weekIndex)) grouped.set(weekIndex, []);
+      grouped.get(weekIndex).push(date);
+    });
+    groups.push(...grouped.values());
+  }
+
+  return groups.map(weekDates => {
+    const count = weekDates.filter(date => checkins.has(date)).length;
+    return getCheckinBadge(count);
+  }).filter(Boolean).map(badge => `<span class="weekly-xp-badge" title="${badge.label}">${badge.icon}</span>`).join("");
+}
+
+function getCheckinBadge(days){
+  if(days === 7) return {icon:"🎨", label:"本周打卡 7 天"};
+  if(days >= 5) return {icon:"🔥", label:`本周打卡 ${days} 天`};
+  if(days >= 3) return {icon:"⭐", label:`本周打卡 ${days} 天`};
+  return null;
 }
 
 function renderMiniCalendar(person, start, end, mode){
