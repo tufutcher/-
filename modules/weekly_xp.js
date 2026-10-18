@@ -241,7 +241,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
 
         <div class="weekly-xp-overview-metrics">
           ${metricCard("参与成员", metrics.people, "人")}
-          ${metricCard("累计 XP", metrics.xp, "XP")}
+          ${metricCard(mode === "week" ? "本周 XP" : "累计 XP", metrics.xp, "XP")}
           ${metricCard("绘画打卡", metrics.draw, "人·天")}
           ${metricCard("反思记录", metrics.reflect, "人·天")}
         </div>
