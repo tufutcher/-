@@ -39,6 +39,13 @@ export function summarizeXp(reports, month){
 }
 
 export async function openWeeklyXpOverview(){
+  if(!document.getElementById("weekly-xp-styles")){
+    const css = document.createElement("link");
+    css.id = "weekly-xp-styles";
+    css.rel = "stylesheet";
+    css.href = "styles/weekly_xp.css";
+    document.head.appendChild(css);
+  }
   document.getElementById("weekly-xp-overview")?.remove();
   const modal = document.createElement("div");
   modal.id = "weekly-xp-overview";
