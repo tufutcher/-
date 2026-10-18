@@ -178,6 +178,27 @@ export async function openWeeklyXpOverview(initialMode = "month"){
   function render(){
     const period = getPeriod();
     const summary = summarizeXp(reports, period.start, period.end);
+
+    // 周榜按本周 XP 排名，同时展示本月此前累计 + 本周新增。
+    if(mode === "week"){
+      const selectedDate = parseLocalDate(weekInput.value || formatDate(new Date()));
+      const monthStart = `${formatMonth(selectedDate)}-01`;
+      const priorEndDate = parseLocalDate(period.start);
+      priorEndDate.setDate(priorEndDate.getDate() - 1);
+      const priorEnd = formatDate(priorEndDate);
+      const priorById = new Map(
+        summarizeXp(reports, monthStart, priorEnd).map(person => [person.id, person.xp])
+      );
+      summary.forEach(person => {
+        person.xpBeforeWeek = priorById.get(person.id) || 0;
+        person.weekXp = person.xp;
+      });
+    }else{
+      summary.forEach(person => {
+        person.xpBeforeWeek = 0;
+        person.weekXp = person.xp;
+      });
+    }
     currentSummary = summary;
 
     const previousMember = personInput.value;
@@ -225,22 +246,13 @@ export async function openWeeklyXpOverview(initialMode = "month"){
           ${metricCard("反思记录", metrics.reflect, "人·天")}
         </div>
 
-        <div class="weekly-xp-ranking-heading">
-          <div><span>RANKING</span><h2>创作参与排行榜</h2></div>
-          <small>${escapeHtml(period.label)} · 按 XP 排序</small>
-        </div>
-
-        <div class="weekly-xp-table-head">
-          <span>排名</span><span>成员</span><span>经验值</span><span>参与统计</span><span>${mode === "week" ? "本周记录" : "本月记录"}</span>
-        </div>
-
         <div class="weekly-xp-ranking-list">
           ${chosen.map((person, index) => renderPersonRow(person, index, period, mode)).join("")}
         </div>
 
         <footer class="weekly-xp-poster-footer">
           <div class="weekly-xp-legend">
-            <span><i class="draw"></i>绘画 +10</span>
+            <span><i class="draw"></i>打卡 +10</span>
             <span><i class="reflect"></i>有效反思 +10</span>
             <span><i class="deep"></i>深度反思 +20</span>
             <span><i class="challenge"></i>主题挑战 +10 × 倍率</span>
@@ -290,28 +302,31 @@ export async function openWeeklyXpOverview(initialMode = "month"){
 
 function renderPersonRow(person, index, period, mode){
   const ordinal = String(index + 1).padStart(2, "0");
+  const rankClass = mode === "week"
+    ? `is-week-rank ${index < 3 ? "rank-top-" + (index + 1) : ""}`
+    : "is-month-rank";
   const calendar = renderMiniCalendar(person, period.start, period.end, mode);
   const badges = renderXpBadges(person, period.start, period.end, mode);
+  const score = mode === "week"
+    ? `<span class="weekly-xp-score-breakdown"><span>${person.xpBeforeWeek || 0}</span><span class="weekly-xp-score-plus">+</span><b>${person.weekXp ?? person.xp}</b><small>XP</small></span>`
+    : `<span class="weekly-xp-score-breakdown"><b>${person.xp}</b><small>XP</small></span>`;
   return `
     <article class="weekly-xp-person-row">
-      <div class="weekly-xp-rank-number">${ordinal}</div>
+      <div class="weekly-xp-rank-number ${rankClass}">${ordinal}</div>
       <div class="weekly-xp-member">
         <div class="weekly-xp-member-heading">
           <strong>${escapeHtml(person.name)}</strong>
           <div class="weekly-xp-badges" aria-label="${mode === "week" ? "本周打卡徽章" : "本月打卡徽章"}">${badges}</div>
         </div>
       </div>
-      <div class="weekly-xp-score"><b>${person.xp}</b><span>XP</span></div>
       <div class="weekly-xp-counts">
-        <span class="weekly-xp-count-draw">画画 <b>${person.draw}</b> 天</span>
+        <span class="weekly-xp-count-draw">打卡 <b>${person.draw}</b> 天</span>
         <span><i class="reflect"></i>有效反思 <b>${person.reflect}</b> 天</span>
         <span><i class="deep"></i>深度反思 <b>${person.deep}</b> 天</span>
         <span><i class="challenge"></i>挑战 <b>${person.challenge}</b> 天</span>
       </div>
-      <div class="weekly-xp-calendar-wrap">
-        <div class="weekly-xp-calendar-label">${mode === "week" ? "本周日历" : "整月日历 · " + period.subtitle}</div>
-        ${calendar}
-      </div>
+      <div class="weekly-xp-calendar-wrap">${calendar}</div>
+      <div class="weekly-xp-score">${score}</div>
     </article>`;
 }
 
