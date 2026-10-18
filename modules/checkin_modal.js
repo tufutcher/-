@@ -723,7 +723,8 @@ async function submitCheckin(modal){
   btn.textContent = "🧾 创建打卡中...";
 
   const username = await loadCurrentUsername(sb, user.id);
-  const checkin = await createCheckin(sb, user.id, username, note, createdAt);
+  const memberId = window.state?.profile?.member_id || null;
+  const checkin = await createCheckin(sb, user.id, username, note, createdAt, memberId);
 
   if(!checkin){
     await rollbackUploadedImages(sb, uploadedImages);
