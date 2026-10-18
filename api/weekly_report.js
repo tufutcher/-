@@ -93,7 +93,8 @@ export async function createWeeklyReport(sb, report){
       poster_columns: report.poster_columns || 9,
       poster_name_font: report.poster_name_font || 28,
       poster_card_font: report.poster_card_font || 16,
-      poster_event_font: report.poster_event_font || 10
+      poster_event_font: report.poster_event_font || 10,
+      challenge_multiplier: normalizeMultiplier(report.challenge_multiplier)
     })
     .select()
     .single();
@@ -119,7 +120,8 @@ export async function updateWeeklyReport(sb, reportId, patch){
     "poster_columns",
     "poster_name_font",
     "poster_card_font",
-    "poster_event_font"
+    "poster_event_font",
+    "challenge_multiplier"
   ].forEach(key => {
     if(patch[key] !== undefined){
       payload[key] = patch[key];
@@ -181,6 +183,10 @@ export async function saveWeeklyReportItems(sb, reportId, items){
     }
 
     const checkinDates = normalizeDates(item.checkin_dates);
+    const deepReflectionDates = normalizeDates(item.deep_reflection_dates);
+    const reflectionDates = normalizeDates(item.reflection_dates)
+      .filter(date => !deepReflectionDates.includes(date));
+    const challengeDates = normalizeDates(item.challenge_dates);
 
     const { data: savedItem, error } = await sb
       .from("weekly_report_items")
@@ -191,6 +197,9 @@ export async function saveWeeklyReportItems(sb, reportId, items){
         cover_image_url: item.cover_image_url || "",
         cover_storage_path: item.cover_storage_path || "",
         checkin_dates: checkinDates,
+        reflection_dates: reflectionDates,
+        deep_reflection_dates: deepReflectionDates,
+        challenge_dates: challengeDates,
         summary: item.summary || "",
         nickname_title: item.nickname_title || "",
         sort_order: i
@@ -329,6 +338,59 @@ async function hasCheckinOnDate(sb, memberId, date){
   return (data || []).length > 0;
 }
 
+export async function deleteWeeklyProxyCheckinAfterFill(sb, checkinId, userId, createdAt){
+  if(!sb || !checkinId || !userId || !createdAt) return false;
+
+  const { data: proxy, error: proxyError } = await sb
+    .from("checkins")
+    .select("id, member_id, source, user_id, claimed_at, created_at")
+    .eq("id", checkinId)
+    .maybeSingle();
+
+  if(proxyError || !proxy){
+    console.error("load weekly proxy before cleanup error:", proxyError);
+    return false;
+  }
+
+  if(
+    proxy.source !== "weekly_report" ||
+    proxy.user_id ||
+    proxy.claimed_at ||
+    String(proxy.created_at || "").slice(0, 10) !== String(createdAt).slice(0, 10)
+  ){
+    return false;
+  }
+
+  const { data: profile, error: profileError } = await sb
+    .from("profiles")
+    .select("member_id")
+    .eq("id", userId)
+    .single();
+
+  if(profileError || !profile?.member_id || profile.member_id !== proxy.member_id){
+    console.error("weekly proxy cleanup member mismatch:", profileError);
+    return false;
+  }
+
+  const { data: deleted, error: deleteError } = await sb
+    .from("checkins")
+    .delete()
+    .eq("id", checkinId)
+    .eq("source", "weekly_report")
+    .eq("member_id", profile.member_id)
+    .is("user_id", null)
+    .is("claimed_at", null)
+    .select("id")
+    .maybeSingle();
+
+  if(deleteError || !deleted){
+    console.error("delete weekly proxy after fill error:", deleteError);
+    return false;
+  }
+
+  return true;
+}
+
 export async function claimWeeklyProxyCheckin(sb, checkinId, userId){
   const { data: checkin, error: checkinError } = await sb
     .from("checkins")
@@ -386,8 +448,15 @@ export async function claimWeeklyProxyCheckin(sb, checkinId, userId){
 function normalizeDates(dates){
   if(!Array.isArray(dates)) return [];
 
-  return dates
-    .map(x => String(x || "").trim())
-    .filter(Boolean)
-    .sort();
+  return [...new Set(
+    dates
+      .map(x => String(x || "").trim())
+      .filter(Boolean)
+  )].sort();
+}
+
+function normalizeMultiplier(value){
+  const multiplier = Number(value);
+  if(!Number.isFinite(multiplier)) return 1;
+  return Math.min(5, Math.max(1, multiplier));
 }
