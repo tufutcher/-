@@ -383,7 +383,7 @@ async function exportEditorPoster(report, exportBtn){
     link.download = "creative-report.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
-    window.showToast?.("周报图片已生成", "完成", "success");
+    window.showToast?.("报告图片已生成", "完成", "success");
   }catch(err){
     console.error("export weekly poster error:", err);
     window.showToast?.("图片生成失败", "错误", "error");
