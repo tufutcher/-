@@ -47,7 +47,7 @@ export function summarizeXp(reports, start, end){
       name:person.name,
       dates,
       draw:dates.filter(day => day.checkin).length,
-      reflect:dates.filter(day => day.reflection > 0).length,
+      reflect:dates.filter(day => day.reflection === 10).length,
       deep:dates.filter(day => day.reflection === 20).length,
       challenge:dates.filter(day => day.challenge > 0).length,
       xp:dates.reduce((total, day) => total + (day.checkin ? 10 : 0) + day.reflection + day.challenge, 0)
@@ -203,7 +203,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
       people:chosen.length,
       xp:chosen.reduce((total, person) => total + person.xp, 0),
       draw:chosen.reduce((total, person) => total + person.draw, 0),
-      reflect:chosen.reduce((total, person) => total + person.reflect, 0),
+      reflect:chosen.reduce((total, person) => total + person.reflect + person.deep, 0),
       challenge:chosen.reduce((total, person) => total + person.challenge, 0)
     };
 
@@ -296,13 +296,13 @@ function renderPersonRow(person, index, period, mode){
       <div class="weekly-xp-rank-number">${ordinal}</div>
       <div class="weekly-xp-member">
         <strong>${escapeHtml(person.name)}</strong>
-        <span>绘画 ${person.draw} 天 · 反思 ${person.reflect} 天 · 深度 ${person.deep} 天 · 挑战 ${person.challenge} 天</span>
+        <span>绘画 ${person.draw} 天 · 有效反思 ${person.reflect} 天 · 深度反思 ${person.deep} 天 · 挑战 ${person.challenge} 天</span>
       </div>
       <div class="weekly-xp-score"><b>${person.xp}</b><span>XP</span></div>
       <div class="weekly-xp-counts">
         <span><i class="draw"></i>画 <b>${person.draw}</b></span>
-        <span><i class="reflect"></i>反 <b>${person.reflect}</b></span>
-        <span><i class="deep"></i>深 <b>${person.deep}</b></span>
+        <span><i class="reflect"></i>有效 <b>${person.reflect}</b></span>
+        <span><i class="deep"></i>深度 <b>${person.deep}</b></span>
         <span><i class="challenge"></i>挑 <b>${person.challenge}</b></span>
       </div>
       <div class="weekly-xp-calendar-wrap">
