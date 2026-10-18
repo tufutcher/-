@@ -5,6 +5,7 @@ import {
 } from "../api/weekly_report.js";
 
 import { openWeeklyEditor } from "./weekly_editor.js";
+import { openWeeklyXpOverview } from "./weekly_xp.js";
 
 let weeklyReportsCache = [];
 
@@ -37,6 +38,7 @@ export async function openWeeklyReportManager(){
     <h3>已有周报</h3>
 
     <div class="weekly-list-actions">
+      <button id="weekly-xp-show" type="button">月度 XP</button>
       <button id="weekly-create" type="button">
         新建周报
       </button>
@@ -61,6 +63,7 @@ function bindWeeklyBaseEvents(modal){
   const close = modal.querySelector("#weekly-close");
   const refresh = modal.querySelector("#weekly-refresh");
   const create = modal.querySelector("#weekly-create");
+  modal.querySelector("#weekly-xp-show")?.addEventListener("click",openWeeklyXpOverview);
 
   if(close){
     close.onclick = () => modal.remove();
