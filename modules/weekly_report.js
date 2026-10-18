@@ -165,7 +165,7 @@ function bindWeeklyListEvents(){
 
         const ok = await window.showConfirm?.({
           title: "删除报告？",
-          message: "删除这一份报告。,
+          message: "删除这一份报告。",
           confirmText: "删除",
           cancelText: "取消"
         });
@@ -181,7 +181,7 @@ function bindWeeklyListEvents(){
 
         if(success){
           window.showToast?.(
-            "周报已删除",
+            "报告已删除",
             "完成",
             "success"
           );
@@ -206,7 +206,6 @@ async function handleCreateWeeklyReport(){
     window.__sb,
     {
       title: "本周创作报告",
-      hide_member_text: true,
       start_date: startDate,
       end_date: endDate,
       theme_color: "#ff6a16",
