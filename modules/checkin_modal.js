@@ -1,4 +1,5 @@
 import { uploadImage } from "../api/storage.js";
+import { deleteWeeklyProxyCheckinAfterFill } from "../api/weekly_report.js";
 import {
   createCheckin,
   addCheckinImage,
@@ -32,6 +33,7 @@ let selectedImageId = null;
 
 let checkinModalOptions = {
   presetDate: "",
+  proxyCheckinId: "",
   onSuccess: null
 };
 
@@ -125,6 +127,7 @@ export function openCheckinModal(options = {}){
 
   checkinModalOptions = {
     presetDate: options.presetDate || "",
+    proxyCheckinId: options.proxyCheckinId || "",
     onSuccess: typeof options.onSuccess === "function"
       ? options.onSuccess
       : null
@@ -744,6 +747,15 @@ async function submitCheckin(modal){
 
   modal.remove();
   window.showConfettiSuccess?.("打卡成功！");
+
+  if(checkinModalOptions.proxyCheckinId){
+    const cleared = await deleteWeeklyProxyCheckinAfterFill(
+      sb, checkinModalOptions.proxyCheckinId, user.id, createdAt
+    );
+    if(!cleared){
+      window.showToast?.("正式打卡已成功，但旧周报占位未清理。请联系管理员处理。", "需要检查", "error");
+    }
+  }
 
   await refreshCheckins(sb);
 
