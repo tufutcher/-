@@ -1,4 +1,5 @@
 import { loadWeeklyReports } from "../api/weekly_report.js";
+import { exportXpLeaderboardPng } from "./weekly_xp_export.js";
 
 const WEEKDAYS = ["一","二","三","四","五","六","日"];
 
@@ -87,11 +88,13 @@ export async function openWeeklyXpOverview(initialMode = "month"){
             <button id="weekly-xp-next" type="button" aria-label="下一期">›</button>
             <button id="weekly-xp-reload" type="button">刷新</button>
             <button id="weekly-xp-poster-toggle" type="button" class="weekly-xp-primary-button">全图海报模式</button>
+            <button id="weekly-xp-export-png" type="button" class="weekly-xp-export-button">导出长图 PNG</button>
           </div>
         </div>
       </div>
       <div id="weekly-xp-poster-wrap"><p class="weekly-xp-loading">正在读取 XP 记录…</p></div>
       <button id="weekly-xp-exit-poster" type="button">退出海报模式（Esc）</button>
+      <button id="weekly-xp-export-poster" type="button">导出长图 PNG</button>
     </div>`;
 
   document.body.appendChild(modal);
@@ -272,6 +275,13 @@ export async function openWeeklyXpOverview(initialMode = "month"){
   modal.querySelector("#weekly-xp-reload").onclick = refresh;
   posterToggle.onclick = () => setPosterMode(!modal.classList.contains("poster-mode"));
   exitPoster.onclick = () => setPosterMode(false);
+  const doExport = button => {
+    const range = getPeriod();
+    const tag = mode === "week" ? `周榜_${range.start}_${range.end}` : `月榜_${range.start.slice(0,7)}`;
+    exportXpLeaderboardPng(modal, button, `创作XP_${tag}`).catch(() => {});
+  };
+  modal.querySelector("#weekly-xp-export-png").onclick = event => doExport(event.currentTarget);
+  modal.querySelector("#weekly-xp-export-poster").onclick = event => doExport(event.currentTarget);
 
   function movePeriod(direction){
     if(mode === "week"){
