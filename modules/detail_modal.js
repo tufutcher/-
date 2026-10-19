@@ -219,6 +219,7 @@ export function openProfileCheckinDetail(item, readonly = false){
 
       openCheckinModal({
         presetDate,
+        proxyCheckinId: item.id,
         onSuccess: () => {
           // 不强制刷新，避免提交后跳回首页
         }

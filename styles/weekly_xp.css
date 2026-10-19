@@ -1,0 +1,662 @@
+#weekly-xp-overview{
+  z-index:1100;
+  padding:22px;
+  box-sizing:border-box;
+  overflow:auto;
+  align-items:flex-start;
+}
+#weekly-xp-overview .weekly-xp-dialog{
+  width:min(1180px,96vw);
+  max-height:calc(100vh - 44px);
+  overflow:auto;
+  border-radius:20px;
+  background:#f5f5f7;
+  padding:20px;
+  color:#202024;
+  box-sizing:border-box;
+  box-shadow:0 24px 80px rgba(0,0,0,.2);
+}
+#weekly-xp-overview button,
+#weekly-xp-overview input,
+#weekly-xp-overview select{font:inherit}
+#weekly-xp-overview button{cursor:pointer}
+#weekly-xp-overview .weekly-xp-toolbar-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  margin-bottom:16px;
+}
+#weekly-xp-overview .weekly-xp-eyebrow{
+  margin:0 0 5px;
+  color:#85858d;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+#weekly-xp-overview .weekly-xp-toolbar-head h2{
+  margin:0 0 5px;
+  color:#19191d;
+  font-size:25px;
+  letter-spacing:-.7px;
+}
+#weekly-xp-overview .weekly-xp-toolbar-head p:last-child{
+  margin:0;
+  color:#777780;
+  font-size:12px;
+  line-height:1.5;
+}
+#weekly-xp-overview .weekly-xp-quiet-button{
+  padding:8px 13px;
+  border:1px solid #dedee3;
+  border-radius:9px;
+  background:#fff;
+  color:#44444b;
+  font-size:12px;
+  font-weight:800;
+}
+#weekly-xp-overview .weekly-xp-toolbar{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  border:1px solid #e7e7eb;
+  border-radius:14px;
+  background:#fff;
+}
+#weekly-xp-overview .weekly-xp-mode-switch{
+  display:flex;
+  gap:3px;
+  padding:3px;
+  border-radius:10px;
+  background:#f0f0f3;
+}
+#weekly-xp-overview .weekly-xp-mode-switch button{
+  border:0;
+  border-radius:8px;
+  padding:8px 12px;
+  background:transparent;
+  color:#65656e;
+  font-size:12px;
+  font-weight:850;
+}
+#weekly-xp-overview .weekly-xp-mode-switch button.is-active{
+  background:#202024;
+  color:#fff;
+}
+#weekly-xp-overview .weekly-xp-toolbar label{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#575760;
+  font-size:12px;
+  font-weight:800;
+}
+#weekly-xp-overview input,
+#weekly-xp-overview select{
+  min-height:34px;
+  min-width:0;
+  border:1px solid #dedee4;
+  border-radius:8px;
+  padding:5px 9px;
+  background:#fff;
+  color:#222;
+  box-sizing:border-box;
+  font-size:12px;
+}
+#weekly-xp-overview .weekly-xp-toolbar-actions{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-left:auto;
+}
+#weekly-xp-overview .weekly-xp-toolbar-actions button{
+  min-height:34px;
+  padding:7px 10px;
+  border:1px solid #dedee4;
+  border-radius:8px;
+  background:#fff;
+  color:#3d3d44;
+  font-size:12px;
+  font-weight:850;
+}
+#weekly-xp-overview .weekly-xp-toolbar-actions .weekly-xp-primary-button{
+  border-color:#242428;
+  background:#242428;
+  color:#fff;
+}
+#weekly-xp-overview .weekly-xp-loading,
+#weekly-xp-overview .weekly-xp-error{
+  padding:28px;
+  color:#666;
+  text-align:center;
+}
+#weekly-xp-overview .weekly-xp-poster{
+  width:100%;
+  margin-top:16px;
+  padding:30px 32px 22px;
+  border:1px solid #ececf0;
+  border-radius:16px;
+  background:#fff;
+  color:#202024;
+  box-sizing:border-box;
+  box-shadow:0 5px 22px rgba(20,20,30,.045);
+}
+#weekly-xp-overview .weekly-xp-poster-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  padding-bottom:21px;
+  border-bottom:2px solid #202024;
+}
+#weekly-xp-overview .weekly-xp-poster-brand{
+  color:#25252a;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.5px;
+}
+#weekly-xp-overview .weekly-xp-poster-brand span{
+  margin-left:8px;
+  color:#9b9ba3;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1.6px;
+}
+#weekly-xp-overview .weekly-xp-poster-header h1{
+  margin:13px 0 5px;
+  color:#18181b;
+  font-size:clamp(25px,3vw,38px);
+  font-weight:950;
+  letter-spacing:-1.3px;
+  line-height:1.1;
+}
+#weekly-xp-overview .weekly-xp-period{
+  margin:0;
+  color:#73737b;
+  font-size:13px;
+  font-weight:750;
+  letter-spacing:.7px;
+}
+#weekly-xp-overview .weekly-xp-poster-mark{
+  flex-shrink:0;
+  padding:8px 0 0 16px;
+  border-left:1px solid #e5e5e8;
+  color:#242428;
+  font-size:26px;
+  font-weight:1000;
+  line-height:.95;
+  text-align:right;
+}
+#weekly-xp-overview .weekly-xp-poster-mark span{
+  color:#8c8c94;
+  font-size:9px;
+  letter-spacing:1.6px;
+}
+#weekly-xp-overview .weekly-xp-overview-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:17px 0 25px;
+}
+#weekly-xp-overview .weekly-xp-metric{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:end;
+  gap:4px 8px;
+  padding:13px 15px;
+  border:1px solid #ececf0;
+  border-radius:11px;
+  background:#fafafd;
+}
+#weekly-xp-overview .weekly-xp-metric>span{
+  grid-column:1/-1;
+  color:#74747d;
+  font-size:11px;
+  font-weight:800;
+}
+#weekly-xp-overview .weekly-xp-metric strong{
+  color:#202024;
+  font-size:25px;
+  font-weight:1000;
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+#weekly-xp-overview .weekly-xp-metric small{
+  color:#85858d;
+  font-size:10px;
+  font-weight:800;
+}
+#weekly-xp-overview .weekly-xp-ranking-heading{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+#weekly-xp-overview .weekly-xp-ranking-heading span{
+  color:#9a9aa2;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+#weekly-xp-overview .weekly-xp-ranking-heading h2{
+  margin:4px 0 0;
+  font-size:19px;
+  font-weight:950;
+  letter-spacing:-.4px;
+}
+#weekly-xp-overview .weekly-xp-ranking-heading small{
+  color:#888891;
+  font-size:10px;
+}
+#weekly-xp-overview .weekly-xp-table-head,
+#weekly-xp-overview .weekly-xp-person-row{
+  display:grid;
+  grid-template-columns:36px minmax(150px,.9fr) minmax(195px,.9fr) minmax(250px,1.15fr) minmax(125px,.55fr);
+  gap:12px;
+  align-items:center;
+}
+#weekly-xp-overview .weekly-xp-table-head{
+  padding:10px 12px;
+  border-radius:8px 8px 0 0;
+  background:#25252a;
+  color:#fff;
+  font-size:10px;
+  font-weight:850;
+  letter-spacing:.3px;
+}
+#weekly-xp-overview .weekly-xp-person-row{
+  padding:13px 12px;
+  border-bottom:1px solid #e9e9ed;
+  background:#fff;
+}
+#weekly-xp-overview .weekly-xp-person-row:nth-child(even){background:#fbfbfc}
+
+/* 周榜左侧显示打卡徽章；月榜保留数字排名。 */
+#weekly-xp-overview .weekly-xp-rank-slot{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+}
+#weekly-xp-overview .weekly-xp-rank-number.is-month-rank{
+  color:#8b8b94;
+  font-size:17px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+#weekly-xp-overview .weekly-xp-lead-badge{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:11px;
+  font-size:17px;
+  line-height:1;
+  box-sizing:border-box;
+}
+#weekly-xp-overview .weekly-xp-lead-badge.is-purple{background:#8b5bd6;color:#fff}
+#weekly-xp-overview .weekly-xp-lead-badge.is-red{background:#ed5555;color:#fff}
+#weekly-xp-overview .weekly-xp-lead-badge.is-yellow{background:#f2c94c;color:#5c4700}
+#weekly-xp-overview .weekly-xp-lead-badge.is-muted{background:#e3e3e8;color:#999}
+#weekly-xp-overview .weekly-xp-badge-dot{
+  display:block;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#fff;
+}
+
+/* 周榜底色只在左侧较明显，向右逐渐淡出，保证统计文字区干净。 */
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-purple{
+  background:linear-gradient(90deg,#eee5ff 0%,#f7f3ff 31%,#fff 72%);
+}
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-red{
+  background:linear-gradient(90deg,#ffe7e7 0%,#fff4f4 31%,#fff 72%);
+}
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-yellow{
+  background:linear-gradient(90deg,#fff3c9 0%,#fffae9 31%,#fff 72%);
+}
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-muted{
+  background:linear-gradient(90deg,#ededf1 0%,#f8f8fa 31%,#fff 72%);
+}
+
+#weekly-xp-overview .weekly-xp-badges{
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:5px;
+  min-width:0;
+  white-space:nowrap;
+}
+#weekly-xp-overview .weekly-xp-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:24px;
+  height:24px;
+  padding:0 5px;
+  border-radius:8px;
+  font-size:17px;
+  line-height:1;
+  flex:0 0 auto;
+  box-sizing:border-box;
+}
+#weekly-xp-overview .weekly-xp-badge.is-purple{background:#8b5bd6;color:#fff}
+#weekly-xp-overview .weekly-xp-badge.is-red{background:#ed5555;color:#fff}
+#weekly-xp-overview .weekly-xp-badge.is-yellow{background:#f2c94c;color:#5c4700}
+#weekly-xp-overview .weekly-xp-badge.is-muted{
+  min-width:14px;
+  width:14px;
+  height:14px;
+  padding:0;
+  border-radius:50%;
+  background:#e3e3e8;
+}
+/* 月榜徽章统一灰底，保留各徽章自己的图标/文字色。 */
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge{
+  background:#eeeef2;
+}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-purple{color:#7950c7}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-red{color:#d94a4a}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-yellow{color:#9a7300}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-muted{
+  min-width:14px;
+  width:14px;
+  height:14px;
+  background:#e3e3e8;
+}
+#weekly-xp-overview .weekly-xp-member{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:5px;
+}
+#weekly-xp-overview .weekly-xp-member strong{
+  overflow-wrap:anywhere;
+  color:#242429;
+  font-size:19px;
+  font-weight:950;
+  letter-spacing:-.35px;
+}
+#weekly-xp-overview .weekly-xp-member-heading{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px 8px;
+  min-width:0;
+}
+#weekly-xp-overview .weekly-xp-badges{
+  display:flex;
+  align-items:center;
+  flex-wrap:nowrap;
+  gap:2px;
+  min-width:0;
+  white-space:nowrap;
+}
+
+#weekly-xp-overview .weekly-xp-member span{
+  color:#8a8a92;
+  font-size:9px;
+  line-height:1.4;
+}
+#weekly-xp-overview .weekly-xp-score{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  min-width:0;
+  color:#25252a;
+  text-align:right;
+}
+#weekly-xp-overview .weekly-xp-score-breakdown{
+  display:flex;
+  align-items:baseline;
+  justify-content:flex-end;
+  gap:4px;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+#weekly-xp-overview .weekly-xp-score-breakdown>span:first-child{
+  color:#8c8c95;
+  font-size:15px;
+  font-weight:750;
+}
+#weekly-xp-overview .weekly-xp-score-plus{
+  color:#a3a3aa;
+  font-size:13px;
+  font-weight:700;
+}
+#weekly-xp-overview .weekly-xp-score-breakdown b{
+  color:#202024;
+  font-size:27px;
+  font-weight:1000;
+  line-height:1;
+}
+#weekly-xp-overview .weekly-xp-score-breakdown small{
+  color:#777780;
+  font-size:10px;
+  font-weight:900;
+}
+#weekly-xp-overview .weekly-xp-counts{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px 8px;
+}
+#weekly-xp-overview .weekly-xp-counts span{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:#696971;
+  font-size:10px;
+  white-space:nowrap;
+}
+#weekly-xp-overview .weekly-xp-counts .weekly-xp-count-draw{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:max-content;
+  max-width:100%;
+  padding:5px 8px;
+  border-radius:6px;
+  background:#0CC0DF;
+  color:#fff;
+  font-weight:850;
+}
+#weekly-xp-overview .weekly-xp-counts .weekly-xp-count-draw b{color:#fff;}
+#weekly-xp-overview .weekly-xp-counts b{
+  color:#25252a;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+}
+#weekly-xp-overview .weekly-xp-counts i,
+#weekly-xp-overview .weekly-xp-legend i,
+#weekly-xp-overview .weekly-xp-day i{
+  display:inline-block;
+  flex-shrink:0;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+}
+#weekly-xp-overview i.draw{background:#0CC0DF}
+#weekly-xp-overview i.reflect{background:#398CE6}
+#weekly-xp-overview i.deep{background:#8B5BD6}
+#weekly-xp-overview i.challenge{background:#ED5555}
+#weekly-xp-overview .weekly-xp-legend span:first-child{
+  padding:5px 8px;
+  border-radius:6px;
+  background:#0CC0DF;
+  color:#fff;
+}
+#weekly-xp-overview .weekly-xp-legend span:first-child i{display:none}
+#weekly-xp-overview .weekly-xp-calendar-wrap{min-width:0}
+#weekly-xp-overview .weekly-xp-calendar-label{
+  margin-bottom:5px;
+  color:#a0a0a7;
+  font-size:8px;
+  font-weight:850;
+  text-align:right;
+}
+#weekly-xp-overview .weekly-xp-mini-calendar{width:100%;max-width:280px;margin-left:auto}
+#weekly-xp-overview .weekly-xp-weekdays,
+#weekly-xp-overview .weekly-xp-calendar-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:2px;
+}
+#weekly-xp-overview .weekly-xp-weekdays{margin-bottom:3px}
+#weekly-xp-overview .weekly-xp-weekdays span{
+  color:#aaaab1;
+  font-size:8px;
+  line-height:10px;
+  text-align:center;
+}
+#weekly-xp-overview .weekly-xp-day{
+  position:relative;
+  display:flex;
+  min-width:0;
+  height:21px;
+  align-items:center;
+  justify-content:center;
+  border-radius:3px;
+  background:#f0f0f3;
+  color:#7e7e87;
+  box-sizing:border-box;
+}
+#weekly-xp-overview .weekly-xp-day b{
+  font-size:8px;
+  font-weight:750;
+  line-height:1;
+}
+#weekly-xp-overview .weekly-xp-day>span{
+  position:absolute;
+  right:1px;
+  bottom:1px;
+  display:flex;
+  gap:1px;
+}
+#weekly-xp-overview .weekly-xp-day i{width:3px;height:3px}
+#weekly-xp-overview .weekly-xp-day.is-active{background:#e7faff;color:#202024;outline:1px solid #bceef7}
+#weekly-xp-overview .weekly-xp-day.is-blank{visibility:hidden;background:transparent}
+#weekly-xp-overview .weekly-xp-mini-calendar.is-week .weekly-xp-day{height:28px}
+#weekly-xp-overview .weekly-xp-mini-calendar.is-week .weekly-xp-day b{font-size:10px}
+#weekly-xp-overview .weekly-xp-mini-calendar.is-month .weekly-xp-day b{font-size:9px}
+#weekly-xp-overview .weekly-xp-poster-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:17px;
+  padding-top:13px;
+  border-top:1px solid #e8e8ec;
+}
+#weekly-xp-overview .weekly-xp-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
+#weekly-xp-overview .weekly-xp-legend span{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  color:#65656e;
+  font-size:9px;
+  font-weight:750;
+}
+#weekly-xp-overview .weekly-xp-poster-footer p{
+  margin:0;
+  color:#9a9aa2;
+  font-size:9px;
+}
+#weekly-xp-overview .weekly-xp-empty-state{
+  margin-top:24px;
+  padding:44px 20px;
+  border:1px dashed #dedee5;
+  border-radius:12px;
+  color:#777780;
+  font-size:14px;
+  text-align:center;
+}
+#weekly-xp-overview #weekly-xp-exit-poster{display:none}
+#weekly-xp-overview.poster-mode{
+  position:fixed;
+  inset:0;
+  display:block;
+  overflow:auto;
+  padding:20px;
+  background:#e8e8ec;
+}
+#weekly-xp-overview.poster-mode .weekly-xp-dialog{
+  width:100%;
+  max-width:1360px;
+  max-height:none;
+  overflow:visible;
+  margin:0 auto;
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+#weekly-xp-overview.poster-mode .weekly-xp-controls{display:none}
+#weekly-xp-overview.poster-mode .weekly-xp-poster{
+  margin:0;
+  border-radius:0;
+  box-shadow:0 8px 36px rgba(20,20,30,.09);
+}
+#weekly-xp-overview.poster-mode #weekly-xp-exit-poster{
+  position:fixed;
+  right:12px;
+  bottom:12px;
+  display:block;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:9px;
+  background:rgba(30,30,35,.82);
+  color:#fff;
+  font-size:10px;
+  opacity:.25;
+  transition:opacity .15s ease;
+}
+#weekly-xp-overview.poster-mode #weekly-xp-exit-poster:hover{opacity:1}
+@media(max-width:900px){
+  #weekly-xp-overview{padding:8px}
+  #weekly-xp-overview .weekly-xp-dialog{width:100%;max-height:calc(100vh - 16px);padding:10px;border-radius:13px}
+  #weekly-xp-overview .weekly-xp-toolbar-head h2{font-size:21px}
+  #weekly-xp-overview .weekly-xp-toolbar-actions{margin-left:0}
+  #weekly-xp-overview .weekly-xp-poster{padding:18px 14px}
+  #weekly-xp-overview .weekly-xp-overview-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  #weekly-xp-overview .weekly-xp-metric{padding:10px}
+  #weekly-xp-overview .weekly-xp-metric strong{font-size:21px}
+  #weekly-xp-overview .weekly-xp-table-head{display:none}
+  #weekly-xp-overview .weekly-xp-person-row{
+    grid-template-columns:28px minmax(0,1fr) max-content;
+    gap:8px;
+    padding:12px 8px;
+  }
+  #weekly-xp-overview .weekly-xp-rank-slot{justify-content:flex-start}
+  #weekly-xp-overview .weekly-xp-lead-badge{width:26px;height:26px;flex-basis:26px;border-radius:8px;font-size:14px}
+  #weekly-xp-overview .weekly-xp-rank-number.is-month-rank{font-size:13px}
+  #weekly-xp-overview .weekly-xp-member strong{font-size:17px}
+  #weekly-xp-overview .weekly-xp-counts{grid-column:2/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr))}
+  #weekly-xp-overview .weekly-xp-calendar-wrap{grid-column:2/4;grid-row:3}
+  #weekly-xp-overview .weekly-xp-score{grid-column:3;grid-row:1}
+  #weekly-xp-overview .weekly-xp-score-breakdown{gap:3px}
+  #weekly-xp-overview .weekly-xp-score-breakdown>span:first-child{font-size:12px}
+  #weekly-xp-overview .weekly-xp-score-breakdown b{font-size:22px}
+  #weekly-xp-overview .weekly-xp-score-breakdown small{font-size:9px}
+  #weekly-xp-overview .weekly-xp-mini-calendar{max-width:none}
+  #weekly-xp-overview .weekly-xp-mini-calendar.is-month .weekly-xp-day{height:24px}
+  #weekly-xp-overview.poster-mode{padding:8px}
+  #weekly-xp-overview.poster-mode .weekly-xp-poster{padding:18px 10px}
+}
+@media print{
+  #weekly-xp-overview .weekly-xp-controls,
+  #weekly-xp-overview #weekly-xp-exit-poster{display:none!important}
+  #weekly-xp-overview .weekly-xp-poster{box-shadow:none!important;border:0!important}
+}

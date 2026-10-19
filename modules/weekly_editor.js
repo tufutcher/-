@@ -31,6 +31,8 @@ export function openWeeklyEditor(report){
   editorNameFont = Number(report.poster_name_font) || 28;
   editorCardFont = Number(report.poster_card_font) || 16;
   editorEventFont = Number(report.poster_event_font) || 10;
+  report.challenge_multiplier = Number(report.challenge_multiplier) || 1;
+  report.hide_member_text = report.hide_member_text !== false;
 
   Object.assign(report, {
     poster_columns: editorColumns,
@@ -62,7 +64,7 @@ export function openWeeklyEditor(report){
   <aside class="weekly-editor-sidebar">
     <div class="weekly-editor-sidebar-head">
       <h2>编辑内容</h2>
-      <p>切换编辑成员或本周事件。</p>
+      <p>切换编辑成员或本期事件。</p>
     </div>
 
     <div class="weekly-editor-panel-switch">
@@ -78,7 +80,7 @@ export function openWeeklyEditor(report){
     <div class="weekly-editor-side-panel ${editorPanel === "events" ? "is-active" : ""}" data-panel-name="events">
       <div class="weekly-event-editor">
         <div class="weekly-event-editor-head">
-          <strong>本周事件</strong>
+          <strong>本期事件</strong>
           <span>空日期不会显示。</span>
         </div>
         <div id="editor-event-list"></div>
@@ -98,7 +100,9 @@ export function openWeeklyEditor(report){
         <label><span>事件字</span><input type="range" id="editor-event-font" min="1" max="20" value="${editorEventFont}"><em id="editor-event-font-value">${editorEventFont}</em></label>
       </div>
       <div class="weekly-settings-actions">
-        <button id="editor-save" class="editor-save" type="button">保存周报</button>
+        <label class="weekly-xp-multiplier">挑战倍率 <select id="editor-challenge-multiplier"><option value="1">×1</option><option value="2">×2</option><option value="3">×3</option></select></label>
+        <label class="weekly-hide-member-text"><input id="editor-hide-member-text" type="checkbox" ${report.hide_member_text ? "checked" : ""}>隐藏评价和称号</label>
+        <button id="editor-save" class="editor-save" type="button">保存报告</button>
         <button id="editor-export" class="editor-export" type="button">导出图片</button>
       </div>
     </div>
@@ -114,6 +118,18 @@ export function openWeeklyEditor(report){
   renderEditorMembers(report);
   renderEditorPoster(report);
   bindEditorEvents(report, modal);
+  const hideMemberText = modal.querySelector("#editor-hide-member-text");
+  if(hideMemberText){
+    hideMemberText.onchange = () => {
+      report.hide_member_text = hideMemberText.checked;
+      renderEditorPoster(report);
+    };
+  }
+  const multiplier = modal.querySelector("#editor-challenge-multiplier");
+  if(multiplier){
+    multiplier.value = String([1,2,3].includes(Number(report.challenge_multiplier)) ? report.challenge_multiplier : 1);
+    multiplier.onchange = () => { report.challenge_multiplier = Number(multiplier.value) || 1; renderEditorMembers(report); };
+  }
 }
 
 function ensureWeeklyEditorPatchCss(){
@@ -185,10 +201,17 @@ function bindEditorEvents(report, modal){
     }
 
     report.weekly_report_items = report.weekly_report_items || [];
+    if(report.weekly_report_items.some(item => item.member_id === member.id)){
+      window.showToast?.("成员已经在本期周报中", "提示");
+      return;
+    }
     report.weekly_report_items.push({
       member_id: member.id,
       display_name: member.display_name,
       checkin_dates: [],
+      reflection_dates: [],
+      deep_reflection_dates: [],
+      challenge_dates: [],
       cover_image_url: "",
       cover_storage_path: "",
       summary: "",
@@ -287,11 +310,13 @@ async function saveEditorReport(report, modal, save){
       poster_columns: editorColumns,
       poster_name_font: editorNameFont,
       poster_card_font: editorCardFont,
-      poster_event_font: editorEventFont
+      poster_event_font: editorEventFont,
+      challenge_multiplier: report.challenge_multiplier,
+      hide_member_text: report.hide_member_text
     });
 
     if(settingsResult.error){
-      window.showToast?.("周报设置保存失败", "错误", "error");
+      window.showToast?.("报告设置保存失败", "错误", "error");
       return;
     }
 
@@ -301,7 +326,7 @@ async function saveEditorReport(report, modal, save){
 
     if(result){
       report.weekly_report_items = result;
-      window.showToast?.("周报保存成功", "完成", "success");
+      window.showToast?.("报告保存成功", "完成", "success");
       renderEditorEvents(report, modal);
       renderEditorMembers(report);
       renderEditorPoster(report);
@@ -310,7 +335,7 @@ async function saveEditorReport(report, modal, save){
     }
   }finally{
     save.disabled = false;
-    save.textContent = "保存周报";
+    save.textContent = "保存报告";
   }
 }
 
@@ -355,10 +380,10 @@ async function exportEditorPoster(report, exportBtn){
     });
 
     const link = document.createElement("a");
-    link.download = "weekly-report.png";
+    link.download = "creative-report.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
-    window.showToast?.("周报图片已生成", "完成", "success");
+    window.showToast?.("报告图片已生成", "完成", "success");
   }catch(err){
     console.error("export weekly poster error:", err);
     window.showToast?.("图片生成失败", "错误", "error");
@@ -507,7 +532,11 @@ function renderEditorMembers(report){
     <button class="editor-remove-member" data-index="${index}" type="button">删除</button>
   </div>
 
-  <label>打卡日期<div class="editor-date-list">${renderEditorDates(report, item, index)}</div></label>
+  <div class="weekly-xp-row"><strong>绘画打卡 · +10</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "checkin_dates")}</div></div>
+  <div class="weekly-xp-row"><strong>有效反思 · +10</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "reflection_dates")}</div></div>
+  <div class="weekly-xp-row"><strong>深度反思 · +20</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "deep_reflection_dates")}</div></div>
+  <div class="weekly-xp-row"><strong>主题挑战 · +10 × ${Number(report.challenge_multiplier) || 1}</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "challenge_dates")}</div></div>
+  <div class="weekly-xp-totals">本期 ${calcWeeklyXp(item, report.challenge_multiplier)} XP · 绘画 ${(item.checkin_dates || []).length} 天 · 反思 ${new Set([...(item.reflection_dates || []),...(item.deep_reflection_dates || [])]).size} 天</div>
 
   <label>代表图
     <div class="editor-cover-box">
@@ -523,10 +552,10 @@ function renderEditorMembers(report){
   bindEditorMemberEvents(report);
 }
 
-function renderEditorDates(report, item, index){
+function renderEditorDates(report, item, index, field){
   return getDateRange(report.start_date, report.end_date).map(date => `
 <label class="editor-date-item">
-  <input type="checkbox" data-date-index="${index}" value="${date}" ${(item.checkin_dates || []).includes(date) ? "checked" : ""}>
+  <input type="checkbox" data-date-index="${index}" data-date-field="${field}" value="${date}" ${(item[field] || []).includes(date) ? "checked" : ""}>
   ${date.slice(5)}
 </label>`).join("");
 }
@@ -543,9 +572,13 @@ function bindEditorMemberEvents(report){
   document.querySelectorAll("[data-date-index]").forEach(input => {
     input.onchange = () => {
       const index = Number(input.dataset.dateIndex);
-      report.weekly_report_items[index].checkin_dates = Array.from(
-        document.querySelectorAll(`[data-date-index="${index}"]:checked`)
-      ).map(x => x.value);
+      const field = input.dataset.dateField;
+      const item = report.weekly_report_items[index];
+      if(!item || !["checkin_dates","reflection_dates","deep_reflection_dates","challenge_dates"].includes(field)) return;
+      item[field] = Array.from(document.querySelectorAll(`[data-date-index="${index}"][data-date-field="${field}"]:checked`)).map(x => x.value);
+      if(input.checked && field === "deep_reflection_dates") item.reflection_dates = (item.reflection_dates || []).filter(d => d !== input.value);
+      if(input.checked && field === "reflection_dates") item.deep_reflection_dates = (item.deep_reflection_dates || []).filter(d => d !== input.value);
+      renderEditorMembers(report);
       renderEditorPoster(report);
     };
   });
@@ -664,4 +697,12 @@ function escapeHtml(value){
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function calcWeeklyXp(item, multiplier = 1){
+  const d = new Set(item.checkin_dates || []);
+  const deep = new Set(item.deep_reflection_dates || []);
+  const normal = new Set((item.reflection_dates || []).filter(date => !deep.has(date)));
+  const events = new Set(item.challenge_dates || []);
+  return d.size * 10 + deep.size * 20 + normal.size * 10 + events.size * 10 * (Number(multiplier) || 1);
 }

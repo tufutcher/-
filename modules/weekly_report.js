@@ -5,6 +5,7 @@ import {
 } from "../api/weekly_report.js";
 
 import { openWeeklyEditor } from "./weekly_editor.js";
+import { openWeeklyXpOverview } from "./weekly_xp.js";
 
 let weeklyReportsCache = [];
 
@@ -24,8 +25,8 @@ export async function openWeeklyReportManager(){
 
   <div class="weekly-manager-head">
     <div>
-      <h2>周报生成器</h2>
-      <p>新建周报后，在编辑器里设置标题、日期、主题色和本周事件。</p>
+      <h2>报告生成器</h2>
+      <p>创建报告后，在编辑器里设置日期、主题色、成员记录和本期事件。</p>
     </div>
 
     <button id="weekly-close" type="button">
@@ -34,11 +35,13 @@ export async function openWeeklyReportManager(){
   </div>
 
   <div class="weekly-list-head">
-    <h3>已有周报</h3>
+    <h3>已有报告</h3>
 
     <div class="weekly-list-actions">
+      <button id="weekly-xp-week-show" type="button">周度 XP</button>
+      <button id="weekly-xp-show" type="button">月度 XP</button>
       <button id="weekly-create" type="button">
-        新建周报
+        创建报告
       </button>
 
       <button id="weekly-refresh" type="button">
@@ -61,6 +64,8 @@ function bindWeeklyBaseEvents(modal){
   const close = modal.querySelector("#weekly-close");
   const refresh = modal.querySelector("#weekly-refresh");
   const create = modal.querySelector("#weekly-create");
+  modal.querySelector("#weekly-xp-week-show")?.addEventListener("click",() => openWeeklyXpOverview("week"));
+  modal.querySelector("#weekly-xp-show")?.addEventListener("click",() => openWeeklyXpOverview("month"));
 
   if(close){
     close.onclick = () => modal.remove();
@@ -97,7 +102,7 @@ async function renderWeeklyReportList(){
   if(!weeklyReportsCache.length){
     list.innerHTML = `
 <div class="weekly-empty">
-  还没有周报。
+  还没有报告。
 </div>
 `;
     return;
@@ -159,8 +164,8 @@ function bindWeeklyListEvents(){
         const reportId = btn.dataset.weeklyDelete;
 
         const ok = await window.showConfirm?.({
-          title: "删除周报？",
-          message: "删除这一期周报。",
+          title: "删除报告？",
+          message: "删除这一份报告。",
           confirmText: "删除",
           cancelText: "取消"
         });
@@ -176,7 +181,7 @@ function bindWeeklyListEvents(){
 
         if(success){
           window.showToast?.(
-            "周报已删除",
+            "报告已删除",
             "完成",
             "success"
           );
@@ -208,7 +213,8 @@ async function handleCreateWeeklyReport(){
       poster_columns: 9,
       poster_name_font: 28,
       poster_card_font: 16,
-      poster_event_font: 10
+      poster_event_font: 10,
+      hide_member_text: true
     }
   );
 
@@ -229,7 +235,7 @@ async function handleCreateWeeklyReport(){
   weeklyReportsCache.unshift(report);
 
   window.showToast?.(
-    "周报创建成功",
+    "报告创建成功",
     "完成",
     "success"
   );

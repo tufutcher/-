@@ -7,7 +7,7 @@ export async function loadCheckins(sb){
   return data || [];
 }
 
-export async function createCheckin(sb, userId, username, note, createdAt){
+export async function createCheckin(sb, userId, username, note, createdAt, memberId = null){
   const payload = {
     user_id: userId,
     username,
@@ -16,6 +16,9 @@ export async function createCheckin(sb, userId, username, note, createdAt){
 
   if(createdAt){
     payload.created_at = createdAt;
+  }
+  if(memberId){
+    payload.member_id = memberId;
   }
 
   const { data, error } = await sb

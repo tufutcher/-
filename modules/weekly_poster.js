@@ -28,13 +28,14 @@ export function renderWeeklyPoster(report, wrap, options = {}){
   const isLongRange = dateCount > 7;
   const eventNotes = String(report.event_notes || "").trim();
   const hasEvents = !!eventNotes;
+  const hideMemberText = report.hide_member_text !== false;
   const columns = Math.max(1, Math.min(Number(report.poster_columns || options.columns || 9), items.length || 1));
   const cardWidth = 88;
   const gap = 7;
   const dateRows = isLongRange ? Math.max(1, Math.ceil(dateCount / 7)) : 1;
   const imageHeight = 220;
   const dateLineHeight = dateRows * 16;
-  const maxTextHeight = items.some(hasPosterText) ? 82 : 0;
+  const maxTextHeight = !hideMemberText && items.some(hasPosterText) ? 82 : 0;
   const maxCardHeight = imageHeight + maxTextHeight + dateLineHeight;
   const rows = Math.ceil(items.length / columns);
   const leftWidth = hasEvents ? 205 : 118;
@@ -51,7 +52,7 @@ export function renderWeeklyPoster(report, wrap, options = {}){
       days,
       badges,
       dayClass: getWeeklyDayClass(days),
-      textHtml: renderCardText(item)
+      textHtml: hideMemberText ? "" : renderCardText(item)
     };
   });
 
