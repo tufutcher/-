@@ -624,7 +624,7 @@ function bindEditorMemberEvents(report){
       const date = button.dataset.xpDate;
       const action = button.dataset.xpAction;
       const item = report.weekly_report_items[index];
-      if(!item || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date || "")) return;
+      if(!item || !/^\d{4}-\d{2}-\d{2}$/.test(date || "")) return;
 
       const toggle = field => {
         const values = new Set(item[field] || []);
