@@ -185,7 +185,12 @@ export async function openWeeklyXpOverview(initialMode = "month"){
     // 周榜按本周 XP 排名，同时展示本月此前累计 + 本周新增。
     if(mode === "week"){
       const selectedDate = parseLocalDate(weekInput.value || formatDate(new Date()));
-      const monthStart = `${formatMonth(selectedDate)}-01`;
+      const selectedMonth = formatMonth(selectedDate);
+      const monthStart = `${selectedMonth}-01`;
+      const monthEnd = formatDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0, 12));
+      const monthlyXpById = new Map(
+        summarizeXp(reports, monthStart, monthEnd).map(person => [person.id, person.xp])
+      );
       const priorEndDate = parseLocalDate(period.start);
       priorEndDate.setDate(priorEndDate.getDate() - 1);
       const priorEnd = formatDate(priorEndDate);
@@ -195,7 +200,14 @@ export async function openWeeklyXpOverview(initialMode = "month"){
       summary.forEach(person => {
         person.xpBeforeWeek = priorById.get(person.id) || 0;
         person.weekXp = person.xp;
+        person.monthXp = monthlyXpById.get(person.id) || 0;
       });
+      // 周榜：本周 XP 降序；同分时按整月 XP 降序；再同分按名字排序。
+      summary.sort((a, b) =>
+        b.weekXp - a.weekXp ||
+        b.monthXp - a.monthXp ||
+        a.name.localeCompare(b.name, "zh-CN")
+      );
     }else{
       summary.forEach(person => {
         person.xpBeforeWeek = 0;
