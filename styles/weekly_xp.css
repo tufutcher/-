@@ -274,20 +274,56 @@
 }
 #weekly-xp-overview .weekly-xp-person-row:nth-child(even){background:#fbfbfc}
 
-/* 周/月榜不显示排名数字；用细小中性标记保留左侧对齐。 */
-#weekly-xp-overview .weekly-xp-rank-marker{
-  width:7px;
-  height:7px;
-  justify-self:center;
+/* 周榜左侧显示打卡徽章；月榜保留数字排名。 */
+#weekly-xp-overview .weekly-xp-rank-slot{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+}
+#weekly-xp-overview .weekly-xp-rank-number.is-month-rank{
+  color:#8b8b94;
+  font-size:17px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+#weekly-xp-overview .weekly-xp-lead-badge{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  flex:0 0 34px;
+  border-radius:11px;
+  font-size:17px;
+  line-height:1;
+  box-sizing:border-box;
+}
+#weekly-xp-overview .weekly-xp-lead-badge.is-purple{background:#8b5bd6;color:#fff}
+#weekly-xp-overview .weekly-xp-lead-badge.is-red{background:#ed5555;color:#fff}
+#weekly-xp-overview .weekly-xp-lead-badge.is-yellow{background:#f2c94c;color:#5c4700}
+#weekly-xp-overview .weekly-xp-lead-badge.is-muted{background:#e3e3e8;color:#999}
+#weekly-xp-overview .weekly-xp-badge-dot{
+  display:block;
+  width:6px;
+  height:6px;
   border-radius:50%;
-  background:#d5d5dc;
+  background:#fff;
 }
 
-/* 按该成员本周期内最高的打卡徽章色，整行使用浅色底。 */
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-muted){background:#f5f5f7}
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-yellow){background:#fff9e6}
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-red){background:#fff0ef}
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-purple){background:#f2edff}
+/* 周榜底色只在左侧较明显，向右逐渐淡出，保证统计文字区干净。 */
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-purple{
+  background:linear-gradient(90deg,#eee5ff 0%,#f7f3ff 31%,#fff 72%);
+}
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-red{
+  background:linear-gradient(90deg,#ffe7e7 0%,#fff4f4 31%,#fff 72%);
+}
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-yellow{
+  background:linear-gradient(90deg,#fff3c9 0%,#fffae9 31%,#fff 72%);
+}
+#weekly-xp-overview .weekly-xp-person-row.is-week.tone-muted{
+  background:linear-gradient(90deg,#ededf1 0%,#f8f8fa 31%,#fff 72%);
+}
 
 #weekly-xp-overview .weekly-xp-badges{
   display:flex;
@@ -321,12 +357,18 @@
   border-radius:50%;
   background:#e3e3e8;
 }
-#weekly-xp-overview .weekly-xp-badge-dot{
-  display:block;
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#fff;
+/* 月榜徽章统一灰底，保留各徽章自己的图标/文字色。 */
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge{
+  background:#eeeef2;
+}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-purple{color:#7950c7}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-red{color:#d94a4a}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-yellow{color:#9a7300}
+#weekly-xp-overview .weekly-xp-badges.is-month-badges .weekly-xp-badge.is-muted{
+  min-width:14px;
+  width:14px;
+  height:14px;
+  background:#e3e3e8;
 }
 #weekly-xp-overview .weekly-xp-member{
   display:flex;
@@ -343,8 +385,9 @@
 }
 #weekly-xp-overview .weekly-xp-member-heading{
   display:flex;
-  flex-wrap:wrap;
+  flex-wrap:nowrap;
   align-items:center;
+  justify-content:space-between;
   gap:6px 8px;
   min-width:0;
 }
@@ -596,7 +639,9 @@
     gap:8px;
     padding:12px 8px;
   }
-  #weekly-xp-overview .weekly-xp-rank-marker{width:6px;height:6px}
+  #weekly-xp-overview .weekly-xp-rank-slot{justify-content:flex-start}
+  #weekly-xp-overview .weekly-xp-lead-badge{width:26px;height:26px;flex-basis:26px;border-radius:8px;font-size:14px}
+  #weekly-xp-overview .weekly-xp-rank-number.is-month-rank{font-size:13px}
   #weekly-xp-overview .weekly-xp-member strong{font-size:17px}
   #weekly-xp-overview .weekly-xp-counts{grid-column:2/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr))}
   #weekly-xp-overview .weekly-xp-calendar-wrap{grid-column:2/4;grid-row:3}
