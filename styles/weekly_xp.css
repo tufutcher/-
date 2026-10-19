@@ -284,10 +284,10 @@
 }
 
 /* 按该成员本周期内最高的打卡徽章色，整行使用浅色底。 */
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-purple){background:#f2edff}
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-red){background:#fff0ef}
-#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-yellow){background:#fff9e6}
 #weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-muted){background:#f5f5f7}
+#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-yellow){background:#fff9e6}
+#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-red){background:#fff0ef}
+#weekly-xp-overview .weekly-xp-person-row:has(.weekly-xp-badge.is-purple){background:#f2edff}
 
 #weekly-xp-overview .weekly-xp-badges{
   display:flex;
