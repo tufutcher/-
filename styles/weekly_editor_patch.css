@@ -257,3 +257,103 @@
   #weekly-editor .weekly-editor-settings-panel{grid-template-columns:minmax(0,1fr)}
   #weekly-editor .weekly-settings-actions{flex-wrap:wrap}
 }
+
+/* XP 录入：每个日期一格，上方绘画打卡，下方反思/挑战二键。 */
+#weekly-editor .weekly-xp-compact-entry{
+  margin:10px 0 12px;
+  padding:10px;
+  border:1px solid #e7e7ec;
+  border-radius:12px;
+  background:#fbfbfc;
+}
+#weekly-editor .weekly-xp-compact-help{
+  margin:0 0 9px;
+  color:#7b7b84;
+  font-size:10px;
+  line-height:1.6;
+}
+#weekly-editor .weekly-xp-compact-help b{color:#404049}
+#weekly-editor .weekly-xp-date-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(64px,1fr));
+  gap:7px;
+}
+#weekly-editor .weekly-xp-date-cell{
+  min-width:0;
+  overflow:hidden;
+  border:1px solid #e5e6ea;
+  border-radius:9px;
+  background:#fff;
+}
+#weekly-editor .weekly-xp-date-draw{
+  display:flex;
+  width:100%;
+  min-height:34px;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:6px 3px;
+  border:0;
+  border-radius:0;
+  background:#efeff2;
+  color:#3c3c43;
+  font-size:11px;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+#weekly-editor .weekly-xp-date-draw small{
+  font-size:12px;
+  color:#a0a0aa;
+}
+#weekly-editor .weekly-xp-date-draw.is-on{
+  background:#0CC0DF;
+  color:#fff;
+}
+#weekly-editor .weekly-xp-date-draw.is-on small{color:#fff}
+#weekly-editor .weekly-xp-date-subactions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:3px;
+  padding:4px;
+}
+#weekly-editor .weekly-xp-date-mini{
+  display:flex;
+  min-width:0;
+  height:24px;
+  align-items:center;
+  justify-content:center;
+  padding:2px 0;
+  border:1px solid #e9e9ee;
+  border-radius:5px;
+  background:#f5f5f7;
+  color:#9797a0;
+  font-size:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+#weekly-editor .weekly-xp-date-mini.is-reflect.is-on{
+  background:#398CE6;
+  border-color:#398CE6;
+  color:#fff;
+}
+#weekly-editor .weekly-xp-date-mini.is-reflect.is-deep{
+  background:#8B5BD6;
+  border-color:#8B5BD6;
+  color:#fff;
+}
+#weekly-editor .weekly-xp-date-mini.is-challenge.is-on{
+  background:#ED5555;
+  border-color:#ED5555;
+  color:#fff;
+}
+#weekly-editor .weekly-xp-date-draw:focus-visible,
+#weekly-editor .weekly-xp-date-mini:focus-visible{
+  outline:2px solid #222;
+  outline-offset:1px;
+}
+#weekly-editor .weekly-xp-compact-entry .weekly-xp-totals{
+  margin:10px 0 0;
+  font-size:11px;
+  line-height:1.5;
+  color:#22536a;
+}
