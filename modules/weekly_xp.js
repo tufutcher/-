@@ -301,10 +301,6 @@ export async function openWeeklyXpOverview(initialMode = "month"){
 }
 
 function renderPersonRow(person, index, period, mode){
-  const ordinal = String(index + 1).padStart(2, "0");
-  const rankClass = mode === "week"
-    ? `is-week-rank ${index < 3 ? "rank-top-" + (index + 1) : ""}`
-    : "is-month-rank";
   const calendar = renderMiniCalendar(person, period.start, period.end, mode);
   const badges = renderXpBadges(person, period.start, period.end, mode);
   const score = mode === "week"
@@ -312,7 +308,7 @@ function renderPersonRow(person, index, period, mode){
     : `<span class="weekly-xp-score-breakdown"><b>${person.xp}</b><small>XP</small></span>`;
   return `
     <article class="weekly-xp-person-row">
-      <div class="weekly-xp-rank-number ${rankClass}">${ordinal}</div>
+      <div class="weekly-xp-rank-marker" aria-hidden="true"></div>
       <div class="weekly-xp-member">
         <div class="weekly-xp-member-heading">
           <strong>${escapeHtml(person.name)}</strong>
@@ -329,7 +325,6 @@ function renderPersonRow(person, index, period, mode){
       <div class="weekly-xp-score">${score}</div>
     </article>`;
 }
-
 function renderXpBadges(person, start, end, mode){
   const checkins = new Set(person.dates.filter(day => day.checkin && day.date >= start && day.date <= end).map(day => day.date));
   const dates = getDateRange(start, end);
@@ -351,13 +346,17 @@ function renderXpBadges(person, start, end, mode){
   return groups.map(weekDates => {
     const count = weekDates.filter(date => checkins.has(date)).length;
     return getCheckinBadge(count);
-  }).filter(Boolean).map(badge => `<span class="weekly-xp-badge" title="${badge.label}">${badge.icon}</span>`).join("");
+  }).filter(Boolean).map(badge => {
+    const content = badge.dot ? '<i class="weekly-xp-badge-dot"></i>' : badge.icon;
+    return `<span class="weekly-xp-badge is-${badge.tone}" title="${badge.label}">${content}</span>`;
+  }).join("");
 }
 
 function getCheckinBadge(days){
-  if(days === 7) return {icon:"🎨", label:"本周打卡 7 天"};
-  if(days >= 5) return {icon:"🔥", label:`本周打卡 ${days} 天`};
-  if(days >= 3) return {icon:"⭐", label:`本周打卡 ${days} 天`};
+  if(days === 7) return {icon:"🎨", label:"打卡 7 天", tone:"purple"};
+  if(days >= 5) return {icon:"🔥", label:`打卡 ${days} 天`, tone:"red"};
+  if(days >= 3) return {icon:"⭐", label:`打卡 ${days} 天`, tone:"yellow"};
+  if(days >= 1) return {icon:"", label:`打卡 ${days} 天`, tone:"muted", dot:true};
   return null;
 }
 
