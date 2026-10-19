@@ -306,13 +306,23 @@ function renderPersonRow(person, index, period, mode){
   const score = mode === "week"
     ? `<span class="weekly-xp-score-breakdown"><span>${person.xpBeforeWeek || 0}</span><span class="weekly-xp-score-plus">+</span><b>${person.weekXp ?? person.xp}</b><small>XP</small></span>`
     : `<span class="weekly-xp-score-breakdown"><b>${person.xp}</b><small>XP</small></span>`;
+
+  const leadBadge = getCheckinBadge(person.draw || 0);
+  const tone = leadBadge?.tone || "muted";
+  const leadingCell = mode === "week"
+    ? renderLeadBadge(leadBadge)
+    : `<div class="weekly-xp-rank-number is-month-rank">${String(index + 1).padStart(2, "0")}</div>`;
+  const rightBadges = mode === "week"
+    ? ""
+    : `<div class="weekly-xp-badges is-month-badges" aria-label="本月打卡徽章">${badges}</div>`;
+
   return `
-    <article class="weekly-xp-person-row">
-      <div class="weekly-xp-rank-marker" aria-hidden="true"></div>
+    <article class="weekly-xp-person-row ${mode === "week" ? `is-week tone-${tone}` : "is-month"}">
+      <div class="weekly-xp-rank-slot">${leadingCell}</div>
       <div class="weekly-xp-member">
         <div class="weekly-xp-member-heading">
           <strong>${escapeHtml(person.name)}</strong>
-          <div class="weekly-xp-badges" aria-label="${mode === "week" ? "本周打卡徽章" : "本月打卡徽章"}">${badges}</div>
+          ${rightBadges}
         </div>
       </div>
       <div class="weekly-xp-counts">
@@ -325,6 +335,14 @@ function renderPersonRow(person, index, period, mode){
       <div class="weekly-xp-score">${score}</div>
     </article>`;
 }
+
+function renderLeadBadge(badge){
+  if(!badge || badge.dot){
+    return `<div class="weekly-xp-lead-badge is-muted" aria-label="${badge?.label || "本周打卡不足 3 天"}" title="${badge?.label || "本周打卡不足 3 天"}"><i class="weekly-xp-badge-dot"></i></div>`;
+  }
+  return `<div class="weekly-xp-lead-badge is-${badge.tone}" title="${badge.label}">${badge.icon}</div>`;
+}
+
 function renderXpBadges(person, start, end, mode){
   const checkins = new Set(person.dates.filter(day => day.checkin && day.date >= start && day.date <= end).map(day => day.date));
   const dates = getDateRange(start, end);
