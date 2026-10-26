@@ -532,11 +532,11 @@ function renderEditorMembers(report){
     <button class="editor-remove-member" data-index="${index}" type="button">删除</button>
   </div>
 
-  <div class="weekly-xp-row"><strong>绘画打卡 · +10</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "checkin_dates")}</div></div>
-  <div class="weekly-xp-row"><strong>有效反思 · +10</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "reflection_dates")}</div></div>
-  <div class="weekly-xp-row"><strong>深度反思 · +20</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "deep_reflection_dates")}</div></div>
-  <div class="weekly-xp-row"><strong>主题挑战 · +10 × ${Number(report.challenge_multiplier) || 1}</strong><div class="editor-date-list">${renderEditorDates(report, item, index, "challenge_dates")}</div></div>
-  <div class="weekly-xp-totals">本期 ${calcWeeklyXp(item, report.challenge_multiplier)} XP · 绘画 ${(item.checkin_dates || []).length} 天 · 反思 ${new Set([...(item.reflection_dates || []),...(item.deep_reflection_dates || [])]).size} 天</div>
+  <div class="weekly-xp-compact-entry">
+    <div class="weekly-xp-compact-help">点日期切换绘画打卡 · <b>反</b>：无 → 有效 → 深度 → 无 · <b>挑</b>：挑战</div>
+    <div class="weekly-xp-date-grid">${renderEditorDateGrid(report, item, index)}</div>
+    <div class="weekly-xp-totals" data-xp-total-index="${index}">${renderXpTotal(item, report.challenge_multiplier)}</div>
+  </div>
 
   <label>代表图
     <div class="editor-cover-box">
@@ -552,12 +552,61 @@ function renderEditorMembers(report){
   bindEditorMemberEvents(report);
 }
 
-function renderEditorDates(report, item, index, field){
-  return getDateRange(report.start_date, report.end_date).map(date => `
-<label class="editor-date-item">
-  <input type="checkbox" data-date-index="${index}" data-date-field="${field}" value="${date}" ${(item[field] || []).includes(date) ? "checked" : ""}>
-  ${date.slice(5)}
-</label>`).join("");
+function renderEditorDateGrid(report, item, index){
+  return getDateRange(report.start_date, report.end_date).map(date => {
+    const drawn = (item.checkin_dates || []).includes(date);
+    const reflected = (item.deep_reflection_dates || []).includes(date)
+      ? "deep" : (item.reflection_dates || []).includes(date) ? "normal" : "off";
+    const challenge = (item.challenge_dates || []).includes(date);
+    const reflectHint = reflected === "deep" ? "深度反思 +20" : reflected === "normal" ? "有效反思 +10" : "未记录反思";
+    return `
+      <div class="weekly-xp-date-cell" data-xp-cell="${index}|${date}">
+        <button type="button" class="weekly-xp-date-draw ${drawn ? "is-on" : ""}"
+          data-xp-date-index="${index}" data-xp-date="${date}" data-xp-action="draw"
+          aria-pressed="${drawn}" title="${date} 绘画打卡"><span>${date.slice(5)}</span><small>${drawn ? "✓" : "·"}</small></button>
+        <div class="weekly-xp-date-subactions">
+          <button type="button" class="weekly-xp-date-mini is-reflect ${reflected === "deep" ? "is-deep" : reflected === "normal" ? "is-on" : ""}"
+            data-xp-date-index="${index}" data-xp-date="${date}" data-xp-action="reflect"
+            aria-label="${date} ${reflectHint}，点击切换等级" title="${reflectHint}">${reflected === "deep" ? "深" : "反"}</button>
+          <button type="button" class="weekly-xp-date-mini is-challenge ${challenge ? "is-on" : ""}"
+            data-xp-date-index="${index}" data-xp-date="${date}" data-xp-action="challenge"
+            aria-pressed="${challenge}" title="${date} 主题挑战">挑</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function renderXpTotal(item, multiplier){
+  const reflectiveDays = new Set([...(item.reflection_dates || []), ...(item.deep_reflection_dates || [])]);
+  return `本期 ${calcWeeklyXp(item, multiplier)} XP · 打卡 ${new Set(item.checkin_dates || []).size} 天 · 反思 ${reflectiveDays.size} 天 · 挑战 ${new Set(item.challenge_dates || []).size} 天`;
+}
+
+function refreshXpDateCell(cell, item, date){
+  if(!cell) return;
+  const draw = (item.checkin_dates || []).includes(date);
+  const deep = (item.deep_reflection_dates || []).includes(date);
+  const normal = !deep && (item.reflection_dates || []).includes(date);
+  const challenge = (item.challenge_dates || []).includes(date);
+  const drawBtn = cell.querySelector('[data-xp-action="draw"]');
+  const reflectionBtn = cell.querySelector('[data-xp-action="reflect"]');
+  const challengeBtn = cell.querySelector('[data-xp-action="challenge"]');
+  if(drawBtn){
+    drawBtn.classList.toggle("is-on", draw);
+    drawBtn.setAttribute("aria-pressed", String(draw));
+    drawBtn.querySelector("small").textContent = draw ? "✓" : "·";
+  }
+  if(reflectionBtn){
+    reflectionBtn.classList.toggle("is-on", normal);
+    reflectionBtn.classList.toggle("is-deep", deep);
+    reflectionBtn.textContent = deep ? "深" : "反";
+    const hint = deep ? "深度反思 +20" : normal ? "有效反思 +10" : "未记录反思";
+    reflectionBtn.title = hint;
+    reflectionBtn.setAttribute("aria-label", `${date} ${hint}，点击切换等级`);
+  }
+  if(challengeBtn){
+    challengeBtn.classList.toggle("is-on", challenge);
+    challengeBtn.setAttribute("aria-pressed", String(challenge));
+  }
 }
 
 function bindEditorMemberEvents(report){
@@ -569,17 +618,46 @@ function bindEditorMemberEvents(report){
     };
   });
 
-  document.querySelectorAll("[data-date-index]").forEach(input => {
-    input.onchange = () => {
-      const index = Number(input.dataset.dateIndex);
-      const field = input.dataset.dateField;
+  document.querySelectorAll("#editor-member-list [data-xp-action]").forEach(button => {
+    button.onclick = () => {
+      const index = Number(button.dataset.xpDateIndex);
+      const date = button.dataset.xpDate;
+      const action = button.dataset.xpAction;
       const item = report.weekly_report_items[index];
-      if(!item || !["checkin_dates","reflection_dates","deep_reflection_dates","challenge_dates"].includes(field)) return;
-      item[field] = Array.from(document.querySelectorAll(`[data-date-index="${index}"][data-date-field="${field}"]:checked`)).map(x => x.value);
-      if(input.checked && field === "deep_reflection_dates") item.reflection_dates = (item.reflection_dates || []).filter(d => d !== input.value);
-      if(input.checked && field === "reflection_dates") item.deep_reflection_dates = (item.deep_reflection_dates || []).filter(d => d !== input.value);
-      renderEditorMembers(report);
-      renderEditorPoster(report);
+      if(!item || !/^\d{4}-\d{2}-\d{2}$/.test(date || "")) return;
+
+      const toggle = field => {
+        const values = new Set(item[field] || []);
+        if(values.has(date)) values.delete(date);
+        else values.add(date);
+        item[field] = [...values].sort();
+      };
+
+      if(action === "draw"){
+        toggle("checkin_dates");
+      }else if(action === "reflect"){
+        const normal = new Set(item.reflection_dates || []);
+        const deep = new Set(item.deep_reflection_dates || []);
+        if(deep.has(date)){
+          deep.delete(date); // 深度 → 无
+        }else if(normal.has(date)){
+          normal.delete(date);
+          deep.add(date); // 有效 → 深度
+        }else{
+          normal.add(date); // 无 → 有效
+        }
+        item.reflection_dates = [...normal].sort();
+        item.deep_reflection_dates = [...deep].sort();
+      }else if(action === "challenge"){
+        toggle("challenge_dates");
+      }else{
+        return;
+      }
+
+      refreshXpDateCell(button.closest(".weekly-xp-date-cell"), item, date);
+      const total = document.querySelector(`[data-xp-total-index="${index}"]`);
+      if(total) total.textContent = renderXpTotal(item, report.challenge_multiplier);
+      if(action === "draw") renderEditorPoster(report);
     };
   });
 

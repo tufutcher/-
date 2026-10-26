@@ -583,7 +583,21 @@
   font-size:14px;
   text-align:center;
 }
-#weekly-xp-overview #weekly-xp-exit-poster{display:none}
+#weekly-xp-overview #weekly-xp-exit-poster,
+#weekly-xp-overview #weekly-xp-export-poster{display:none}
+#weekly-xp-overview .weekly-xp-toolbar-actions .weekly-xp-export-button{
+  background:#0CC0DF;
+  color:#fff;
+  border-color:#0CC0DF;
+}
+#weekly-xp-overview .weekly-xp-export-stage{
+  box-sizing:border-box;
+}
+#weekly-xp-overview .weekly-xp-export-stage .weekly-xp-poster{
+  margin:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
 #weekly-xp-overview.poster-mode{
   position:fixed;
   inset:0;
@@ -624,6 +638,23 @@
   transition:opacity .15s ease;
 }
 #weekly-xp-overview.poster-mode #weekly-xp-exit-poster:hover{opacity:1}
+#weekly-xp-overview.poster-mode #weekly-xp-export-poster{
+  position:fixed;
+  right:12px;
+  bottom:48px;
+  display:block;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.4);
+  border-radius:9px;
+  background:rgba(30,30,35,.82);
+  color:#fff;
+  font-size:11px;
+  font-weight:850;
+  cursor:pointer;
+  opacity:.55;
+  transition:opacity .15s ease;
+}
+#weekly-xp-overview.poster-mode #weekly-xp-export-poster:hover{opacity:1}
 @media(max-width:900px){
   #weekly-xp-overview{padding:8px}
   #weekly-xp-overview .weekly-xp-dialog{width:100%;max-height:calc(100vh - 16px);padding:10px;border-radius:13px}
@@ -657,6 +688,7 @@
 }
 @media print{
   #weekly-xp-overview .weekly-xp-controls,
-  #weekly-xp-overview #weekly-xp-exit-poster{display:none!important}
+  #weekly-xp-overview #weekly-xp-exit-poster,
+  #weekly-xp-overview #weekly-xp-export-poster{display:none!important}
   #weekly-xp-overview .weekly-xp-poster{box-shadow:none!important;border:0!important}
 }
