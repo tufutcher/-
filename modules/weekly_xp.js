@@ -1,14 +1,15 @@
 import { loadWeeklyReports } from "../api/weekly_report.js";
 import { exportXpLeaderboardPng } from "./weekly_xp_export.js";
+import { resolveChallengeXp } from "./xp_rules.js";
 
 const WEEKDAYS = ["一","二","三","四","五","六","日"];
 
-// 汇总区间内的 XP；同一成员同一天只计算一次同类型行为。
+// 汇总区间内的经验值；同一成员同一天只计算一次同类型行为。
 export function summarizeXp(reports, start, end){
   const persons = new Map();
 
   for(const report of reports || []){
-    const multiplier = Math.max(1, Math.min(3, Number(report.challenge_multiplier) || 1));
+    const challengeXp = resolveChallengeXp(report);
 
     for(const item of report.weekly_report_items || []){
       const key = item.member_id || item.display_name;
@@ -37,7 +38,7 @@ export function summarizeXp(reports, start, end){
       write("checkin_dates", row => { row.checkin = true; });
       write("reflection_dates", row => { row.reflection = Math.max(row.reflection, 10); });
       write("deep_reflection_dates", row => { row.reflection = 20; });
-      write("challenge_dates", row => { row.challenge = Math.max(row.challenge, 10 * multiplier); });
+      write("challenge_dates", row => { row.challenge = Math.max(row.challenge, challengeXp); row.hasChallenge = true; });
     }
   }
 
@@ -50,7 +51,7 @@ export function summarizeXp(reports, start, end){
       draw:dates.filter(day => day.checkin).length,
       reflect:dates.filter(day => day.reflection === 10).length,
       deep:dates.filter(day => day.reflection === 20).length,
-      challenge:dates.filter(day => day.challenge > 0).length,
+      challenge:dates.filter(day => day.hasChallenge).length,
       xp:dates.reduce((total, day) => total + (day.checkin ? 10 : 0) + day.reflection + day.challenge, 0)
     };
   }).filter(person => person.dates.length)
@@ -70,15 +71,15 @@ export async function openWeeklyXpOverview(initialMode = "month"){
         <header class="weekly-xp-toolbar-head">
           <div>
             <p class="weekly-xp-eyebrow">CREATIVE PARTICIPATION</p>
-            <h2>XP 排行榜</h2>
+            <h2>经验值排行榜</h2>
             <p>按已保存的周报日期统计；不评价绘画水平，只记录创作参与。</p>
           </div>
           <button id="weekly-xp-close" type="button" class="weekly-xp-quiet-button">关闭</button>
         </header>
         <div class="weekly-xp-toolbar">
           <div class="weekly-xp-mode-switch">
-            <button id="weekly-xp-mode-week" type="button">周度 XP</button>
-            <button id="weekly-xp-mode-month" type="button">月度 XP</button>
+            <button id="weekly-xp-mode-week" type="button">周度经验值</button>
+            <button id="weekly-xp-mode-month" type="button">月度经验值</button>
           </div>
           <label id="weekly-xp-week-control">选择本周日期 <input id="weekly-xp-date" type="date"></label>
           <label id="weekly-xp-month-control">统计月份 <input id="weekly-xp-month" type="month"></label>
@@ -159,7 +160,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
       return {
         start:range.start,
         end:range.end,
-        title:"周度创作 XP 排行榜",
+        title:"周度创作经验值排行榜",
         subtitle:`${formatDotDate(range.start)} — ${formatDotDate(range.end)}`,
         label:"本周统计"
       };
@@ -172,7 +173,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
     return {
       start,
       end,
-      title:"月度创作 XP 排行榜",
+      title:"月度创作经验值排行榜",
       subtitle:`${year} 年 ${String(monthNumber).padStart(2,"0")} 月`,
       label:"本月统计"
     };
@@ -182,7 +183,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
     const period = getPeriod();
     const summary = summarizeXp(reports, period.start, period.end);
 
-    // 周榜按本周 XP 排名，同时展示本月此前累计 + 本周新增。
+    // 周榜按本周经验值排名，同时展示本月此前累计 + 本周新增。
     if(mode === "week"){
       const selectedDate = parseLocalDate(weekInput.value || formatDate(new Date()));
       const selectedMonth = formatMonth(selectedDate);
@@ -202,7 +203,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
         person.weekXp = person.xp;
         person.monthXp = monthlyXpById.get(person.id) || 0;
       });
-      // 周榜：本周 XP 降序；同分时按整月 XP 降序；再同分按名字排序。
+      // 周榜：本周经验值降序；同分时按整月经验值降序；再同分按名字排序。
       summary.sort((a, b) =>
         b.weekXp - a.weekXp ||
         b.monthXp - a.monthXp ||
@@ -230,7 +231,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
           <div class="weekly-xp-poster-brand">不画画真的要完了 · 创作参与记录</div>
           <h1>${escapeHtml(period.title)}</h1>
           <p>${escapeHtml(period.subtitle)}</p>
-          <div class="weekly-xp-empty-state">这个统计周期还没有 XP 记录。</div>
+          <div class="weekly-xp-empty-state">这个统计周期还没有经验值记录。</div>
         </section>`;
       return;
     }
@@ -247,16 +248,16 @@ export async function openWeeklyXpOverview(initialMode = "month"){
       <section class="weekly-xp-poster" id="weekly-xp-poster">
         <div class="weekly-xp-poster-header">
           <div>
-            <div class="weekly-xp-poster-brand">不画画真的要完了 <span>CREATIVE LOG · XP</span></div>
+            <div class="weekly-xp-poster-brand">不画画真的要完了 <span>CREATIVE LOG · 经验值</span></div>
             <h1>${escapeHtml(period.title)}</h1>
             <p class="weekly-xp-period">${escapeHtml(period.subtitle)}</p>
           </div>
-          <div class="weekly-xp-poster-mark">XP<br><span>RANKING</span></div>
+          <div class="weekly-xp-poster-mark">经验值<br><span>RANKING</span></div>
         </div>
 
         <div class="weekly-xp-overview-metrics">
           ${metricCard("参与成员", metrics.people, "人")}
-          ${metricCard(mode === "week" ? "本周 XP" : "累计 XP", metrics.xp, "XP")}
+          ${metricCard(mode === "week" ? "本周经验值" : "累计经验值", metrics.xp, "经验值")}
           ${metricCard("绘画打卡", metrics.draw, "人·天")}
           ${metricCard("反思记录", metrics.reflect, "人·天")}
         </div>
@@ -270,9 +271,9 @@ export async function openWeeklyXpOverview(initialMode = "month"){
             <span><i class="draw"></i>打卡 +10</span>
             <span><i class="reflect"></i>有效反思 +10</span>
             <span><i class="deep"></i>深度反思 +20</span>
-            <span><i class="challenge"></i>主题挑战 +10 × 倍率</span>
+            <span><i class="challenge"></i>主题挑战：按每期设定奖励计分（默认 +5）</span>
           </div>
-          <p>XP 仅记录创作参与，不代表绘画水平。每月重新累计，历史记录保留。</p>
+          <p>经验值仅记录创作参与，不代表绘画水平。每月重新累计，历史记录保留。</p>
         </footer>
       </section>`;
   }
@@ -290,7 +291,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
   const doExport = button => {
     const range = getPeriod();
     const tag = mode === "week" ? `周榜_${range.start}_${range.end}` : `月榜_${range.start.slice(0,7)}`;
-    exportXpLeaderboardPng(modal, button, `创作XP_${tag}`).catch(() => {});
+    exportXpLeaderboardPng(modal, button, `创作经验值_${tag}`).catch(() => {});
   };
   modal.querySelector("#weekly-xp-export-png").onclick = event => doExport(event.currentTarget);
   modal.querySelector("#weekly-xp-export-poster").onclick = event => doExport(event.currentTarget);
