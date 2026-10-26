@@ -93,7 +93,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
           </div>
         </div>
       </div>
-      <div id="weekly-xp-poster-wrap"><p class="weekly-xp-loading">正在读取 XP 记录…</p></div>
+      <div id="weekly-xp-poster-wrap"><p class="weekly-xp-loading">正在读取经验值记录…</p></div>
       <button id="weekly-xp-exit-poster" type="button">退出海报模式（Esc）</button>
       <button id="weekly-xp-export-poster" type="button">导出长图 PNG</button>
     </div>`;
@@ -309,7 +309,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
   }
 
   async function refresh(){
-    modal.querySelector("#weekly-xp-poster-wrap").innerHTML = '<p class="weekly-xp-loading">正在读取 XP 记录…</p>';
+    modal.querySelector("#weekly-xp-poster-wrap").innerHTML = '<p class="weekly-xp-loading">正在读取经验值记录…</p>';
     try{
       reports = await loadWeeklyReports(window.__sb);
       render();
