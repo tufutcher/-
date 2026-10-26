@@ -1,4 +1,5 @@
 import { uploadImage } from "./storage.js";
+import { DEFAULT_CHALLENGE_XP, normalizeChallengeXp } from "../modules/xp_rules.js";
 
 export function normalizeName(name){
   return String(name || "")
@@ -94,7 +95,8 @@ export async function createWeeklyReport(sb, report){
       poster_name_font: report.poster_name_font || 28,
       poster_card_font: report.poster_card_font || 16,
       poster_event_font: report.poster_event_font || 10,
-      challenge_multiplier: normalizeMultiplier(report.challenge_multiplier),
+      challenge_multiplier: normalizeMultiplier(report.challenge_multiplier), // legacy DB field, not used in new scoring
+      challenge_xp: normalizeChallengeXp(report.challenge_xp, DEFAULT_CHALLENGE_XP),
       hide_member_text: report.hide_member_text !== false
     })
     .select()
@@ -122,7 +124,8 @@ export async function updateWeeklyReport(sb, reportId, patch){
     "poster_name_font",
     "poster_card_font",
     "poster_event_font",
-    "challenge_multiplier",
+    "challenge_multiplier", // legacy compatibility only
+    "challenge_xp",
     "hide_member_text"
   ].forEach(key => {
     if(patch[key] !== undefined){
