@@ -330,7 +330,13 @@ async function saveEditorReport(report, modal, save){
     });
 
     if(settingsResult.error){
-      window.showToast?.("报告设置保存失败", "错误", "error");
+      const message = String(settingsResult.error?.message || "");
+      window.showToast?.(
+        /challenge_xp|schema cache|does not exist/i.test(message)
+          ? "请先在 Supabase 执行 supabase-challenge-xp-migration.sql，再保存报告。"
+          : "报告设置保存失败：" + (message || "未知错误"),
+        "错误", "error"
+      );
       return;
     }
 
