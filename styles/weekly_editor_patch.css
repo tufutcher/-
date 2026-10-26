@@ -231,7 +231,19 @@
 #weekly-editor .weekly-xp-row>strong{display:block;font-size:12px;margin-bottom:7px;color:#292929}
 #weekly-editor .weekly-xp-totals{margin:10px 0;color:#35586a;font-weight:850;font-size:12px}
 #weekly-editor .weekly-xp-multiplier{display:flex;align-items:center;gap:5px;white-space:nowrap;font-weight:800;font-size:12px}
-#weekly-editor .weekly-xp-multiplier select{border-radius:8px;border:1px solid #ddd;padding:5px;background:#fff}
+#weekly-editor .weekly-xp-multiplier input{
+  width:64px;
+  min-width:64px;
+  box-sizing:border-box;
+  border-radius:8px;
+  border:1px solid #dedee4;
+  padding:5px 6px;
+  background:#fff;
+  color:#222;
+  font:inherit;
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+}
 
 #weekly-editor .weekly-hide-member-text{
   display:flex;
