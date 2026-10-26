@@ -84,7 +84,7 @@ export async function exportXpLeaderboardPng(modal, button, filename){
     objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
-    link.download = (filename || "XP-排行榜") + ".png";
+    link.download = (filename || "经验值排行榜") + ".png";
     document.body.appendChild(link);
     link.click();
     link.remove();
