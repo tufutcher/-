@@ -38,8 +38,8 @@ export async function openWeeklyReportManager(){
     <h3>已有报告</h3>
 
     <div class="weekly-list-actions">
-      <button id="weekly-xp-week-show" type="button">周度 XP</button>
-      <button id="weekly-xp-show" type="button">月度 XP</button>
+      <button id="weekly-xp-week-show" type="button">周度经验值</button>
+      <button id="weekly-xp-show" type="button">月度经验值</button>
       <button id="weekly-create" type="button">
         创建报告
       </button>
@@ -214,13 +214,14 @@ async function handleCreateWeeklyReport(){
       poster_name_font: 28,
       poster_card_font: 16,
       poster_event_font: 10,
+      challenge_xp: 5,
       hide_member_text: true
     }
   );
 
   if(result.error || !result.data){
     window.showToast?.(
-      "创建失败",
+      "创建失败：请先在 Supabase 执行 supabase-challenge-xp-migration.sql",
       "错误",
       "error"
     );
