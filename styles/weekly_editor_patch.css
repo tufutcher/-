@@ -369,3 +369,50 @@
   line-height:1.5;
   color:#22536a;
 }
+
+/* 主题挑战按每个成员、每个日期独立设置奖励。只有开启挑战时才出现数字栏。 */
+#weekly-editor .editor-member-card .weekly-xp-challenge-points{
+  display:none;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  margin:0 4px 5px;
+  padding:2px 4px;
+  border:1px solid #f7cdcd;
+  border-radius:6px;
+  background:#fff2f2;
+  color:#ca4242;
+  font-size:11px;
+  font-weight:900;
+}
+#weekly-editor .editor-member-card .weekly-xp-challenge-points.is-visible{
+  display:flex;
+}
+#weekly-editor .editor-member-card .weekly-xp-challenge-points input{
+  display:block;
+  width:42px;
+  min-width:0;
+  height:22px;
+  margin:0;
+  padding:1px 2px;
+  border:0;
+  border-radius:4px;
+  background:#fff;
+  color:#b73535;
+  font-size:11px;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+#weekly-editor .editor-member-card .weekly-xp-challenge-points input::-webkit-inner-spin-button,
+#weekly-editor .editor-member-card .weekly-xp-challenge-points input::-webkit-outer-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+#weekly-editor .editor-member-card .weekly-xp-challenge-points input:focus-visible{
+  outline:2px solid #ed5555;
+  outline-offset:1px;
+}
