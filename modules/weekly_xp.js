@@ -217,9 +217,16 @@ export async function openWeeklyXpOverview(initialMode = "month"){
         a.name.localeCompare(b.name, "zh-CN")
       );
     }else{
-      summary.forEach(person => {
+      // 月榜只按当月经验值决定名次。并列采用竞赛排名：01、01、03。
+      // 先在完整榜单上确定名次，再进行成员筛选，避免单人查看时名次变化。
+      let previousXp = null;
+      let sharedRank = 0;
+      summary.forEach((person, index) => {
         person.xpBeforeWeek = 0;
         person.weekXp = person.xp;
+        if(index === 0 || person.xp !== previousXp) sharedRank = index + 1;
+        person.monthRank = sharedRank;
+        previousXp = person.xp;
       });
     }
     currentSummary = summary;
@@ -341,7 +348,7 @@ function renderPersonRow(person, index, period, mode){
   const tone = leadBadge?.tone || "muted";
   const leadingCell = mode === "week"
     ? renderLeadBadge(leadBadge)
-    : `<div class="weekly-xp-rank-number is-month-rank">${String(index + 1).padStart(2, "0")}</div>`;
+    : `<div class="weekly-xp-rank-number is-month-rank">${String(person.monthRank ?? index + 1).padStart(2, "0")}</div>`;
   const rightBadges = mode === "week"
     ? ""
     : `<div class="weekly-xp-badges is-month-badges" aria-label="本月打卡徽章">${badges}</div>`;
@@ -417,20 +424,21 @@ function renderMiniCalendar(person, start, end, mode){
   const cells = dates.map(date => {
     const day = records.get(date);
     const dots = day ? [
-      day.checkin ? '<i class="draw"></i>' : "",
       day.reflection === 10 ? '<i class="reflect"></i>' : "",
       day.reflection === 20 ? '<i class="deep"></i>' : "",
-      day.challenge ? '<i class="challenge"></i>' : ""
+      day.hasChallenge || day.challenge ? '<i class="challenge"></i>' : ""
     ].join("") : "";
-    const active = day && (day.checkin || day.reflection || day.challenge);
+    // 绘画打卡只染蓝日期数字，不再占用小点或点亮整块日期背景。
+    const active = Boolean(day && (day.reflection || day.hasChallenge || day.challenge));
+    const checkedIn = Boolean(day?.checkin);
     const title = [
       date,
       day?.checkin ? "绘画打卡" : "",
       day?.reflection === 10 ? "有效反思" : "",
       day?.reflection === 20 ? "深度反思" : "",
-      day?.challenge ? "主题挑战" : ""
+      (day?.hasChallenge || day?.challenge) ? "主题挑战" : ""
     ].filter(Boolean).join(" · ");
-    return `<span class="weekly-xp-day ${active ? "is-active" : ""}" title="${escapeAttr(title)}"><b>${Number(date.slice(-2))}</b><span>${dots}</span></span>`;
+    return `<span class="weekly-xp-day ${active ? "is-active" : ""} ${checkedIn ? "is-checkin" : ""}" title="${escapeAttr(title)}"><b>${Number(date.slice(-2))}</b><span>${dots}</span></span>`;
   }).join("");
 
   return `
