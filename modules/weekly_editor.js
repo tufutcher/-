@@ -11,7 +11,7 @@ import {
   setPosterCardFontSize,
   setPosterEventFontSize
 } from "./weekly_poster.js";
-import { resolveChallengeXp, normalizeChallengeXp } from "./xp_rules.js";
+import { DEFAULT_CHALLENGE_XP, getChallengeXpForDate, normalizeChallengeXp } from "./xp_rules.js";
 
 let editorColumns = 9;
 let editorNameFont = 28;
@@ -32,7 +32,6 @@ export function openWeeklyEditor(report){
   editorNameFont = Number(report.poster_name_font) || 28;
   editorCardFont = Number(report.poster_card_font) || 16;
   editorEventFont = Number(report.poster_event_font) || 10;
-  report.challenge_xp = resolveChallengeXp(report);
   report.hide_member_text = report.hide_member_text !== false;
 
   Object.assign(report, {
@@ -101,7 +100,6 @@ export function openWeeklyEditor(report){
         <label><span>事件字</span><input type="range" id="editor-event-font" min="1" max="20" value="${editorEventFont}"><em id="editor-event-font-value">${editorEventFont}</em></label>
       </div>
       <div class="weekly-settings-actions">
-        <label class="weekly-xp-multiplier">每次挑战经验值 <input id="editor-challenge-xp" type="number" min="0" max="1000" step="1" value="${report.challenge_xp}" aria-label="每次挑战奖励的经验值"></label>
         <label class="weekly-hide-member-text"><input id="editor-hide-member-text" type="checkbox" ${report.hide_member_text ? "checked" : ""}>隐藏评价和称号</label>
         <button id="editor-save" class="editor-save" type="button">保存报告</button>
         <button id="editor-export" class="editor-export" type="button">导出图片</button>
@@ -126,24 +124,7 @@ export function openWeeklyEditor(report){
       renderEditorPoster(report);
     };
   }
-  const challengeXpInput = modal.querySelector("#editor-challenge-xp");
-  if(challengeXpInput){
-    challengeXpInput.onchange = () => {
-      const value = Number(challengeXpInput.value);
-      if(challengeXpInput.value.trim() === "" || !Number.isInteger(value) || value < 0 || value > 1000){
-        challengeXpInput.value = String(report.challenge_xp);
-        window.showToast?.("挑战经验值请输入 0～1000 之间的整数", "输入无效", "error");
-        return;
-      }
-      report.challenge_xp = normalizeChallengeXp(value);
-      challengeXpInput.value = String(report.challenge_xp);
-      document.querySelectorAll("#editor-member-list [data-xp-total-index]").forEach(node => {
-        const item = report.weekly_report_items?.[Number(node.dataset.xpTotalIndex)];
-        if(item) node.textContent = renderXpTotal(item, report.challenge_xp);
-      });
-      renderEditorPoster(report);
-    };
-  }
+
 }
 
 function ensureWeeklyEditorPatchCss(){
@@ -226,6 +207,7 @@ function bindEditorEvents(report, modal){
       reflection_dates: [],
       deep_reflection_dates: [],
       challenge_dates: [],
+      challenge_xp_overrides: {},
       cover_image_url: "",
       cover_storage_path: "",
       summary: "",
@@ -325,7 +307,6 @@ async function saveEditorReport(report, modal, save){
       poster_name_font: editorNameFont,
       poster_card_font: editorCardFont,
       poster_event_font: editorEventFont,
-      challenge_xp: report.challenge_xp,
       hide_member_text: report.hide_member_text
     });
 
@@ -553,9 +534,9 @@ function renderEditorMembers(report){
   </div>
 
   <div class="weekly-xp-compact-entry">
-    <div class="weekly-xp-compact-help">点日期切换绘画打卡 · <b>反</b>：无 → 有效 → 深度 → 无 · <b>挑</b>：挑战</div>
+    <div class="weekly-xp-compact-help">点日期切换绘画打卡 · <b>反</b>：无 → 有效 → 深度 → 无 · <b>挑</b>：开启后可单独修改经验值（默认 +5）</div>
     <div class="weekly-xp-date-grid">${renderEditorDateGrid(report, item, index)}</div>
-    <div class="weekly-xp-totals" data-xp-total-index="${index}">${renderXpTotal(item, report.challenge_xp)}</div>
+    <div class="weekly-xp-totals" data-xp-total-index="${index}">${renderXpTotal(item, report)}</div>
   </div>
 
   <label>代表图
@@ -578,6 +559,7 @@ function renderEditorDateGrid(report, item, index){
     const reflected = (item.deep_reflection_dates || []).includes(date)
       ? "deep" : (item.reflection_dates || []).includes(date) ? "normal" : "off";
     const challenge = (item.challenge_dates || []).includes(date);
+    const challengeXp = getChallengeXpForDate(item, date, report);
     const reflectHint = reflected === "deep" ? "深度反思 +20" : reflected === "normal" ? "有效反思 +10" : "未记录反思";
     return `
       <div class="weekly-xp-date-cell" data-xp-cell="${index}|${date}">
@@ -590,18 +572,25 @@ function renderEditorDateGrid(report, item, index){
             aria-label="${date} ${reflectHint}，点击切换等级" title="${reflectHint}">${reflected === "deep" ? "深" : "反"}</button>
           <button type="button" class="weekly-xp-date-mini is-challenge ${challenge ? "is-on" : ""}"
             data-xp-date-index="${index}" data-xp-date="${date}" data-xp-action="challenge"
-            aria-pressed="${challenge}" title="${date} 主题挑战">挑</button>
+            aria-pressed="${challenge}" title="${date} 主题挑战 +${challengeXp} 经验值">挑</button>
         </div>
+        <label class="weekly-xp-challenge-points ${challenge ? "is-visible" : ""}">
+          <span aria-hidden="true">+</span>
+          <input type="number" min="0" max="1000" step="1" inputmode="numeric"
+            data-xp-challenge-index="${index}" data-xp-challenge-date="${date}"
+            value="${challengeXp}" ${challenge ? "" : "disabled"}
+            aria-label="${date} 单次挑战经验值">
+        </label>
       </div>`;
   }).join("");
 }
 
-function renderXpTotal(item, challengeXp){
+function renderXpTotal(item, report){
   const reflectiveDays = new Set([...(item.reflection_dates || []), ...(item.deep_reflection_dates || [])]);
-  return `本期 ${calcWeeklyXp(item, challengeXp)} 经验值 · 打卡 ${new Set(item.checkin_dates || []).size} 天 · 反思 ${reflectiveDays.size} 天 · 挑战 ${new Set(item.challenge_dates || []).size} 天`;
+  return `本期 ${calcWeeklyXp(item, report)} 经验值 · 打卡 ${new Set(item.checkin_dates || []).size} 天 · 反思 ${reflectiveDays.size} 天 · 挑战 ${new Set(item.challenge_dates || []).size} 天`;
 }
 
-function refreshXpDateCell(cell, item, date){
+function refreshXpDateCell(cell, item, date, report){
   if(!cell) return;
   const draw = (item.checkin_dates || []).includes(date);
   const deep = (item.deep_reflection_dates || []).includes(date);
@@ -626,6 +615,14 @@ function refreshXpDateCell(cell, item, date){
   if(challengeBtn){
     challengeBtn.classList.toggle("is-on", challenge);
     challengeBtn.setAttribute("aria-pressed", String(challenge));
+    challengeBtn.title = `${date} 主题挑战 +${getChallengeXpForDate(item, date, report)} 经验值`;
+  }
+  const pointsField = cell.querySelector(".weekly-xp-challenge-points");
+  const pointsInput = pointsField?.querySelector("input");
+  pointsField?.classList.toggle("is-visible", challenge);
+  if(pointsInput){
+    pointsInput.disabled = !challenge;
+    pointsInput.value = String(getChallengeXpForDate(item, date, report));
   }
 }
 
@@ -669,15 +666,49 @@ function bindEditorMemberEvents(report){
         item.reflection_dates = [...normal].sort();
         item.deep_reflection_dates = [...deep].sort();
       }else if(action === "challenge"){
+        const enabled = (item.challenge_dates || []).includes(date);
         toggle("challenge_dates");
+        if(enabled && item.challenge_xp_overrides){
+          delete item.challenge_xp_overrides[date];
+        }
+        if(!enabled && !item.challenge_xp_overrides){
+          item.challenge_xp_overrides = {};
+        }
       }else{
         return;
       }
 
-      refreshXpDateCell(button.closest(".weekly-xp-date-cell"), item, date);
+      refreshXpDateCell(button.closest(".weekly-xp-date-cell"), item, date, report);
       const total = document.querySelector(`[data-xp-total-index="${index}"]`);
-      if(total) total.textContent = renderXpTotal(item, report.challenge_xp);
+      if(total) total.textContent = renderXpTotal(item, report);
       if(action === "draw") renderEditorPoster(report);
+    };
+  });
+
+  document.querySelectorAll("#editor-member-list [data-xp-challenge-date]").forEach(input => {
+    input.onchange = () => {
+      const index = Number(input.dataset.xpChallengeIndex);
+      const date = input.dataset.xpChallengeDate;
+      const item = report.weekly_report_items[index];
+      if(!item || !(item.challenge_dates || []).includes(date)) return;
+
+      const raw = input.value.trim();
+      const value = Number(raw);
+      if(!raw || !Number.isInteger(value) || value < 0 || value > 1000){
+        input.value = String(getChallengeXpForDate(item, date, report));
+        window.showToast?.("单次挑战经验值请输入 0～1000 之间的整数", "输入无效", "error");
+        return;
+      }
+
+      item.challenge_xp_overrides = { ...(item.challenge_xp_overrides || {}) };
+      if(value === DEFAULT_CHALLENGE_XP){
+        delete item.challenge_xp_overrides[date]; // 恢复单次挑战默认 +5
+      }else{
+        item.challenge_xp_overrides[date] = normalizeChallengeXp(value);
+      }
+      refreshXpDateCell(input.closest(".weekly-xp-date-cell"), item, date, report);
+      const total = document.querySelector(`[data-xp-total-index="${index}"]`);
+      if(total) total.textContent = renderXpTotal(item, report);
     };
   });
 
@@ -797,10 +828,13 @@ function escapeHtml(value){
     .replaceAll("'", "&#039;");
 }
 
-function calcWeeklyXp(item, challengeXp = 5){
+function calcWeeklyXp(item, report){
   const d = new Set(item.checkin_dates || []);
   const deep = new Set(item.deep_reflection_dates || []);
   const normal = new Set((item.reflection_dates || []).filter(date => !deep.has(date)));
   const events = new Set(item.challenge_dates || []);
-  return d.size * 10 + deep.size * 20 + normal.size * 10 + events.size * normalizeChallengeXp(challengeXp);
+  const challengeTotal = [...events].reduce(
+    (total, date) => total + getChallengeXpForDate(item, date, report), 0
+  );
+  return d.size * 10 + deep.size * 20 + normal.size * 10 + challengeTotal;
 }
