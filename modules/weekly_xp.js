@@ -1,6 +1,6 @@
 import { loadWeeklyReports } from "../api/weekly_report.js";
 import { exportXpLeaderboardPng } from "./weekly_xp_export.js";
-import { resolveChallengeXp } from "./xp_rules.js";
+import { getChallengeXpForDate } from "./xp_rules.js";
 
 const WEEKDAYS = ["一","二","三","四","五","六","日"];
 
@@ -9,7 +9,6 @@ export function summarizeXp(reports, start, end){
   const persons = new Map();
 
   for(const report of reports || []){
-    const challengeXp = resolveChallengeXp(report);
 
     for(const item of report.weekly_report_items || []){
       const key = item.member_id || item.display_name;
@@ -38,7 +37,15 @@ export function summarizeXp(reports, start, end){
       write("checkin_dates", row => { row.checkin = true; });
       write("reflection_dates", row => { row.reflection = Math.max(row.reflection, 10); });
       write("deep_reflection_dates", row => { row.reflection = 20; });
-      write("challenge_dates", row => { row.challenge = Math.max(row.challenge, challengeXp); row.hasChallenge = true; });
+      for(const date of new Set(normalizeDates(item.challenge_dates))){
+        if(date < start || date > end) continue;
+        const row = person.dates.get(date) || {
+          date, checkin:false, reflection:0, challenge:0
+        };
+        row.challenge = Math.max(row.challenge, getChallengeXpForDate(item, date, report));
+        row.hasChallenge = true;
+        person.dates.set(date, row);
+      }
     }
   }
 
@@ -271,7 +278,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
             <span><i class="draw"></i>打卡 +10</span>
             <span><i class="reflect"></i>有效反思 +10</span>
             <span><i class="deep"></i>深度反思 +20</span>
-            <span><i class="challenge"></i>主题挑战：按每期设定奖励计分（默认 +5）</span>
+            <span><i class="challenge"></i>主题挑战：每次默认 +5，可单独设置</span>
           </div>
           <p>经验值仅记录创作参与，不代表绘画水平。每月重新累计，历史记录保留。</p>
         </footer>
