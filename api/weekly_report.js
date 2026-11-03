@@ -174,10 +174,10 @@ export async function uploadWeeklyCover(sb, file){
 export async function saveWeeklyReportItems(sb, reportId, items){
   // SQL migration missing? Never delete existing weekly data before schema is ready.
   const { error: schemaError } = await sb.from("weekly_report_items")
-    .select("reflection_dates, deep_reflection_dates, challenge_dates").limit(1);
+    .select("reflection_dates, deep_reflection_dates, challenge_dates, challenge_xp_overrides").limit(1);
   if(schemaError){
     console.error("weekly XP migration required:", schemaError);
-    window.showToast?.("请先在 Supabase 执行 supabase-xp-migration.sql，再保存报告。", "数据库未升级", "error");
+    window.showToast?.("请先在 Supabase 执行 supabase-challenge-per-date-migration.sql，再保存报告。", "数据库未升级", "error");
     return null;
   }
   await deleteProxyCheckinsForReport(sb, reportId);
@@ -200,6 +200,16 @@ export async function saveWeeklyReportItems(sb, reportId, items){
     const reflectionDates = normalizeDates(item.reflection_dates)
       .filter(date => !deepReflectionDates.includes(date));
     const challengeDates = normalizeDates(item.challenge_dates);
+    const rawOverrides = item.challenge_xp_overrides && typeof item.challenge_xp_overrides === "object"
+      ? item.challenge_xp_overrides : {};
+    const challengeXpOverrides = {};
+    for(const date of challengeDates){
+      if(!Object.prototype.hasOwnProperty.call(rawOverrides, date)) continue;
+      const value = Number(rawOverrides[date]);
+      if(Number.isInteger(value) && value >= 0 && value <= 1000 && value !== DEFAULT_CHALLENGE_XP){
+        challengeXpOverrides[date] = value;
+      }
+    }
 
     const { data: savedItem, error } = await sb
       .from("weekly_report_items")
@@ -213,6 +223,7 @@ export async function saveWeeklyReportItems(sb, reportId, items){
         reflection_dates: reflectionDates,
         deep_reflection_dates: deepReflectionDates,
         challenge_dates: challengeDates,
+        challenge_xp_overrides: challengeXpOverrides,
         summary: item.summary || "",
         nickname_title: item.nickname_title || "",
         sort_order: i
