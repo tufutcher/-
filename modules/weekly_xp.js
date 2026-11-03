@@ -429,7 +429,7 @@ function renderMiniCalendar(person, start, end, mode){
       day.hasChallenge || day.challenge ? '<i class="challenge"></i>' : ""
     ].join("") : "";
     // 绘画打卡只染蓝日期数字，不再占用小点或点亮整块日期背景。
-    const active = Boolean(day && (day.reflection || day.hasChallenge || day.challenge));
+    // 仅绘画打卡点亮蓝色日期背景；反思、挑战只显示彩色小点。
     const checkedIn = Boolean(day?.checkin);
     const title = [
       date,
@@ -438,7 +438,7 @@ function renderMiniCalendar(person, start, end, mode){
       day?.reflection === 20 ? "深度反思" : "",
       (day?.hasChallenge || day?.challenge) ? "主题挑战" : ""
     ].filter(Boolean).join(" · ");
-    return `<span class="weekly-xp-day ${active ? "is-active" : ""} ${checkedIn ? "is-checkin" : ""}" title="${escapeAttr(title)}"><b>${Number(date.slice(-2))}</b><span>${dots}</span></span>`;
+    return `<span class="weekly-xp-day ${checkedIn ? "is-checkin" : ""}" title="${escapeAttr(title)}"><b>${Number(date.slice(-2))}</b><span>${dots}</span></span>`;
   }).join("");
 
   return `
