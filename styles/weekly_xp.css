@@ -541,7 +541,7 @@
   gap:1px;
 }
 #weekly-xp-overview .weekly-xp-day i{width:3px;height:3px}
-#weekly-xp-overview .weekly-xp-day.is-active{background:#e7faff;color:#202024;outline:1px solid #bceef7}
+#weekly-xp-overview .weekly-xp-day.is-checkin{background:#e7faff;color:#202024;outline:1px solid #bceef7}
 /* 周历和月历：绘画打卡仅将日期数字标为蓝色；反思、挑战沿用底部小点。 */
 #weekly-xp-overview .weekly-xp-day.is-checkin b{
   color:#0CC0DF;
