@@ -88,14 +88,11 @@ function reportPaper(data,note,coverUrl){
     '<header class="analysis-report-header">'+
       '<div class="analysis-topline"><span>CREATIVE ACTIVITY REPORT</span><span>'+escapeHtml(data.month)+' / MONTHLY</span></div>'+
       '<div class="analysis-profile-card">'+
-        '<div class="analysis-identity"><div class="analysis-avatar">'+avatar+'</div>'+
+        '<div class="analysis-identity"><div class="analysis-avatar"><div class="analysis-avatar-inner">'+avatar+'</div></div>'+
           '<div class="analysis-identity-copy"><h1>'+title+'</h1>'+
             '<div class="analysis-identity-caption">'+formatMonthTitle(data.month)+'</div></div></div>'+
-        '<button type="button" class="analysis-cover-upload '+(cover?'has-cover':'is-empty')+
-          '" data-analysis-cover title="上传或更换横向名片图片" aria-label="上传或更换横向名片图片">'+
-          (cover?'<img src="'+cover+'" alt="成员名片横图">':
-            '<span class="analysis-cover-placeholder"><b>＋</b>上传横图</span>')+
-          '<span class="analysis-cover-action">'+(cover?'更换图片':'16:9 横向图片')+'</span></button>'+
+        (cover?'<button type="button" class="analysis-cover-upload has-cover" data-analysis-cover title="更换横向名片图片" aria-label="更换横向名片图片">'+
+          '<img src="'+cover+'" alt="成员名片横图"><span class="analysis-cover-action">更换图片</span></button>':"")+
       '</div>'+
     '</header>'+
     '<section class="analysis-report-section">'+
@@ -112,34 +109,34 @@ function reportPaper(data,note,coverUrl){
       '</div></div>'+
       '<p class="analysis-observation">'+escapeHtml(data.observations.rhythm)+'</p>'+
     '</section>'+
-    '<section class="analysis-report-section">'+
-      '<div class="analysis-engagement-grid">'+
-        '<div><span>有效反思</span><strong>'+reportValue(data,"normalDays","天")+'</strong></div>'+
-        '<div><span>深度反思</span><strong>'+reportValue(data,"deepDays","天")+'</strong></div>'+
-        '<div><span>主题挑战</span><strong>'+reportValue(data,"challengeDays","次")+'</strong></div>'+
+    '<div class="analysis-bottom-grid">'+
+      '<div class="analysis-bottom-data">'+
+        '<section class="analysis-report-section">'+
+          '<div class="analysis-engagement-grid">'+
+            '<div><span>有效反思</span><strong>'+reportValue(data,"normalDays","天")+'</strong></div>'+
+            '<div><span>深度反思</span><strong>'+reportValue(data,"deepDays","天")+'</strong></div>'+
+            '<div><span>主题挑战</span><strong>'+reportValue(data,"challengeDays","次")+'</strong></div>'+
+          '</div>'+
+          '<div class="analysis-xp-composition"><div class="analysis-xp-head"><b>经验值来源</b><span>'+(hasReport?xpTotal+' XP':"尚未关联周报数据")+'</span></div>'+
+          '<div class="analysis-xp-bar">'+bar+'</div>'+
+          (hasReport?'<div class="analysis-xp-legend">'+xpSegments.map(x=>
+            '<span><i style="background:'+x.colour+'"></i>'+x.title+' '+x.value+'</span>').join("")+'</div>':"")+
+          '</div>'+
+          '<p class="analysis-observation">'+escapeHtml(data.observations.engagement)+'</p>'+
+        '</section>'+
+        '<section class="analysis-report-section">'+
+          '<div class="analysis-change-grid">'+
+            '<div><span>打卡率变化</span><strong>'+rateChange+'</strong><small>'+data.previousRate+'% → '+data.rate+'%</small></div>'+
+            '<div><span>反思天数变化</span><strong>'+reflectionChange+'</strong><small>'+(hasReport?data.previous.reflectDays+' → '+c.reflectDays+' 天':"无周报数据")+'</small></div>'+
+            '<div><span>经验值变化</span><strong>'+xpChange+'</strong><small>'+(hasReport?data.previous.xp+' → '+c.xp+' XP':"无周报数据")+'</small></div>'+
+          '</div>'+
+        '</section>'+
       '</div>'+
-      '<div class="analysis-xp-composition"><div class="analysis-xp-head"><b>经验值来源</b><span>'+(hasReport?xpTotal+' XP':"尚未关联周报数据")+'</span></div>'+
-      '<div class="analysis-xp-bar">'+bar+'</div>'+
-      (hasReport?'<div class="analysis-xp-legend">'+xpSegments.map(x=>
-        '<span><i style="background:'+x.colour+'"></i>'+x.title+' '+x.value+'</span>').join("")+'</div>':"")+
-      '</div>'+
-      '<p class="analysis-observation">'+escapeHtml(data.observations.engagement)+'</p>'+
-    '</section>'+
-    '<section class="analysis-report-section">'+
-      '<div class="analysis-change-grid">'+
-        '<div><span>打卡率变化</span><strong>'+rateChange+'</strong><small>'+data.previousRate+'% → '+data.rate+'%</small></div>'+
-        '<div><span>反思天数变化</span><strong>'+reflectionChange+'</strong><small>'+(hasReport?data.previous.reflectDays+' → '+c.reflectDays+' 天':"无周报数据")+'</small></div>'+
-        '<div><span>经验值变化</span><strong>'+xpChange+'</strong><small>'+(hasReport?data.previous.xp+' → '+c.xp+' XP':"无周报数据")+'</small></div>'+
-      '</div>'+
-
-
-    '</section>'+
-    '<section class="analysis-report-section is-commentary">'+
-      
-      '<div id="analysis-note" class="analysis-note" contenteditable="true" role="textbox" aria-multiline="true" '+
-      'data-placeholder="点击这里粘贴 AI 评语。"></div>'+
-
-    '</section>'+
+      '<section class="analysis-report-section is-commentary">'+
+        '<div id="analysis-note" class="analysis-note" contenteditable="true" role="textbox" aria-multiline="true" '+
+        'data-placeholder="点击这里粘贴 AI 评语。"></div>'+
+      '</section>'+
+    '</div>'+
     '<footer class="analysis-report-footer"><b>不画画真的要完了</b></footer>'+
   '</article>';
 }
