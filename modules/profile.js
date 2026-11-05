@@ -15,6 +15,7 @@ import {
 } from "./detail_modal.js";
 import { loadProfileCheckins } from "../api/checkin.js";
 import { openWeeklyReportManager } from "./weekly_report.js";
+import { openPersonalAnalysisReport } from "./personal_report.js";
 import {openWeeklyEditor} from "./weekly_editor.js";
 import {
   buildArtworksFromCheckins,
@@ -508,6 +509,7 @@ export function renderProfile(state, options = {}){
         '<div class="profile-copy">' +
           '<div class="profile-greeting">' + greeting + '</div>' +
           '<div class="profile-subtitle">' + subtitle + '</div>' +
+          '<button type="button" class="profile-analysis-trigger">生成个人创作分析报告</button>' +
           avatarActionHtml +
         '</div>' +
 
@@ -555,7 +557,7 @@ export function renderProfile(state, options = {}){
     renderArchiveCard(tagCount, topTags, visibleMine);
 
   if(!skipBind){
-    setTimeout(() => bindProfileEvents(state, mine, { readonly }), 0);
+    setTimeout(() => bindProfileEvents(state, mine, { readonly, userId: targetUserId }), 0);
   }
 
   return html;
@@ -563,6 +565,12 @@ export function renderProfile(state, options = {}){
 
 function bindProfileEvents(state, mine, options = {}){
   const readonly = !!options.readonly;
+  document.querySelectorAll(".profile-analysis-trigger").forEach(button => {
+    button.onclick = () => {
+      const target = getProfileByUserId(state, options.userId || state.user?.id);
+      openPersonalAnalysisReport(target, mine);
+    };
+  });
 
   const exportCsvBtn = document.getElementById("admin-export-csv");
   if(exportCsvBtn){
@@ -673,6 +681,14 @@ export function openReadonlyProfileModal(userId){
 
   function bindReadonlyProfileEvents(){
     const mine = getProfileItems(state, userId, { readonly: true });
+    const analysisButton = modal.querySelector(".profile-analysis-trigger");
+    if(analysisButton){
+      analysisButton.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        openPersonalAnalysisReport(getProfileByUserId(state, userId), mine);
+      };
+    }
 
     const dataFilter = modal.querySelector("#profile-data-filter");
     if(dataFilter){
