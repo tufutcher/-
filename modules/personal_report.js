@@ -137,7 +137,7 @@ function reportPaper(data,note,coverUrl){
     '<section class="analysis-report-section is-commentary">'+
       
       '<div id="analysis-note" class="analysis-note" contenteditable="true" role="textbox" aria-multiline="true" '+
-      'data-placeholder="点击这里粘贴评语。可以分析本期创作节奏、实际作品表现与下一阶段计划。"></div>'+
+      'data-placeholder="点击这里粘贴 AI 评语。"></div>'+
 
     '</section>'+
     '<footer class="analysis-report-footer"><b>不画画真的要完了</b></footer>'+
