@@ -337,6 +337,24 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     preview.innerHTML='<div class="analysis-paper-wrap">'+reportPaper(data,existingNote,selection)+'</div>';
     const editor=preview.querySelector("#analysis-note");
     editor.textContent=existingNote;
+    // AI 评语粘贴为纯文本，避免富文本样式破坏固定宽度的长图排版。
+    editor.addEventListener("paste",event=>{
+      event.preventDefault();
+      const text=event.clipboardData?.getData("text/plain") || "";
+      if(document.execCommand("insertText",false,text))return;
+      const selection=window.getSelection();
+      if(!selection?.rangeCount)return;
+      const range=selection.getRangeAt(0);
+      range.deleteContents();
+      const node=document.createTextNode(text);
+      range.insertNode(node);
+      range.setStartAfter(node);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      saveNote();
+      requestAnimationFrame(syncScale);
+    });
     editor.addEventListener("input",()=>{
       saveNote();
       requestAnimationFrame(syncScale);
