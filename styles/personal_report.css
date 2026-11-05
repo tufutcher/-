@@ -627,3 +627,16 @@
   margin:0;
   box-sizing:border-box;
 }
+
+/* 横图贴合名片左右边缘；无图时名片只保留成员信息。 */
+.analysis-profile-card{
+  gap:0;
+  padding:0;
+  overflow:hidden;
+}
+.analysis-profile-card .analysis-identity{
+  padding:18px 20px;
+}
+.analysis-profile-card .analysis-cover-upload{
+  border-radius:0;
+}
