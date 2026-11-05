@@ -836,3 +836,24 @@ button.cal-cell:disabled{
   flex:0 0 auto;
 }
 
+
+/* 个人主页报告入口：成员本人的主页和其他成员的只读主页均可打开。 */
+.profile-analysis-trigger{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:flex-start;
+  max-width:100%;
+  margin:13px 0 2px;
+  padding:9px 14px;
+  border:1px solid #0CC0DF;
+  border-radius:10px;
+  background:#e7faff;
+  color:#087e93;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.35;
+  cursor:pointer;
+}
+.profile-analysis-trigger:hover{background:#d4f7ff}
+.profile-analysis-trigger:focus-visible{outline:2px solid #087e93;outline-offset:2px}
