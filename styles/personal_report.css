@@ -428,3 +428,98 @@
 .analysis-art.is-empty{height:175px;min-height:175px}
 .analysis-report-section{margin-top:12px;padding-top:6px}
 .analysis-section-heading{margin-bottom:8px}
+
+/* 月报第三版：没有章节标题与作品宫格，顶部使用单张 16:9 横图名片。 */
+.analysis-report-paper{padding:32px 48px 28px}
+.analysis-profile-card{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 365px;
+  gap:22px;
+  align-items:center;
+  min-height:224px;
+  margin-top:14px;
+  padding:18px 20px;
+  border:1px solid #e7e8ed;
+  border-radius:17px;
+  background:#f9fafb;
+}
+.analysis-profile-card .analysis-identity{
+  display:flex;
+  align-items:center;
+  min-width:0;
+  gap:17px;
+  margin:0;
+}
+.analysis-profile-card .analysis-avatar{
+  width:84px;
+  height:84px;
+  flex:0 0 84px;
+  border-radius:18px;
+  font-size:45px;
+}
+.analysis-profile-card .analysis-identity-copy{min-width:0}
+.analysis-profile-card .analysis-identity-copy h1{
+  margin:0;
+  font-size:48px;
+  letter-spacing:-1.4px;
+  overflow-wrap:anywhere;
+}
+.analysis-profile-card .analysis-identity-caption{margin-top:8px;font-size:15px}
+.analysis-cover-upload{
+  position:relative;
+  display:flex;
+  width:100%;
+  aspect-ratio:16 / 9;
+  height:auto;
+  min-height:0;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  overflow:hidden;
+  padding:0;
+  border:1px dashed #d7dce2;
+  border-radius:12px;
+  background:linear-gradient(135deg,#ebf7fa 0%,#e8ebf1 100%);
+  color:#89939f;
+  cursor:pointer;
+}
+.analysis-cover-upload img{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.analysis-cover-placeholder{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:4px;
+  color:#8b99a4;
+  font-size:13px;
+  font-weight:800;
+}
+.analysis-cover-placeholder b{font-size:25px;font-weight:600}
+.analysis-cover-action{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  padding:4px 9px;
+  border-radius:7px;
+  background:rgba(30,35,45,.72);
+  color:#fff;
+  font-size:10px;
+  font-weight:850;
+}
+.analysis-cover-upload.is-empty .analysis-cover-action{
+  color:#8f9da8;
+  background:transparent;
+}
+.analysis-cover-upload:focus-visible{outline:2px solid #0CC0DF;outline-offset:2px}
+.analysis-report-paper.is-exporting .analysis-cover-action{display:none}
+.analysis-report-paper.is-exporting .analysis-cover-upload.is-empty .analysis-cover-placeholder{visibility:hidden}
+.analysis-report-section{margin-top:13px;padding-top:0;border:0}
+.analysis-report-section.is-commentary{margin-top:13px}
+.analysis-note{margin-top:2px}
