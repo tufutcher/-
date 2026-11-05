@@ -1,6 +1,7 @@
 // 可编辑、可导出的个人创作月报。独立于个人主页渲染，不修改数据库。
 // 评语及代表作品选择仅保存在当前浏览器本地。
 import { loadProfileCheckins } from "../api/checkin.js";
+import { loadReportUploads, saveReportUploads, uploadAssetFromBlob } from "./personal_report_uploads.js";
 import {
   buildPersonalMonthlyData, personalMonthKey, personalReportDataText
 } from "./personal_report_data.js";
@@ -14,7 +15,7 @@ function escapeHtml(value){
 }
 function safeImageUrl(url){
   const value=String(url || "");
-  return /^https?:\/\//i.test(value)?escapeHtml(value):"";
+  return /^(https?:\/\/|blob:https?:\/\/)/i.test(value)?escapeHtml(value):"";
 }
 function formatMonthTitle(month){
   const [year, m]=month.split("-");
@@ -156,13 +157,14 @@ function reportPaper(data,note,selection){
 
 function pickerMarkup(data,selection){
   const list=data.current.arts.slice(0,80);
-  if(!list.length)return '<p class="analysis-no-art">本月没有可选择的作品图片。</p>';
-  return '<p>点击作品选择或取消，最多选择三张；只影响这份报告。</p>'+
-    '<div class="analysis-picker-grid">'+list.map(a=>{
+  if(!list.length)return '<p class="analysis-no-art">暂无作品，可点击「上传图片」添加。</p>';
+  return '<div class="analysis-picker-grid">'+list.map(a=>{
       const on=selection.includes(a.id);
-      return '<button type="button" data-analysis-art="'+escapeHtml(a.id)+'" class="'+(on?"is-selected":"")+
-        '" aria-pressed="'+on+'" title="'+escapeHtml(a.date)+'"><img loading="lazy" src="'+safeImageUrl(a.url)+'" alt="">'+
-        '<span>'+(on?"已选":"选择")+'</span></button>';
+      return '<div class="analysis-picker-tile"><button type="button" data-analysis-art="'+escapeHtml(a.id)+'" class="'+(on?"is-selected":"")+
+        '" aria-pressed="'+on+'"><img loading="lazy" src="'+safeImageUrl(a.url)+'" alt="">'+
+        '<span>'+(on?"已选":"选择")+'</span></button>'+
+        (a.source==="upload"?'<button class="analysis-remove-upload" type="button" data-analysis-remove-art="'+escapeHtml(a.id)+'">移除上传</button>':"")+
+        '</div>';
     }).join("")+'</div>';
 }
 function attachCss(){
@@ -225,7 +227,7 @@ async function exportPng(paper,button,data){
   }
 }
 
-export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
+export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],options={}){
   if(!profile?.id){
     window.showToast?.("无法确定个人主页对应的成员","报告无法生成","error");
     return;
@@ -240,7 +242,9 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     '<div class="analysis-toolbar-actions"><button type="button" id="analysis-prev" title="上个月">‹</button>'+
     '<input type="month" id="analysis-month" aria-label="统计月份">'+
     '<button type="button" id="analysis-next" title="下个月">›</button>'+
-    '<button type="button" id="analysis-pick">选择代表作品</button>'+
+    '<button type="button" id="analysis-pick">选择作品</button>'+
+    '<button type="button" id="analysis-upload">上传图片</button>'+
+    '<input type="file" id="analysis-upload-input" accept="image/*" multiple hidden>'+
     '<button type="button" id="analysis-copy">复制分析数据</button>'+
     '<button type="button" id="analysis-export" class="is-primary">导出 PNG 长图</button>'+
     '<button type="button" id="analysis-close" aria-label="关闭分析报告">×</button></div></div>'+
@@ -254,6 +258,7 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     if(closed)return;
     closed=true;
     resizeObs?.disconnect();
+    disposeUploadedUrls();
     overlay.remove();
     document.removeEventListener("keydown",onKey);
   };
@@ -264,13 +269,32 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
 
   const monthInput=overlay.querySelector("#analysis-month");
   monthInput.max=DEFAULT_MAX_MONTH();
-  monthInput.value=DEFAULT_MAX_MONTH();
+  monthInput.value=(/^\d{4}-(0[1-9]|1[0-2])$/.test(options.month || "") && options.month<=DEFAULT_MAX_MONTH())
+    ? options.month : DEFAULT_MAX_MONTH();
   let checkins=fallbackCheckins;
   let reports=[],reportsAvailable=false;
   let resizeObs=null;
   let data=null;
   let selection=[];
   let pickerOpen=false;
+  let uploadedFiles=[];
+  let uploadedUrls=[];
+  let renderVersion=0;
+  const localMediaKey=()=>data?.id+":"+data?.month;
+  function disposeUploadedUrls(){
+    uploadedUrls.forEach(url=>URL.revokeObjectURL(url));
+    uploadedUrls=[];
+  }
+  function applyUploadedAssets(){
+    if(!data)return;
+    disposeUploadedUrls();
+    const assets=uploadedFiles.map(file=>{
+      const art=uploadAssetFromBlob(file);
+      uploadedUrls.push(art.url);
+      return art;
+    });
+    data.current.arts=data.current.arts.filter(a=>a.source!=="upload").concat(assets);
+  }
 
   function saveNote(){
     if(!data)return;
@@ -293,6 +317,20 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     picker.hidden=!pickerOpen;
     if(!pickerOpen || !data)return;
     picker.innerHTML=pickerMarkup(data,selection);
+    picker.querySelectorAll("[data-analysis-remove-art]").forEach(button=>{
+      button.onclick=async()=>{
+        const id=button.dataset.analysisRemoveArt;
+        uploadedFiles=uploadedFiles.filter(file=>file.id!==id);
+        selection=selection.filter(x=>x!==id);
+        try{await saveReportUploads(localMediaKey(),uploadedFiles);}
+        catch(error){window.showToast?.("本地图片保存失败，本次预览仍可使用","提醒","error");}
+        saveLocal(artKey(data.id,data.month),selection);
+        saveNote();
+        applyUploadedAssets();
+        renderPaper(false);
+        renderPicker();
+      };
+    });
     picker.querySelectorAll("[data-analysis-art]").forEach(button=>{
       button.onclick=()=>{
         const id=button.dataset.analysisArt;
@@ -353,12 +391,19 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     }
     requestAnimationFrame(syncScale);
   }
-  function rerenderMonth(){
+  async function rerenderMonth(){
+
     if(!monthInput.value)return;
     const month=monthInput.value>DEFAULT_MAX_MONTH()?DEFAULT_MAX_MONTH():monthInput.value;
     monthInput.value=month;
     try{
+      const version=++renderVersion;
       data=buildPersonalMonthlyData({profile,checkins,reports,month,reportsAvailable});
+      uploadedFiles=[];
+      try{uploadedFiles=await loadReportUploads(localMediaKey());}
+      catch(error){console.warn("report uploads unavailable",error);}
+      if(closed || version!==renderVersion)return;
+      applyUploadedAssets();
       renderPaper(true);
       renderPicker();
       overlay.querySelector("#analysis-next").disabled=month>=DEFAULT_MAX_MONTH();
@@ -375,6 +420,40 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     const next=moveMonth(monthInput.value,1);
     if(next>DEFAULT_MAX_MONTH())return;
     saveNote();monthInput.value=next;rerenderMonth();
+  };
+  const uploadInput=overlay.querySelector("#analysis-upload-input");
+  const uploadButton=overlay.querySelector("#analysis-upload");
+  uploadButton.onclick=()=>uploadInput.click();
+  overlay.querySelector("#analysis-preview").addEventListener("click",event=>{
+    if(event.target.closest(".analysis-art.is-empty"))uploadInput.click();
+  });
+  uploadInput.onchange=async()=>{
+    const files=Array.from(uploadInput.files||[]).filter(file=>file.type.startsWith("image/"));
+    uploadInput.value="";
+    if(!files.length || !data)return;
+    const target=data;
+    const key=localMediaKey();
+    for(const file of files.slice(0,3)){
+      if(file.size>20*1024*1024){
+        window.showToast?.("单张图片最大 20 MB","文件过大","error");
+        continue;
+      }
+      const id="upload-"+Date.now()+"-"+Math.random().toString(36).slice(2,9);
+      uploadedFiles=uploadedFiles.concat([{id,name:file.name,blob:file}]).slice(-3);
+      selection=selection.filter(x=>uploadedFiles.some(f=>f.id===x)||!x.startsWith("upload-"));
+      selection=[...selection.filter(x=>x!==id),id].slice(-3);
+    }
+    if(data!==target)return;
+    try{await saveReportUploads(key,uploadedFiles);}
+    catch(error){
+      console.warn("uploaded report image could not persist",error);
+      window.showToast?.("图片已加入预览，但本地保存失败；请在关闭前导出","提醒","error");
+    }
+    saveLocal(artKey(data.id,data.month),selection);
+    saveNote();
+    applyUploadedAssets();
+    renderPaper(false);
+    renderPicker();
   };
   overlay.querySelector("#analysis-pick").onclick=()=>{
     pickerOpen=!pickerOpen;renderPicker();
@@ -408,7 +487,12 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[]){
     const sb=window.__sb;
     if(sb){
       const responses=await Promise.all([
-        loadProfileCheckins(sb,profile),
+        profile.virtual_member
+          ? (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(profile.member_id||""))
+              ? sb.from("checkins").select("*,checkin_images(*)").eq("member_id",profile.member_id).order("created_at",{ascending:false})
+                  .then(result=>result.error?[]:result.data||[])
+              : Promise.resolve([]))
+          : loadProfileCheckins(sb,profile),
         sb.from("weekly_reports").select("*,weekly_report_items(*)")
       ]);
       checkins=responses[0] || fallbackCheckins;
