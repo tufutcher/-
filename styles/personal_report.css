@@ -523,3 +523,107 @@
 .analysis-report-section{margin-top:13px;padding-top:0;border:0}
 .analysis-report-section.is-commentary{margin-top:13px}
 .analysis-note{margin-top:2px}
+
+/* 月报第四版：数据分析与人工评语左右并排；横图使用完整内容宽度。 */
+.analysis-profile-card{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:16px;
+  min-height:0;
+}
+.analysis-profile-card .analysis-identity{
+  width:100%;
+}
+.analysis-cover-upload{
+  width:100%;
+  flex:0 0 auto;
+  aspect-ratio:16 / 9;
+  height:auto;
+  border:0;
+  border-radius:12px;
+  background:#f1f3f5;
+}
+.analysis-cover-upload img{
+  object-fit:cover;
+}
+.analysis-bottom-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  align-items:stretch;
+  gap:18px;
+  margin-top:14px;
+}
+.analysis-bottom-data{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  gap:16px;
+}
+.analysis-bottom-data .analysis-report-section{
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+}
+.analysis-bottom-data .analysis-report-section + .analysis-report-section{
+  padding-top:14px;
+  border-top:1px solid #e9eaed;
+}
+.analysis-bottom-data .analysis-engagement-grid,
+.analysis-bottom-data .analysis-change-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+.analysis-bottom-data .analysis-engagement-grid>div,
+.analysis-bottom-data .analysis-change-grid>div{
+  padding:11px 10px;
+}
+.analysis-bottom-data .analysis-engagement-grid strong{
+  font-size:23px;
+}
+.analysis-bottom-data .analysis-change-grid strong{
+  font-size:17px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+.analysis-bottom-data .analysis-change-grid small{
+  line-height:1.4;
+}
+.analysis-bottom-data .analysis-xp-composition{
+  margin-top:10px;
+  padding:11px 12px;
+}
+.analysis-bottom-data .analysis-xp-head{
+  gap:8px;
+}
+.analysis-bottom-data .analysis-xp-head span{
+  text-align:right;
+}
+.analysis-bottom-data .analysis-xp-legend{
+  gap:8px 12px;
+}
+.analysis-bottom-data .analysis-xp-legend span{
+  font-size:10px;
+}
+.analysis-bottom-data .analysis-observation{
+  margin-top:9px;
+  padding:9px 11px;
+  font-size:11px;
+  line-height:1.55;
+}
+.analysis-bottom-grid .analysis-report-section.is-commentary{
+  display:flex;
+  min-width:0;
+  flex-direction:column;
+  margin:0;
+  padding:0;
+  border:0;
+}
+.analysis-bottom-grid .analysis-note{
+  flex:1 1 auto;
+  min-height:420px;
+  height:100%;
+  margin:0;
+  box-sizing:border-box;
+}
