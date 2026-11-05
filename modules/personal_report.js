@@ -1,7 +1,7 @@
 // 可编辑、可导出的个人创作月报。独立于个人主页渲染，不修改数据库。
-// 评语及代表作品选择仅保存在当前浏览器本地。
+// 评语和单张名片横图保存在当前浏览器本地。
 import { loadProfileCheckins } from "../api/checkin.js";
-import { loadReportUploads, saveReportUploads, uploadAssetFromBlob } from "./personal_report_uploads.js";
+import { loadReportUploads, saveReportUploads } from "./personal_report_uploads.js";
 import {
   buildPersonalMonthlyData, personalMonthKey, personalReportDataText
 } from "./personal_report_data.js";
@@ -34,7 +34,6 @@ function loadLocal(key,fallback){
   catch(error){return fallback;}
 }
 function draftKey(profileId,month){return "creative-report-note-v1:"+profileId+":"+month;}
-function artKey(profileId,month){return "creative-report-art-v1:"+profileId+":"+month;}
 
 function statusChange(change,unit=""){
   return change>0?"+"+change+unit:change<0?String(change)+unit:"持平";
@@ -220,13 +219,12 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
     '<div class="analysis-toolbar-actions"><button type="button" id="analysis-prev" title="上个月">‹</button>'+
     '<input type="month" id="analysis-month" aria-label="统计月份">'+
     '<button type="button" id="analysis-next" title="下个月">›</button>'+
-    '<button type="button" id="analysis-pick">选择作品</button>'+
-    '<button type="button" id="analysis-upload">上传图片</button>'+
-    '<input type="file" id="analysis-upload-input" accept="image/*" multiple hidden>'+
+    '<button type="button" id="analysis-upload">上传名片横图</button>'+
+    '<button type="button" id="analysis-remove-cover" hidden>移除横图</button>'+
+    '<input type="file" id="analysis-upload-input" accept="image/*" hidden>'+
     '<button type="button" id="analysis-copy">复制分析数据</button>'+
     '<button type="button" id="analysis-export" class="is-primary">导出 PNG 长图</button>'+
     '<button type="button" id="analysis-close" aria-label="关闭分析报告">×</button></div></div>'+
-    '<div class="analysis-picker" id="analysis-picker" hidden></div>'+
     '<div class="analysis-preview" id="analysis-preview"><p class="analysis-loading">正在整合个人打卡与周报数据…</p></div>'+
     '</div>';
   document.body.appendChild(overlay);
@@ -236,7 +234,8 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
     if(closed)return;
     closed=true;
     resizeObs?.disconnect();
-    disposeUploadedUrls();
+    if(coverObjectUrl)URL.revokeObjectURL(coverObjectUrl);
+    coverObjectUrl="";
     overlay.remove();
     document.removeEventListener("keydown",onKey);
   };
@@ -253,25 +252,15 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
   let reports=[],reportsAvailable=false;
   let resizeObs=null;
   let data=null;
-  let selection=[];
-  let pickerOpen=false;
-  let uploadedFiles=[];
-  let uploadedUrls=[];
+  let coverUpload=null;
+  let coverObjectUrl="";
   let renderVersion=0;
-  const localMediaKey=()=>data?.id+":"+data?.month;
-  function disposeUploadedUrls(){
-    uploadedUrls.forEach(url=>URL.revokeObjectURL(url));
-    uploadedUrls=[];
-  }
-  function applyUploadedAssets(){
-    if(!data)return;
-    disposeUploadedUrls();
-    const assets=uploadedFiles.map(file=>{
-      const art=uploadAssetFromBlob(file);
-      uploadedUrls.push(art.url);
-      return art;
-    });
-    data.current.arts=data.current.arts.filter(a=>a.source!=="upload").concat(assets);
+  const localMediaKey=()=>data?.id+":"+data?.month+":landscape-cover";
+  function setCoverUpload(item){
+    if(coverObjectUrl)URL.revokeObjectURL(coverObjectUrl);
+    coverUpload=item || null;
+    coverObjectUrl=coverUpload?URL.createObjectURL(coverUpload.blob):"";
+    overlay.querySelector("#analysis-remove-cover").hidden=!coverUpload;
   }
 
   function saveNote(){
@@ -290,53 +279,12 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
     wrap.style.width=Math.ceil(PAPER_WIDTH*scale)+"px";
     wrap.style.height=Math.ceil(paper.offsetHeight*scale)+"px";
   }
-  function renderPicker(){
-    const picker=overlay.querySelector("#analysis-picker");
-    picker.hidden=!pickerOpen;
-    if(!pickerOpen || !data)return;
-    picker.innerHTML=pickerMarkup(data,selection);
-    picker.querySelectorAll("[data-analysis-remove-art]").forEach(button=>{
-      button.onclick=async()=>{
-        const id=button.dataset.analysisRemoveArt;
-        uploadedFiles=uploadedFiles.filter(file=>file.id!==id);
-        selection=selection.filter(x=>x!==id);
-        try{await saveReportUploads(localMediaKey(),uploadedFiles);}
-        catch(error){window.showToast?.("本地图片保存失败，本次预览仍可使用","提醒","error");}
-        saveLocal(artKey(data.id,data.month),selection);
-        saveNote();
-        applyUploadedAssets();
-        renderPaper(false);
-        renderPicker();
-      };
-    });
-    picker.querySelectorAll("[data-analysis-art]").forEach(button=>{
-      button.onclick=()=>{
-        const id=button.dataset.analysisArt;
-        if(selection.includes(id))selection=selection.filter(x=>x!==id);
-        else if(selection.length<3)selection=[...selection,id];
-        else {
-          window.showToast?.("最多选择三张代表作品","提示");return;
-        }
-        saveLocal(artKey(data.id,data.month),selection);
-        saveNote();
-        renderPaper(false);
-        renderPicker();
-      };
-    });
-  }
   function renderPaper(loadDraft=true){
     const preview=overlay.querySelector("#analysis-preview");
-    if(loadDraft){
-      const stored=loadLocal(artKey(data.id,data.month),null);
-      const valid=new Set(data.current.arts.map(a=>a.id));
-      selection=(Array.isArray(stored)?stored:data.current.arts.slice(0,3).map(a=>a.id))
-        .filter(id=>valid.has(id)).slice(0,3);
-    }
     const note=loadLocal(draftKey(data.id,data.month),{text:""});
-    // When only changing artwork selection, keep the existing unsaved editor content.
-    const existingNote=loadDraft?String(note?.text||""):
-      String(preview.querySelector("#analysis-note")?.innerText??note?.text??"");
-    preview.innerHTML='<div class="analysis-paper-wrap">'+reportPaper(data,existingNote,selection)+'</div>';
+    const existingNote=loadDraft?String(note?.text || ""):
+      String(preview.querySelector("#analysis-note")?.innerText ?? note?.text ?? "");
+    preview.innerHTML='<div class="analysis-paper-wrap">'+reportPaper(data,existingNote,coverObjectUrl)+'</div>';
     const editor=preview.querySelector("#analysis-note");
     editor.textContent=existingNote;
     // AI 评语粘贴为纯文本，避免富文本样式破坏固定宽度的长图排版。
@@ -380,12 +328,10 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
       let files=[];
       const imageKey=localMediaKey();
       try{files=await loadReportUploads(imageKey);}
-      catch(error){console.warn("report uploads unavailable",error);}
+      catch(error){console.warn("report cover unavailable",error);}
       if(closed || version!==renderVersion)return;
-      uploadedFiles=files;
-      applyUploadedAssets();
+      setCoverUpload(files[0] || null);
       renderPaper(true);
-      renderPicker();
       overlay.querySelector("#analysis-next").disabled=month>=DEFAULT_MAX_MONTH();
     }catch(error){
       console.error("monthly report error",error);
@@ -402,41 +348,44 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
     saveNote();monthInput.value=next;rerenderMonth();
   };
   const uploadInput=overlay.querySelector("#analysis-upload-input");
-  const uploadButton=overlay.querySelector("#analysis-upload");
-  uploadButton.onclick=()=>uploadInput.click();
+  overlay.querySelector("#analysis-upload").onclick=()=>uploadInput.click();
   overlay.querySelector("#analysis-preview").addEventListener("click",event=>{
-    if(event.target.closest(".analysis-art.is-empty"))uploadInput.click();
+    if(event.target.closest("[data-analysis-cover]"))uploadInput.click();
   });
-  uploadInput.onchange=async()=>{
-    const files=Array.from(uploadInput.files||[]).filter(file=>file.type.startsWith("image/"));
-    uploadInput.value="";
-    if(!files.length || !data)return;
+  overlay.querySelector("#analysis-remove-cover").onclick=async()=>{
+    if(!data)return;
     const target=data;
     const key=localMediaKey();
-    for(const file of files.slice(0,3)){
-      if(file.size>20*1024*1024){
-        window.showToast?.("单张图片最大 20 MB","文件过大","error");
-        continue;
-      }
-      const id="upload-"+Date.now()+"-"+Math.random().toString(36).slice(2,9);
-      uploadedFiles=uploadedFiles.concat([{id,name:file.name,blob:file}]).slice(-3);
-      selection=selection.filter(x=>uploadedFiles.some(f=>f.id===x)||!x.startsWith("upload-"));
-      selection=[...selection.filter(x=>x!==id),id].slice(-3);
-    }
-    if(data!==target)return;
-    try{await saveReportUploads(key,uploadedFiles);}
+    try{await saveReportUploads(key,[]);}
     catch(error){
-      console.warn("uploaded report image could not persist",error);
-      window.showToast?.("图片已加入预览，但本地保存失败；请在关闭前导出","提醒","error");
+      window.showToast?.("本地保存失败，无法移除横图","错误","error");
+      return;
     }
-    saveLocal(artKey(data.id,data.month),selection);
+    if(closed || data!==target)return;
     saveNote();
-    applyUploadedAssets();
+    setCoverUpload(null);
     renderPaper(false);
-    renderPicker();
   };
-  overlay.querySelector("#analysis-pick").onclick=()=>{
-    pickerOpen=!pickerOpen;renderPicker();
+  uploadInput.onchange=async()=>{
+    const file=uploadInput.files?.[0];
+    uploadInput.value="";
+    if(!file || !data)return;
+    if(!file.type.startsWith("image/") || file.size>20*1024*1024){
+      window.showToast?.("请选择不超过 20 MB 的图片","文件无效","error");
+      return;
+    }
+    const target=data;
+    const key=localMediaKey();
+    const item={id:"cover-"+Date.now(),name:file.name,blob:file};
+    try{await saveReportUploads(key,[item]);}
+    catch(error){
+      console.warn("personal cover could not persist",error);
+      window.showToast?.("图片可以预览，但本地保存失败","提醒","error");
+    }
+    if(closed || data!==target)return;
+    saveNote();
+    setCoverUpload(item);
+    renderPaper(false);
   };
   overlay.querySelector("#analysis-copy").onclick=async()=>{
     if(!data)return;
