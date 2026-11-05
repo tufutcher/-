@@ -697,3 +697,20 @@
   #weekly-xp-overview #weekly-xp-export-poster{display:none!important}
   #weekly-xp-overview .weekly-xp-poster{box-shadow:none!important;border:0!important}
 }
+
+/* 月榜成员行是分析报告入口；周榜仍保持原来的信息展示。 */
+#weekly-xp-overview .weekly-xp-person-row.is-month[data-xp-member-id]{
+  cursor:pointer;
+  transition:background-color .16s ease;
+}
+#weekly-xp-overview .weekly-xp-person-row.is-month[data-xp-member-id]:hover{
+  background:#f1fbfd;
+}
+#weekly-xp-overview .weekly-xp-person-row.is-month[data-xp-member-id]:focus-visible{
+  outline:2px solid #0CC0DF;
+  outline-offset:-2px;
+}
+#weekly-xp-overview .weekly-xp-person-row.is-month[aria-busy="true"]{
+  opacity:.6;
+  pointer-events:none;
+}
