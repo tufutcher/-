@@ -376,3 +376,48 @@
   .analysis-toolbar-actions button,.analysis-toolbar-actions input{font-size:11px;padding:5px 8px}
   .analysis-preview{padding:8px}
 }
+
+/* 月报第二版：减弱附注、收紧模块间距，四项摘要移至日历右侧。 */
+.analysis-report-paper{padding:38px 52px 28px}
+.analysis-identity{margin:18px 0 14px;gap:19px}
+.analysis-avatar{width:90px;height:90px;flex-basis:90px;border-radius:20px}
+.analysis-identity-copy h1{font-size:54px}
+.analysis-identity-caption{margin-top:4px}
+.analysis-topline{font-size:10px}
+.analysis-report-section{margin-top:16px;padding-top:12px;border-top:0}
+.analysis-section-heading{margin-bottom:9px}
+.analysis-section-heading h2{font-size:23px}
+.analysis-section-num,.analysis-section-heading p{display:none}
+.analysis-rhythm-grid{grid-template-columns:1fr .94fr;gap:12px;align-items:stretch}
+.analysis-calendar{padding:12px}
+.analysis-day{height:33px}
+.analysis-calendar-wrap{min-width:0}
+.analysis-cal-legend{margin-top:9px;gap:6px 11px}
+.analysis-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.analysis-summary-grid>div{padding:17px 14px;justify-content:center}
+.analysis-summary-grid strong{margin:4px 0 0;font-size:34px}
+.analysis-summary-grid span{font-size:12px}
+.analysis-summary-grid small{font-size:12px}
+.analysis-summary-grid em{display:none}
+.analysis-observation{margin-top:9px;padding:9px 11px;font-size:12px;border-left-width:2px;background:#fafbfc}
+.analysis-engagement-grid>div,.analysis-change-grid>div{padding:12px 14px}
+.analysis-xp-composition{margin-top:10px;padding:10px 13px}
+.analysis-xp-bar{margin:8px 0 6px}
+.analysis-works-title{margin:14px 0 8px}
+.analysis-art-grid{gap:9px}
+.analysis-art img{height:165px}
+.analysis-art.is-empty{min-height:194px;cursor:pointer}
+.analysis-art.is-empty:hover{border-color:#0CC0DF;background:#f4fcfd}
+.analysis-art-placeholder{font-size:22px}
+.analysis-art-placeholder span{font-size:12px}
+.analysis-report-section.is-commentary{margin-top:18px}
+.analysis-note{min-height:340px}
+.analysis-report-footer{margin-top:16px}
+.analysis-compare-caption,.analysis-privacy-hint{display:none}
+.analysis-picker-grid .analysis-picker-tile{width:84px;display:flex;flex-direction:column;gap:3px}
+.analysis-picker-grid .analysis-remove-upload{
+  display:block;width:84px;height:auto;min-height:22px;padding:3px 4px;
+  border:0;border-radius:5px;background:#f2f2f3;
+  color:#787a83;font-size:10px;cursor:pointer
+}
+.analysis-picker-grid .analysis-remove-upload:hover{background:#ffebeb;color:#ae3030}
