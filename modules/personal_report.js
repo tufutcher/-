@@ -88,7 +88,7 @@ function reportPaper(data,note,coverUrl){
     '<header class="analysis-report-header">'+
       '<div class="analysis-topline"><span>CREATIVE ACTIVITY REPORT</span><span>'+escapeHtml(data.month)+' / MONTHLY</span></div>'+
       '<div class="analysis-profile-card">'+
-        '<div class="analysis-identity"><div class="analysis-avatar"><div class="analysis-avatar-inner">'+avatar+'</div></div>'+
+        '<div class="analysis-identity"><div class="analysis-avatar">'+avatar+'</div>'+
           '<div class="analysis-identity-copy"><h1>'+title+'</h1>'+
             '<div class="analysis-identity-caption">'+formatMonthTitle(data.month)+'</div></div></div>'+
         (cover?'<button type="button" class="analysis-cover-upload has-cover" data-analysis-cover title="更换横向名片图片" aria-label="更换横向名片图片">'+
