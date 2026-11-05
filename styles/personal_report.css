@@ -320,7 +320,7 @@
   display:flex;flex-direction:column;overflow:hidden;
   border:1px solid #e7e8ed;border-radius:11px;background:#f3f4f6;
 }
-.analysis-art img{display:block;width:100%;height:180px;object-fit:cover}
+.analysis-art img{display:block;width:100%;height:180px;object-fit:contain;background:#f5f6f8}
 .analysis-art-label{background:#fff;padding:7px 10px;color:#8b8d96;font-size:11px}
 .analysis-art.is-empty{min-height:215px;border:1px dashed #d9dce0;background:#f9fafa}
 .analysis-art-placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#b7b9c0;font-size:27px}
