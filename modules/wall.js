@@ -1,4 +1,4 @@
-import { openReadonlyProfileModal } from "./profile.js";
+import { openReadonlyProfileModal, openReadonlyMemberProfileModal } from "./profile.js";
 import { deleteCheckinWithImages, loadCheckins } from "../api/checkin.js";
 import { openEditModal } from "./edit_modal.js";
 import { buildArtworksFromCheckins, getArtworkCover } from "./artwork.js";
@@ -67,10 +67,13 @@ export function renderWall(items, profiles = []){
 }
 
 function getProfile(userId, username, memberId){
-  return allProfiles.find(p => userId && p.id === userId)
-    || allProfiles.find(p => memberId && p.member_id === memberId)
-    || allProfiles.find(p => username && p.username === username)
-    || null;
+  const identified = allProfiles.find(p => userId && p.id === userId)
+    || allProfiles.find(p => memberId && p.member_id === memberId);
+  if(identified)return identified;
+  // 存在 member_id 时不能用同名注册用户冒充该成员，以免误合并档案。
+  return !userId && !memberId
+    ? allProfiles.find(p => username && p.username === username) || null
+    : null;
 }
 
 function getProfileForItem(item){
@@ -91,15 +94,11 @@ function avatarHtml(profile, name){
   return `<div class="person-avatar avatar-fallback">${escapeHtml(first)}</div>`;
 }
 
-function openWallProfile(userId){
-  if(!userId) return;
-
-  // readonly 主页必须使用全站 checkins；profileCheckins 是当前登录用户的个人页缓存。
-  if(window.state){
-    window.state.profileCheckins = null;
-  }
-
-  openReadonlyProfileModal(userId);
+function openWallProfile(userId,memberId,name){
+  if(!userId && !memberId)return;
+  if(window.state)window.state.profileCheckins=null;
+  if(userId)openReadonlyProfileModal(userId);
+  else openReadonlyMemberProfileModal(memberId,name,allCheckins);
 }
 
 function getWeekKey(date){
@@ -159,7 +158,7 @@ function personCardHtml(group){
     .join("");
 
   return `
-    <div class="person-card" data-profile-user-id="${escapeAttr(group.userId || "")}">
+    <div class="person-card" data-profile-user-id="${escapeAttr(group.userId || "")}" data-profile-member-id="${escapeAttr(group.memberId || "")}" data-profile-name="${escapeAttr(group.name || "")}">
       <div class="person-head">
         ${avatarHtml(profile, group.name)}
         <div class="person-meta">
@@ -260,7 +259,7 @@ function bindCardClicks(){
   // 按人分组：点头像、名字、卡片空白区域，打开这个人的主页弹窗
   document.querySelectorAll(".person-card").forEach(card => {
     card.onclick = () => {
-      openWallProfile(card.dataset.profileUserId);
+      openWallProfile(card.dataset.profileUserId,card.dataset.profileMemberId,card.dataset.profileName);
     };
   });
 }
@@ -305,7 +304,7 @@ function openArtworkDetail(artwork){
     <div class="detail-viewer-card">
 
       <div class="detail-viewer-head">
-        <button class="detail-author-card" data-profile-user-id="${escapeAttr(profileUserId)}" type="button">
+        <button class="detail-author-card" data-profile-user-id="${escapeAttr(profileUserId)}" data-profile-member-id="${escapeAttr(artwork.member_id || profile?.member_id || "")}" data-profile-name="${escapeAttr(username)}" type="button">
           ${avatarHtml(profile, username).replace("person-avatar", "detail-avatar")}
           <div>
             <div class="detail-author">${escapeHtml(username)}</div>
@@ -350,10 +349,10 @@ function openArtworkDetail(artwork){
   if(authorCard){
     authorCard.onclick = () => {
       const userId = authorCard.dataset.profileUserId;
-      if(!userId) return;
-  
+      const memberId = authorCard.dataset.profileMemberId;
+      if(!userId && !memberId)return;
       modal.remove();
-      openWallProfile(userId);
+      openWallProfile(userId,memberId,authorCard.dataset.profileName);
     };
   }
 
@@ -401,7 +400,7 @@ function openDetail(item){
     <div class="detail-viewer-card">
 
       <div class="detail-viewer-head">
-        <button class="detail-author-card" data-profile-user-id="${escapeAttr(profileUserId)}" type="button">
+        <button class="detail-author-card" data-profile-user-id="${escapeAttr(profileUserId)}" data-profile-member-id="${escapeAttr(item.member_id || profile?.member_id || "")}" data-profile-name="${escapeAttr(username)}" type="button">
           ${avatarHtml(profile, username).replace("person-avatar", "detail-avatar")}
           <div>
             <div class="detail-author">${escapeHtml(username)}</div>
@@ -446,10 +445,10 @@ function openDetail(item){
   if(authorCard){
     authorCard.onclick = () => {
       const userId = authorCard.dataset.profileUserId;
-      if(!userId) return;
-  
+      const memberId = authorCard.dataset.profileMemberId;
+      if(!userId && !memberId)return;
       modal.remove();
-      openWallProfile(userId);
+      openWallProfile(userId,memberId,authorCard.dataset.profileName);
     };
   }
 
