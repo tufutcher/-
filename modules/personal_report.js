@@ -71,7 +71,7 @@ function featuredArt(data,selection){
     .sort((a,b)=>selection.indexOf(a.id)-selection.indexOf(b.id)).slice(0,3);
   const cards=selected.map((a,i)=>
     '<div class="analysis-art"><img crossorigin="anonymous" src="'+safeImageUrl(a.url)+'" alt="代表作品 '+(i+1)+'">'+
-    '<div class="analysis-art-label">作品记录 '+String(i+1).padStart(2,"0")+'</div></div>'
+    '</div>'
   );
   while(cards.length<3){
     cards.push('<div class="analysis-art is-empty"><div class="analysis-art-placeholder">＋<span>代表作品</span></div></div>');
@@ -115,9 +115,9 @@ function reportPaper(data,note,selection){
       '<span><i class="challenge"></i>挑战</span></div></div>'+
       '<div class="analysis-summary-grid">'+
         '<div><span>打卡记录</span><strong>'+c.drawCount+'<small> / '+data.availableDays+' 天</small></strong></div>'+
-        '<div><span>打卡率</span><strong>'+data.rate+'<small>%</small></strong></div>'+
         '<div><span>最长连续</span><strong>'+c.maxStreak+'<small> 天</small></strong></div>'+
         '<div><span>反思记录</span><strong>'+reflectValue+'<small>'+(hasReport?' 天':'')+'</small></strong></div>'+
+        '<div><span>累计经验值</span><strong>'+reportScore(data)+'<small>'+(hasReport?' XP':'')+'</small></strong></div>'+
       '</div></div>'+
       '<p class="analysis-observation">'+escapeHtml(data.observations.rhythm)+'</p>'+
     '</section>'+
