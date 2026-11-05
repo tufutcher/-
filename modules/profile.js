@@ -651,7 +651,11 @@ if(!readonly){
   });
 }
 
-export function openReadonlyProfileModal(userId){
+export function openReadonlyProfileModal(userId, options={}){
+  const pageState = options.virtualProfile
+    ? {...state,profiles:[...(state.profiles||[]),options.virtualProfile],
+        checkins:options.memberCheckins||[],profileCheckins:null}
+    : state;
   const old = document.getElementById("readonly-profile-modal");
   if(old) old.remove();
 
@@ -670,7 +674,7 @@ export function openReadonlyProfileModal(userId){
     const content = modal.querySelector(".readonly-profile-content");
     if(!content) return;
 
-    content.innerHTML = renderProfile(state, {
+    content.innerHTML = renderProfile(pageState, {
       userId,
       readonly: true,
       skipBind: true
@@ -680,13 +684,13 @@ export function openReadonlyProfileModal(userId){
   }
 
   function bindReadonlyProfileEvents(){
-    const mine = getProfileItems(state, userId, { readonly: true });
+    const mine = getProfileItems(pageState, userId, { readonly: true });
     const analysisButton = modal.querySelector(".profile-analysis-trigger");
     if(analysisButton){
       analysisButton.onclick = e => {
         e.preventDefault();
         e.stopPropagation();
-        openPersonalAnalysisReport(getProfileByUserId(state, userId), mine);
+        openPersonalAnalysisReport(getProfileByUserId(pageState, userId), mine);
       };
     }
 
@@ -763,4 +767,26 @@ export function openReadonlyProfileModal(userId){
   document.addEventListener("keydown", escClose);
 
   renderReadonlyContent();
+}
+
+/** 无注册账号的周报成员仍然可以打开只读档案（依靠 member_id，而非 auth 用户 id）。 */
+export function openReadonlyMemberProfileModal(memberId,displayName,checkins=[]){
+  const id=String(memberId||"");
+  if(!id)return;
+  const linked=(state.profiles||[]).find(profile=>String(profile.member_id||"")===id);
+  if(linked?.id){
+    openReadonlyProfileModal(linked.id);
+    return;
+  }
+  const virtualProfile={
+    id:"virtual-member:"+id,
+    username:String(displayName||"成员档案"),
+    member_id:id,
+    avatar_url:"",
+    virtual_member:true
+  };
+  openReadonlyProfileModal(virtualProfile.id,{
+    virtualProfile,
+    memberCheckins:(checkins||[]).filter(item=>String(item.member_id||"")===id)
+  });
 }
