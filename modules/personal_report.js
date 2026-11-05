@@ -399,10 +399,12 @@ export async function openPersonalAnalysisReport(profile,fallbackCheckins=[],opt
     try{
       const version=++renderVersion;
       data=buildPersonalMonthlyData({profile,checkins,reports,month,reportsAvailable});
-      uploadedFiles=[];
-      try{uploadedFiles=await loadReportUploads(localMediaKey());}
+      let files=[];
+      const imageKey=localMediaKey();
+      try{files=await loadReportUploads(imageKey);}
       catch(error){console.warn("report uploads unavailable",error);}
       if(closed || version!==renderVersion)return;
+      uploadedFiles=files;
       applyUploadedAssets();
       renderPaper(true);
       renderPicker();
