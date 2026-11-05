@@ -35,9 +35,8 @@ function loadLocal(key,fallback){
 function draftKey(profileId,month){return "creative-report-note-v1:"+profileId+":"+month;}
 function artKey(profileId,month){return "creative-report-art-v1:"+profileId+":"+month;}
 
-function sectionHeading(num,title,caption){
-  return '<div class="analysis-section-heading"><span class="analysis-section-num">'+num+
-    '</span><h2>'+title+'</h2><p>'+caption+'</p></div>';
+function sectionHeading(num,title){
+  return '<div class="analysis-section-heading"><h2>'+title+'</h2></div>';
 }
 function statusChange(change,unit=""){
   return change>0?"+"+change+unit:change<0?String(change)+unit:"持平";
@@ -59,15 +58,6 @@ function calendarMarkup(data){
   return '<div class="analysis-calendar"><div class="analysis-weekdays">'+
     ["一","二","三","四","五","六","日"].map(d=>'<span>'+d+'</span>').join("")+
     '</div><div class="analysis-calendar-grid">'+blanks+days+'</div></div>';
-}
-function weekGraph(data){
-  const max=Math.max(1,...data.current.weeks.map(w=>w.days));
-  return '<div class="analysis-week-chart">'+data.current.weeks.map((w)=>{
-    const pct=w.days?Math.round(w.draw/w.days*100):0;
-    return '<div class="analysis-week-row"><strong>'+w.label+'</strong>'+
-      '<div class="analysis-week-track"><div class="analysis-week-fill" style="width:'+pct+'%"></div></div>'+
-      '<b>'+w.draw+' / '+w.days+' 天</b></div>';
-  }).join("")+'</div>';
 }
 function reportScore(data){
   return data.reportsLinked?data.current.xp.toLocaleString("zh-CN"):"—";
@@ -112,25 +102,22 @@ function reportPaper(data,note,selection){
     '<header class="analysis-report-header">'+
       '<div class="analysis-topline"><span>CREATIVE ACTIVITY REPORT</span><span>'+escapeHtml(data.month)+' / MONTHLY</span></div>'+
       '<div class="analysis-identity"><div class="analysis-avatar">'+avatar+'</div>'+
-        '<div class="analysis-identity-copy"><p>PERSONAL CREATIVE REPORT</p>'+
+        '<div class="analysis-identity-copy">'+
           '<h1>'+title+'</h1><div class="analysis-identity-caption">'+formatMonthTitle(data.month)+
-          ' · '+escapeHtml(data.periodCaption)+'</div></div></div>'+
-      '<div class="analysis-summary-grid">'+
-        '<div><span>打卡记录</span><strong>'+c.drawCount+'<small> / '+data.availableDays+' 天</small></strong>'+
-          '<em>'+data.rate+'% 的已统计日期</em></div>'+
-        '<div><span>本期最长连续</span><strong>'+c.maxStreak+'<small> 天</small></strong><em>按自然日连续计算</em></div>'+
-        '<div><span>反思记录</span><strong>'+reflectValue+'<small>'+(hasReport?' 天':'')+'</small></strong><em>'+(hasReport?'包括深度反思':'周报记录尚不可用')+'</em></div>'+
-        '<div><span>累计经验值</span><strong>'+reportScore(data)+'<small>'+(hasReport?' XP':'')+'</small></strong><em>依据已保存的周报</em></div>'+
-      '</div>'+
+          '</div></div></div>'+
     '</header>'+
-    '<section class="analysis-report-section">'+sectionHeading("01","创作节奏","什么时候在画？记录是否连续？")+
-      '<div class="analysis-rhythm-grid"><div>'+calendarMarkup(data)+'</div>'+
-        '<div class="analysis-rhythm-sidebar"><div class="analysis-sidebar-title">每周打卡分布</div>'+
-          weekGraph(data)+
-          '<div class="analysis-cal-legend"><span><i class="draw"></i>打卡日期底色</span>'+
-          '<span><i class="reflect"></i>有效反思</span>'+
-          '<span><i class="deep"></i>深度反思</span>'+
-          '<span><i class="challenge"></i>挑战</span></div></div></div>'+
+    '<section class="analysis-report-section">'+sectionHeading("01","创作节奏")+
+      '<div class="analysis-rhythm-grid"><div class="analysis-calendar-wrap">'+calendarMarkup(data)+
+      '<div class="analysis-cal-legend"><span><i class="draw"></i>打卡</span>'+
+      '<span><i class="reflect"></i>反思</span>'+
+      '<span><i class="deep"></i>深度反思</span>'+
+      '<span><i class="challenge"></i>挑战</span></div></div>'+
+      '<div class="analysis-summary-grid">'+
+        '<div><span>打卡记录</span><strong>'+c.drawCount+'<small> / '+data.availableDays+' 天</small></strong></div>'+
+        '<div><span>打卡率</span><strong>'+data.rate+'<small>%</small></strong></div>'+
+        '<div><span>最长连续</span><strong>'+c.maxStreak+'<small> 天</small></strong></div>'+
+        '<div><span>反思记录</span><strong>'+reflectValue+'<small>'+(hasReport?' 天':'')+'</small></strong></div>'+
+      '</div></div>'+
       '<p class="analysis-observation">'+escapeHtml(data.observations.rhythm)+'</p>'+
     '</section>'+
     '<section class="analysis-report-section">'+sectionHeading("02","创作参与方式","除打卡外，还进行了多少反思与挑战？")+
@@ -152,9 +139,8 @@ function reportPaper(data,note,selection){
         '<div><span>反思天数变化</span><strong>'+reflectionChange+'</strong><small>'+(hasReport?data.previous.reflectDays+' → '+c.reflectDays+' 天':"无周报数据")+'</small></div>'+
         '<div><span>经验值变化</span><strong>'+xpChange+'</strong><small>'+(hasReport?data.previous.xp+' → '+c.xp+' XP':"无周报数据")+'</small></div>'+
       '</div>'+
-      '<p class="analysis-compare-caption">比较对象：'+escapeHtml(data.previousMonth)+(data.month===DEFAULT_MAX_MONTH()?" 同期":" 全月")+
-        '。仅对记录数量作比较，不推断绘画能力。</p>'+
-      '<div class="analysis-works-title"><strong>本期作品记录</strong><span>上传图片 '+c.imageCount+' 张 · 自选最多 3 张代表作品</span></div>'+
+
+      '<div class="analysis-works-title"><strong>本期作品记录</strong></div>'+
       featuredArt(data,selection)+
       (tags?'<div class="analysis-top-tags"><span>常见标签</span>'+tags+'</div>':'')+
     '</section>'+
@@ -162,9 +148,9 @@ function reportPaper(data,note,selection){
       sectionHeading("04","创作观察与评语","在这里粘贴并编辑 AI 生成的评语")+
       '<div id="analysis-note" class="analysis-note" contenteditable="true" role="textbox" aria-multiline="true" '+
       'data-placeholder="点击这里粘贴评语。可以分析本期创作节奏、实际作品表现与下一阶段计划。"></div>'+
-      '<p class="analysis-privacy-hint">评语由你编辑；仅保存在此浏览器，不会自动提交给 AI。</p>'+
+
     '</section>'+
-    '<footer class="analysis-report-footer"><b>不画画真的要完了</b><span>创作参与记录 · 非能力测评</span></footer>'+
+    '<footer class="analysis-report-footer"><b>不画画真的要完了</b></footer>'+
   '</article>';
 }
 
