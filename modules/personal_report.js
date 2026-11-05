@@ -36,9 +36,6 @@ function loadLocal(key,fallback){
 function draftKey(profileId,month){return "creative-report-note-v1:"+profileId+":"+month;}
 function artKey(profileId,month){return "creative-report-art-v1:"+profileId+":"+month;}
 
-function sectionHeading(num,title){
-  return '<div class="analysis-section-heading"><h2>'+title+'</h2></div>';
-}
 function statusChange(change,unit=""){
   return change>0?"+"+change+unit:change<0?String(change)+unit:"持平";
 }
@@ -66,24 +63,13 @@ function reportScore(data){
 function reportValue(data,key,unit){
   return data.reportsLinked?data.current[key]+' '+unit:"—";
 }
-function featuredArt(data,selection){
-  const selected=data.current.arts.filter(a=>selection.includes(a.id))
-    .sort((a,b)=>selection.indexOf(a.id)-selection.indexOf(b.id)).slice(0,3);
-  const cards=selected.map((a,i)=>
-    '<div class="analysis-art"><img crossorigin="anonymous" src="'+safeImageUrl(a.url)+'" alt="代表作品 '+(i+1)+'">'+
-    '</div>'
-  );
-  while(cards.length<3){
-    cards.push('<div class="analysis-art is-empty"><div class="analysis-art-placeholder">＋<span>代表作品</span></div></div>');
-  }
-  return '<div class="analysis-art-grid">'+cards.join("")+'</div>';
-}
-function reportPaper(data,note,selection){
+function reportPaper(data,note,coverUrl){
   const c=data.current;
 
   const hasReport=data.reportsLinked;
   const reflectValue=hasReport?String(c.reflectDays):"—";
   const title=escapeHtml(data.name);
+  const cover=safeImageUrl(coverUrl);
   const avatar=safeImageUrl(data.avatarUrl)
     ?'<img crossorigin="anonymous" src="'+safeImageUrl(data.avatarUrl)+'" alt="">'
     :'<span>'+title.slice(0,1)+'</span>';
@@ -102,12 +88,18 @@ function reportPaper(data,note,selection){
   return '<article class="analysis-report-paper" id="analysis-report-paper">'+
     '<header class="analysis-report-header">'+
       '<div class="analysis-topline"><span>CREATIVE ACTIVITY REPORT</span><span>'+escapeHtml(data.month)+' / MONTHLY</span></div>'+
-      '<div class="analysis-identity"><div class="analysis-avatar">'+avatar+'</div>'+
-        '<div class="analysis-identity-copy">'+
-          '<h1>'+title+'</h1><div class="analysis-identity-caption">'+formatMonthTitle(data.month)+
-          '</div></div></div>'+
+      '<div class="analysis-profile-card">'+
+        '<div class="analysis-identity"><div class="analysis-avatar">'+avatar+'</div>'+
+          '<div class="analysis-identity-copy"><h1>'+title+'</h1>'+
+            '<div class="analysis-identity-caption">'+formatMonthTitle(data.month)+'</div></div></div>'+
+        '<button type="button" class="analysis-cover-upload '+(cover?'has-cover':'is-empty')+
+          '" data-analysis-cover title="上传或更换横向名片图片" aria-label="上传或更换横向名片图片">'+
+          (cover?'<img src="'+cover+'" alt="成员名片横图">':
+            '<span class="analysis-cover-placeholder"><b>＋</b>上传横图</span>')+
+          '<span class="analysis-cover-action">'+(cover?'更换图片':'16:9 横向图片')+'</span></button>'+
+      '</div>'+
     '</header>'+
-    '<section class="analysis-report-section">'+sectionHeading("01","创作节奏")+
+    '<section class="analysis-report-section">'+
       '<div class="analysis-rhythm-grid"><div class="analysis-calendar-wrap">'+calendarMarkup(data)+
       '<div class="analysis-cal-legend"><span><i class="draw"></i>打卡</span>'+
       '<span><i class="reflect"></i>反思</span>'+
@@ -121,7 +113,7 @@ function reportPaper(data,note,selection){
       '</div></div>'+
       '<p class="analysis-observation">'+escapeHtml(data.observations.rhythm)+'</p>'+
     '</section>'+
-    '<section class="analysis-report-section">'+sectionHeading("02","创作参与方式","除打卡外，还进行了多少反思与挑战？")+
+    '<section class="analysis-report-section">'+
       '<div class="analysis-engagement-grid">'+
         '<div><span>有效反思</span><strong>'+reportValue(data,"normalDays","天")+'</strong></div>'+
         '<div><span>深度反思</span><strong>'+reportValue(data,"deepDays","天")+'</strong></div>'+
@@ -134,19 +126,17 @@ function reportPaper(data,note,selection){
       '</div>'+
       '<p class="analysis-observation">'+escapeHtml(data.observations.engagement)+'</p>'+
     '</section>'+
-    '<section class="analysis-report-section">'+sectionHeading("03","阶段变化与作品记录","相比上个周期，记录发生了哪些变化？")+
+    '<section class="analysis-report-section">'+
       '<div class="analysis-change-grid">'+
         '<div><span>打卡率变化</span><strong>'+rateChange+'</strong><small>'+data.previousRate+'% → '+data.rate+'%</small></div>'+
         '<div><span>反思天数变化</span><strong>'+reflectionChange+'</strong><small>'+(hasReport?data.previous.reflectDays+' → '+c.reflectDays+' 天':"无周报数据")+'</small></div>'+
         '<div><span>经验值变化</span><strong>'+xpChange+'</strong><small>'+(hasReport?data.previous.xp+' → '+c.xp+' XP':"无周报数据")+'</small></div>'+
       '</div>'+
 
-      '<div class="analysis-works-title"><strong>本期作品记录</strong></div>'+
-      featuredArt(data,selection)+
 
     '</section>'+
     '<section class="analysis-report-section is-commentary">'+
-      sectionHeading("04","创作观察与评语","在这里粘贴并编辑 AI 生成的评语")+
+      
       '<div id="analysis-note" class="analysis-note" contenteditable="true" role="textbox" aria-multiline="true" '+
       'data-placeholder="点击这里粘贴评语。可以分析本期创作节奏、实际作品表现与下一阶段计划。"></div>'+
 
@@ -155,18 +145,6 @@ function reportPaper(data,note,selection){
   '</article>';
 }
 
-function pickerMarkup(data,selection){
-  const list=data.current.arts.slice(0,80);
-  if(!list.length)return '<p class="analysis-no-art">暂无作品，可点击「上传图片」添加。</p>';
-  return '<div class="analysis-picker-grid">'+list.map(a=>{
-      const on=selection.includes(a.id);
-      return '<div class="analysis-picker-tile"><button type="button" data-analysis-art="'+escapeHtml(a.id)+'" class="'+(on?"is-selected":"")+
-        '" aria-pressed="'+on+'"><img loading="lazy" src="'+safeImageUrl(a.url)+'" alt="">'+
-        '<span>'+(on?"已选":"选择")+'</span></button>'+
-        (a.source==="upload"?'<button class="analysis-remove-upload" type="button" data-analysis-remove-art="'+escapeHtml(a.id)+'">移除上传</button>':"")+
-        '</div>';
-    }).join("")+'</div>';
-}
 function attachCss(){
   if(document.getElementById("personal-report-css"))return;
   const link=document.createElement("link");link.id="personal-report-css";link.rel="stylesheet";
