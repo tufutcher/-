@@ -80,6 +80,15 @@ function collectPeriod({memberId,checkins,reports,month,endDay,reportsAvailable}
     maxStreak=Math.max(maxStreak,streak);
     previous=d;
   }
+  let longestUnrecorded=0,unrecordedRun=0;
+  for(let day=1;day<=endDay;day++){
+    const date=month+"-"+String(day).padStart(2,"0");
+    if(drawDays.has(date)) unrecordedRun=0;
+    else {
+      unrecordedRun++;
+      longestUnrecorded=Math.max(longestUnrecorded,unrecordedRun);
+    }
+  }
   const daily=[...dateMap.values()].sort((a,b)=>a.date.localeCompare(b.date));
   const reflectDays=daily.filter(x=>x.reflection>0).length;
   const deepDays=daily.filter(x=>x.reflection===20).length;
@@ -105,7 +114,7 @@ function collectPeriod({memberId,checkins,reports,month,endDay,reportsAvailable}
   }
   return {
     month,start,end,drawDays,dates,dateMap,daily,checkins:filtered,
-    drawCount:drawDays.size,maxStreak,reflectDays,normalDays,deepDays,
+    drawCount:drawDays.size,maxStreak,longestUnrecorded,reflectDays,normalDays,deepDays,
     challengeDays,reflectionWithDraw,
     xp:reportsAvailable&&memberId?(summary?.xp||0):null,
     scoreParts,arts,imageCount,
@@ -142,7 +151,7 @@ export function buildPersonalMonthlyData({profile,checkins=[],reports=[],month=p
   });
   const observations={
     rhythm:"本期 "+current.drawCount+" / "+range.availableDays+" 天留下打卡记录（"+rate+"%），"+
-      "本期最长连续打卡 "+current.maxStreak+" 天；"+rateSummary+"。",
+      "最长连续打卡 "+current.maxStreak+" 天，最长连续无打卡记录 "+current.longestUnrecorded+" 天。",
     engagement:memberId&&reportsAvailable
       ? "本期记录反思 "+current.reflectDays+" 天，其中深度反思 "+current.deepDays+
         " 天；主题挑战 "+current.challengeDays+" 次。"
@@ -169,6 +178,7 @@ export function personalReportDataText(d){
     "期间："+d.periodStart+" 至 "+d.periodEnd+"（"+d.periodCaption+"）",
     "打卡："+c.drawCount+" / "+d.availableDays+" 天（"+d.rate+"%）",
     "本期最长连续打卡："+c.maxStreak+" 天",
+    "最长连续无打卡记录："+c.longestUnrecorded+" 天",
     "上期（"+d.previousMonth+"）打卡："+p.drawCount+" / "+(d.month===personalMonthKey()?
       Math.min(d.availableDays,new Date(Number(d.previousMonth.slice(0,4)),Number(d.previousMonth.slice(5)),0).getDate()):
       new Date(Number(d.previousMonth.slice(0,4)),Number(d.previousMonth.slice(5)),0).getDate())+
