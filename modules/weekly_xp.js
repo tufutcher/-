@@ -292,6 +292,53 @@ export async function openWeeklyXpOverview(initialMode = "month"){
       </section>`;
   }
 
+  // 月榜直接点击成员进入分析报告。周报中的成员没有注册账号也可使用虚拟成员档案。
+  const rankingWrap=modal.querySelector("#weekly-xp-poster-wrap");
+  async function openMonthlyMember(row){
+    if(mode!=="month" || !row)return;
+    const id=row.dataset.xpMemberId;
+    const person=currentSummary.find(p=>String(p.id)===id);
+    if(!person)return;
+    row.setAttribute("aria-busy","true");
+    try{
+      let profile=null;
+      const sb=window.__sb;
+      if(sb && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)){
+        const result=await sb.from("profiles")
+          .select("id, username, avatar_url, member_id")
+          .eq("member_id",id).maybeSingle();
+        if(!result.error)profile=result.data;
+      }
+      if(!profile){
+        profile={
+          id:"member:"+id,
+          member_id:id,
+          username:person.name,
+          avatar_url:"",
+          virtual_member:true
+        };
+      }
+      const module=await import("./personal_report.js");
+      await module.openPersonalAnalysisReport(profile,[],{month:monthInput.value});
+    }catch(error){
+      console.error("open member monthly report failed",error);
+      window.showToast?.("成员分析报告打开失败","错误","error");
+    }finally{
+      row.removeAttribute("aria-busy");
+    }
+  }
+  rankingWrap.addEventListener("click",event=>{
+    const row=event.target.closest(".weekly-xp-person-row[data-xp-member-id]");
+    if(row)void openMonthlyMember(row);
+  });
+  rankingWrap.addEventListener("keydown",event=>{
+    if(event.key!=="Enter" && event.key!==" ")return;
+    const row=event.target.closest(".weekly-xp-person-row[data-xp-member-id]");
+    if(!row)return;
+    event.preventDefault();
+    void openMonthlyMember(row);
+  });
+
   weekButton.onclick = () => setMode("week");
   monthButton.onclick = () => setMode("month");
   weekInput.onchange = render;
@@ -354,7 +401,7 @@ function renderPersonRow(person, index, period, mode){
     : `<div class="weekly-xp-badges is-month-badges" aria-label="本月打卡徽章">${badges}</div>`;
 
   return `
-    <article class="weekly-xp-person-row ${mode === "week" ? `is-week tone-${tone}` : "is-month"}">
+    <article class="weekly-xp-person-row ${mode === "week" ? `is-week tone-${tone}` : "is-month"}" ${mode === "month" ? `data-xp-member-id="${escapeAttr(person.id)}" role="button" tabindex="0" title="生成${escapeAttr(person.name)}的创作分析报告" aria-label="生成${escapeAttr(person.name)}的创作分析报告"` : ""}>
       <div class="weekly-xp-rank-slot">${leadingCell}</div>
       <div class="weekly-xp-member">
         <div class="weekly-xp-member-heading">
