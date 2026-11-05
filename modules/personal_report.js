@@ -80,7 +80,7 @@ function featuredArt(data,selection){
 }
 function reportPaper(data,note,selection){
   const c=data.current;
-  const tags=c.topTags.map(([tag,n])=>'<span>'+escapeHtml(tag)+'</span>').join("");
+
   const hasReport=data.reportsLinked;
   const reflectValue=hasReport?String(c.reflectDays):"—";
   const title=escapeHtml(data.name);
@@ -143,7 +143,7 @@ function reportPaper(data,note,selection){
 
       '<div class="analysis-works-title"><strong>本期作品记录</strong></div>'+
       featuredArt(data,selection)+
-      (tags?'<div class="analysis-top-tags"><span>常见标签</span>'+tags+'</div>':'')+
+
     '</section>'+
     '<section class="analysis-report-section is-commentary">'+
       sectionHeading("04","创作观察与评语","在这里粘贴并编辑 AI 生成的评语")+
