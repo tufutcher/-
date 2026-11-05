@@ -311,7 +311,7 @@ export async function openWeeklyXpOverview(initialMode = "month"){
       }
       if(!profile){
         profile={
-          id:"member:"+id,
+          id:"virtual-member:"+id,
           member_id:id,
           username:person.name,
           avatar_url:"",
