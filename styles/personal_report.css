@@ -640,3 +640,93 @@
 .analysis-profile-card .analysis-cover-upload{
   border-radius:0;
 }
+
+/* 月报第五版：成员信息与矮横幅并排，数据分析列与评语列等高。 */
+.analysis-topline{
+  justify-content:flex-end;
+}
+.analysis-profile-card{
+  display:grid;
+  grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
+  align-items:center;
+  gap:20px;
+  min-height:0;
+  padding:0;
+  overflow:hidden;
+}
+.analysis-profile-card .analysis-identity{
+  min-width:0;
+  padding:18px 20px;
+}
+.analysis-profile-card .analysis-cover-upload{
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  height:auto;
+  aspect-ratio:2.2 / 1;
+  flex:0 0 auto;
+  border:0;
+  border-radius:0;
+}
+.analysis-profile-card .analysis-cover-upload img{
+  object-fit:cover;
+}
+.analysis-profile-card:not(.has-cover){
+  grid-template-columns:minmax(0,1fr);
+}
+.analysis-bottom-grid{
+  align-items:stretch;
+}
+.analysis-bottom-data{
+  min-height:420px;
+  height:100%;
+}
+.analysis-bottom-data .analysis-report-section{
+  flex:1 1 0;
+  justify-content:space-between;
+}
+.analysis-bottom-data .analysis-report-section:first-child .analysis-observation{
+  margin-top:auto;
+}
+.analysis-bottom-data .analysis-report-section + .analysis-report-section{
+  display:flex;
+  align-items:center;
+}
+.analysis-bottom-data .analysis-change-grid{
+  width:100%;
+}
+.analysis-bottom-grid .analysis-report-section.is-commentary{
+  height:100%;
+}
+.analysis-bottom-grid .analysis-note{
+  min-height:420px;
+  height:100%;
+}
+@media(max-width:750px){
+  .analysis-profile-card{
+    grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+    gap:8px;
+  }
+  .analysis-profile-card .analysis-identity{
+    padding:12px;
+    gap:9px;
+  }
+  .analysis-profile-card .analysis-avatar{
+    width:58px;
+    height:58px;
+    flex-basis:58px;
+    font-size:30px;
+  }
+  .analysis-profile-card .analysis-identity-copy h1{
+    font-size:27px;
+    letter-spacing:-.7px;
+  }
+  .analysis-profile-card .analysis-identity-caption{font-size:11px}
+  .analysis-bottom-grid{grid-template-columns:minmax(0,1fr)}
+  .analysis-bottom-data{min-height:0}
+  .analysis-bottom-data .analysis-report-section + .analysis-report-section{
+    min-height:110px;
+  }
+  .analysis-bottom-grid .analysis-note{min-height:300px}
+}
