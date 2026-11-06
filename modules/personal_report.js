@@ -86,7 +86,7 @@ function reportPaper(data,note,coverUrl){
     (x.value/xpTotal*100).toFixed(3)+'%;background:'+x.colour+'"></span>').join(""):"";
   return '<article class="analysis-report-paper" id="analysis-report-paper">'+
     '<header class="analysis-report-header">'+
-      '<div class="analysis-topline"><span>CREATIVE ACTIVITY REPORT</span><span>'+escapeHtml(data.month)+' / MONTHLY</span></div>'+
+      '<div class="analysis-topline"><span>'+escapeHtml(data.month)+' / MONTHLY</span></div>'+
       '<div class="analysis-profile-card">'+
         '<div class="analysis-identity"><div class="analysis-avatar">'+avatar+'</div>'+
           '<div class="analysis-identity-copy"><h1>'+title+'</h1>'+
