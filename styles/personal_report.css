@@ -730,3 +730,8 @@
   }
   .analysis-bottom-grid .analysis-note{min-height:300px}
 }
+
+.analysis-bottom-data .analysis-report-section{
+  display:flex;
+  flex-direction:column;
+}
