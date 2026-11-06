@@ -692,6 +692,7 @@
 .analysis-bottom-data .analysis-report-section + .analysis-report-section{
   display:flex;
   align-items:center;
+  justify-content:center;
 }
 .analysis-bottom-data .analysis-change-grid{
   width:100%;
